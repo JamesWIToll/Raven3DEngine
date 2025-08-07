@@ -5,9 +5,16 @@
 #ifndef IRENDERER_H
 #define IRENDERER_H
 #include "glm/vec3.hpp"
+#include "SDL3/SDL_events.h"
 #include "SDL3/SDL_video.h"
 
 namespace Raven3DEngineCore::Rendering {
+
+
+    enum class RenderAPI {
+        OPENGL,
+    };
+
     class IRenderer {
     public:
         SDL_Window* window = nullptr;
@@ -17,7 +24,7 @@ namespace Raven3DEngineCore::Rendering {
             window = nullptr;
         };
 
-        virtual void InitializeWindow(const std::string &name, const int &pixelWidth, const int &pixelHeight, const glm::vec3 &clearColor) = 0;
+        virtual void Initialize(const glm::vec3 & clearColor) = 0;
         virtual void RenderFrame() = 0;
     };
 
@@ -32,7 +39,7 @@ namespace Raven3DEngineCore::Rendering {
             context = nullptr;
             window = nullptr;
         }
-        void InitializeWindow(const std::string &name, const int &pixelWidth, const int &pixelHeight, const glm::vec3 &clearColor) override;
+        void Initialize(const glm::vec3 & clearColor) override;
         void RenderFrame() override;
     };
 }

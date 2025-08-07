@@ -5,17 +5,22 @@
 #ifndef RAVENAPP_H
 #define RAVENAPP_H
 #include <string>
-#include "Rendering/IRenderer.h"
+#include "Rendering/Renderer.h"
+#include "Window/Window.h"
 
 namespace Raven3DEngineCore {
     class RavenApp {
-        Rendering::IRenderer *renderer;
+        Rendering::IRenderer *_renderer;
+        Window::IRenderWindow *_window;
+        Events::EventHandler *_eventHandler;
+        bool _quit = false;
 
     public:
         RavenApp(const std::string &appName, const int &pixelWidth, const int &pixelHeight);
 
         ~RavenApp();
         void run() const;
+        void quitApp();
     };
 }
 

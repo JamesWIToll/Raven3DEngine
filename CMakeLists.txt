@@ -13,10 +13,9 @@ add_subdirectory(ThirdParty/SDL/SDL3)
 
 
 add_library(Raven3DEngineCore SHARED
+        Raven3DEngineCore/Window/SDLWindow.cpp
         Raven3DEngineCore/Rendering/OpenGLRenderer.cpp
-        Raven3DEngineCore/Rendering/IRenderer.h
         Raven3DEngineCore/RavenApp.cpp
-        Raven3DEngineCore/RavenApp.h
 )
 
 target_include_directories(Raven3DEngineCore PUBLIC

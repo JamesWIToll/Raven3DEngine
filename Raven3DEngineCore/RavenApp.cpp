@@ -8,22 +8,32 @@
 using namespace Raven3DEngineCore;
 
 RavenApp::RavenApp(const std::string& appName, const int &pixelWidth, const int &pixelHeight) {
-    renderer = new Rendering::OpenGLRenderer();
-    renderer->InitializeWindow(appName, pixelWidth, pixelHeight, glm::vec3(0.1f, 0.3f, 0.4f));
 
+    _eventHandler = new Events::EventHandler();
+    _eventHandler->RegisterEventListener(Events::EventType::WindowClosed, [this] (const Events::Event & event) { quitApp(); });
+    _window = new Window::SDLWindow();
+    _window->SetEventHandler(*_eventHandler);
+    _window->Initialize(Rendering::RenderAPI::OPENGL, appName, pixelWidth, pixelHeight);
+    _renderer = new Rendering::OpenGLRenderer();
+    _renderer->Initialize(glm::vec3(0.1f, 0.3f, 0.4f));
 }
 
 RavenApp::~RavenApp() {
-    delete renderer;
+    delete _renderer;
+    delete _window;
 }
 
 void RavenApp::run() const {
-    bool quit = false;
-
-    while (!quit) {
-
-        renderer->RenderFrame();
+    while (!_quit) {
+        _window->UpdateWindow();
+        _renderer->RenderFrame();
+        _window->SwapWindow();
     }
 }
+
+void RavenApp::quitApp() {
+    _quit = true;
+}
+
 
 
