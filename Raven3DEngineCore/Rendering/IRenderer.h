@@ -7,7 +7,7 @@
 #include "glm/vec3.hpp"
 #include "SDL3/SDL_video.h"
 
-namespace RavEngineCore::Rendering {
+namespace Raven3DEngineCore::Rendering {
     class IRenderer {
     public:
         SDL_Window* window = nullptr;

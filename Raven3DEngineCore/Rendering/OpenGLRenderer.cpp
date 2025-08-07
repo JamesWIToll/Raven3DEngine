@@ -7,7 +7,7 @@
 #include "./IRenderer.h"
 #include "GL/glew.h"
 
-using namespace RavEngineCore::Rendering;
+using namespace Raven3DEngineCore::Rendering;
 
 void OpenGLRenderer::InitializeWindow(const std::string &name, const int &pixelWidth, const int &pixelHeight, const glm::vec3 &clearColor) {
     glewInit();

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(RavEngineCore)
+project(Raven3DEngineCore)
 
 set(CMAKE_CXX_STANDARD 20)
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -12,14 +12,14 @@ add_subdirectory(ThirdParty/SDL/SDL3)
 
 
 
-add_library(RavEngineCore SHARED
-        RavEngineCore/Rendering/OpenGLRenderer.cpp
-        RavEngineCore/Rendering/IRenderer.h
-        RavEngineCore/RavenApp.cpp
-        RavEngineCore/RavenApp.h
+add_library(Raven3DEngineCore SHARED
+        Raven3DEngineCore/Rendering/OpenGLRenderer.cpp
+        Raven3DEngineCore/Rendering/IRenderer.h
+        Raven3DEngineCore/RavenApp.cpp
+        Raven3DEngineCore/RavenApp.h
 )
 
-target_include_directories(RavEngineCore PUBLIC
+target_include_directories(Raven3DEngineCore PUBLIC
         ThirdParty/assimp/include
         ThirdParty/entt/src/
         ThirdParty/glew/include
@@ -27,14 +27,14 @@ target_include_directories(RavEngineCore PUBLIC
         ThirdParty/SDL/SDL3/include
 )
 
-target_link_libraries(RavEngineCore PRIVATE
+target_link_libraries(Raven3DEngineCore PRIVATE
     glew
     SDL3::SDL3
     assimp::assimp
 )
 
-add_executable(RavEngineTest
-        RavEngineTest/main.cpp
+add_executable(EngineTest
+        EngineTest/main.cpp
 )
 
-target_link_libraries(RavEngineTest PRIVATE RavEngineCore)
+target_link_libraries(EngineTest PRIVATE Raven3DEngineCore)

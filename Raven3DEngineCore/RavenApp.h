@@ -5,13 +5,12 @@
 #ifndef RAVENAPP_H
 #define RAVENAPP_H
 #include <string>
-
 #include "Rendering/IRenderer.h"
-#include "SDL3/SDL_video.h"
 
-namespace RavEngineCore {
+namespace Raven3DEngineCore {
     class RavenApp {
         Rendering::IRenderer *renderer;
+
     public:
         RavenApp(const std::string &appName, const int &pixelWidth, const int &pixelHeight);
 
