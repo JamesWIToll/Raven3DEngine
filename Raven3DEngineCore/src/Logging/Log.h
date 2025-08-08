@@ -120,8 +120,13 @@ namespace Raven3DEngineCore::Logging {
 #define RAVEN_LOG_FATAL(format_str, ...)    Raven3DEngineCore::Logging::SubmitMessage(Raven3DEngineCore::Logging::LogLevel::Fatal,    std::format(format_str, ##__VA_ARGS__))
 #define RAVEN_LOG_WARNING(format_str, ...)  Raven3DEngineCore::Logging::SubmitMessage(Raven3DEngineCore::Logging::LogLevel::Warning,  std::format(format_str, ##__VA_ARGS__))
 #define RAVEN_LOG_ERROR(format_str, ...)    Raven3DEngineCore::Logging::SubmitMessage(Raven3DEngineCore::Logging::LogLevel::Error,    std::format(format_str, ##__VA_ARGS__))
-#define RAVEN_LOG_DEBUG(format_str, ...)    Raven3DEngineCore::Logging::SubmitMessage(Raven3DEngineCore::Logging::LogLevel::Debug,    std::format(format_str, ##__VA_ARGS__))
 #define RAVEN_LOG_INFO(format_str, ...)     Raven3DEngineCore::Logging::SubmitMessage(Raven3DEngineCore::Logging::LogLevel::Info,     std::format(format_str, ##__VA_ARGS__))
+
+#ifdef RAVEN_CORE_DEBUG
+#define RAVEN_LOG_DEBUG(format_str, ...)    Raven3DEngineCore::Logging::SubmitMessage(Raven3DEngineCore::Logging::LogLevel::Debug,    std::format(format_str, ##__VA_ARGS__))
+#else
+#define RAVEN_LOG_DEBUG(format_str, ...)
+#endif
 
 
 #endif //LOGHANDLER_H

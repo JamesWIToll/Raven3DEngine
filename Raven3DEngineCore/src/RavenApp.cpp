@@ -14,6 +14,8 @@ RavenApp::RavenApp(const std::string& appName, const int &pixelWidth, const int 
     this->appName = appName;
 
     RAVEN_REGISTER_LOG_LISTENER(loggerListener);
+    RAVEN_LOG_DEBUG("Debug mode active");
+
     _eventHandler = new Events::EventHandler();
     _eventHandler->RegisterEventListener(Events::EventType::WindowClosed, [this] (const Events::Event &) { quitApp(); });
     _window = new Window::SDLWindow();

@@ -11,13 +11,17 @@ add_subdirectory(ThirdParty/glm)
 add_subdirectory(ThirdParty/SDL/SDL3)
 
 
-
 add_library(Raven3DEngineCore SHARED
         Raven3DEngineCore/src/Logging/Log.cpp
         Raven3DEngineCore/src/Window/SDLWindow.cpp
         Raven3DEngineCore/src/Rendering/OpenGLRenderer.cpp
         Raven3DEngineCore/src/RavenApp.cpp
 )
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(Raven3DEngineCore PRIVATE RAVEN_CORE_DEBUG)
+endif ()
+
 
 target_include_directories(Raven3DEngineCore PUBLIC
         ThirdParty/assimp/include
