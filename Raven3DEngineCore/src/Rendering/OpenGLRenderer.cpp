@@ -1,9 +1,7 @@
 //
 // Created by wesley on 8/4/25.
 //
-
-#include "./Renderer.h"
-#include "GL/glew.h"
+#include <Raven3DEngineCore.h>
 
 using namespace Raven3DEngineCore::Rendering;
 

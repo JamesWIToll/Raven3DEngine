@@ -4,13 +4,12 @@
 
 #ifndef KEYEVENT_H
 #define KEYEVENT_H
-#include "Event.h"
-#include "../Input/KeyCode.h"
+#include <Raven3DEngineCore.h>
 
 namespace Raven3DEngineCore::Events {
     class KeyEvent : public Event {
     public:
-        Input::Key::KeyCode getKeyCode() const {
+        [[nodiscard]] Input::Key::KeyCode getKeyCode() const {
             return _keyCode;
         }
     protected:
@@ -23,7 +22,7 @@ namespace Raven3DEngineCore::Events {
     public:
         explicit KeyPressedEvent(const Input::Key::KeyCode code, const bool isRepeat = false) : KeyEvent(code), _isRepeat(isRepeat) {}
 
-        bool isRepeatEvent() const {
+        [[nodiscard]] bool isRepeatEvent() const {
             return _isRepeat;
         }
 

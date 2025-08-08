@@ -4,7 +4,7 @@
 
 #ifndef WINDOWEVENT_H
 #define WINDOWEVENT_H
-#include "Event.h"
+#include <Raven3DEngineCore.h>
 
 namespace Raven3DEngineCore::Events {
     class WindowCloseEvent final: public Event {
@@ -16,8 +16,8 @@ namespace Raven3DEngineCore::Events {
     public:
         WindowResizeEvent(int width, int height) : _width(width), _height(height) {}
 
-        unsigned int getWidth() const { return _width; }
-        unsigned int getHeight() const { return _height; }
+        [[nodiscard]] unsigned int getWidth() const { return _width; }
+        [[nodiscard]] unsigned int getHeight() const { return _height; }
 
         EVENT_TYPE_GETTERS(WindowResized);
     };

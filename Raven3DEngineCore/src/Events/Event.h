@@ -29,7 +29,7 @@ namespace Raven3DEngineCore::Events {
     public:
         virtual ~Event() = default;
 
-        virtual EventType getEventType() const = 0;
+        [[nodiscard]] virtual EventType getEventType() const = 0;
     };
 }
 

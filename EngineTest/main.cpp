@@ -3,10 +3,10 @@
 //
 
 
-#include "../Raven3DEngineCore/RavenApp.h"
+#include "../Raven3DEngineCore/Include/Raven3DEngineCore.h"
 
 int main() {
-    auto app = Raven3DEngineCore::RavenApp("Raven 3D app", 800, 600);
+    const auto app = Raven3DEngineCore::RavenApp("Raven 3D app", 800, 600);
     app.run();
     return 0;
 }

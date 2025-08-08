@@ -13,9 +13,9 @@ add_subdirectory(ThirdParty/SDL/SDL3)
 
 
 add_library(Raven3DEngineCore SHARED
-        Raven3DEngineCore/Window/SDLWindow.cpp
-        Raven3DEngineCore/Rendering/OpenGLRenderer.cpp
-        Raven3DEngineCore/RavenApp.cpp
+        Raven3DEngineCore/src/Window/SDLWindow.cpp
+        Raven3DEngineCore/src/Rendering/OpenGLRenderer.cpp
+        Raven3DEngineCore/src/RavenApp.cpp
 )
 
 target_include_directories(Raven3DEngineCore PUBLIC
@@ -24,6 +24,12 @@ target_include_directories(Raven3DEngineCore PUBLIC
         ThirdParty/glew/include
         ThirdParty/glm/
         ThirdParty/SDL/SDL3/include
+        Raven3DEngineCore/Include
+        Raven3DEngineCore/src
+)
+
+target_precompile_headers(Raven3DEngineCore PUBLIC
+    Raven3DEngineCore/src/pch.h
 )
 
 target_link_libraries(Raven3DEngineCore PRIVATE

@@ -2,15 +2,23 @@
 // Created by wesley on 8/2/25.
 //
 
-#include "RavenApp.h"
-#include "SDL3/SDL_events.h"
+#include <Raven3DEngineCore.h>
+
+#include "assimp/Logger.hpp"
 
 using namespace Raven3DEngineCore;
 
 RavenApp::RavenApp(const std::string& appName, const int &pixelWidth, const int &pixelHeight) {
+    auto loggerListener = new Logging::ConsoleLog();
+    RAVEN_REGISTER_LOG_LISTENER(loggerListener);
+    RAVEN_LOG_INFO("hello {}", appName);
+    RAVEN_LOG_DEBUG("debug {}", appName);
+    RAVEN_LOG_WARNING("warn {}, {}", appName, 1);
+    RAVEN_LOG_ERROR("error {}, {}", appName, 1);
+    RAVEN_LOG_FATAL("fatal {}, {}", appName, 1);
 
     _eventHandler = new Events::EventHandler();
-    _eventHandler->RegisterEventListener(Events::EventType::WindowClosed, [this] (const Events::Event & event) { quitApp(); });
+    _eventHandler->RegisterEventListener(Events::EventType::WindowClosed, [this] (const Events::Event &) { quitApp(); });
     _window = new Window::SDLWindow();
     _window->SetEventHandler(*_eventHandler);
     _window->Initialize(Rendering::RenderAPI::OPENGL, appName, pixelWidth, pixelHeight);

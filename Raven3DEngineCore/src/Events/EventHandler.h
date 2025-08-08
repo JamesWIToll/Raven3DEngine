@@ -4,10 +4,6 @@
 
 #ifndef EVENTHANDLER_H
 #define EVENTHANDLER_H
-#include <map>
-#include "Event.h"
-#include "entt/signal/sigh.hpp"
-
 
 namespace Raven3DEngineCore::Events {
 
@@ -20,7 +16,7 @@ namespace Raven3DEngineCore::Events {
         }
 
         void Notify(const Event& event) const {
-            for (auto listener : _listeners) {
+            for (const auto& listener : _listeners) {
                 listener(event);
             }
         }

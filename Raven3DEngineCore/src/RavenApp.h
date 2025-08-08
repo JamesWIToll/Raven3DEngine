@@ -4,9 +4,6 @@
 
 #ifndef RAVENAPP_H
 #define RAVENAPP_H
-#include <string>
-#include "Rendering/Renderer.h"
-#include "Window/Window.h"
 
 namespace Raven3DEngineCore {
     class RavenApp {

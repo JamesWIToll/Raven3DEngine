@@ -4,7 +4,6 @@
 
 #ifndef MOUSECODE_H
 #define MOUSECODE_H
-#include "SDL3/SDL_mouse.h"
 
 namespace Raven3DEngineCore::Input::Mouse {
 

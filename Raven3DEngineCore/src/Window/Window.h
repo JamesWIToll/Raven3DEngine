@@ -4,10 +4,6 @@
 
 #ifndef WINDOW_H
 #define WINDOW_H
-#include <string>
-
-#include "../Events/EventHandler.h"
-#include "../Rendering/Renderer.h"
 
 namespace Raven3DEngineCore::Window {
     class IRenderWindow {

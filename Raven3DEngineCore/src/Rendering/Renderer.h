@@ -4,9 +4,6 @@
 
 #ifndef IRENDERER_H
 #define IRENDERER_H
-#include "glm/vec3.hpp"
-#include "SDL3/SDL_events.h"
-#include "SDL3/SDL_video.h"
 
 namespace Raven3DEngineCore::Rendering {
 

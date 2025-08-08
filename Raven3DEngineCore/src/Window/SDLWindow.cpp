@@ -1,12 +1,7 @@
 //
 // Created by wesley on 8/6/25.
 //
-#include "Window.h"
-#include "../Events/WindowEvent.h"
-#include "../Events/MouseEvent.h"
-#include "../Events/KeyEvent.h"
-#include "../Input/MouseCode.h"
-#include "../Input/KeyCode.h"
+#include <Raven3DEngineCore.h>
 
 using namespace Raven3DEngineCore::Window;
 

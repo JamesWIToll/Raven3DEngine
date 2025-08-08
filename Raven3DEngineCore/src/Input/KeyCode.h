@@ -4,7 +4,6 @@
 
 #ifndef KEYCODE_H
 #define KEYCODE_H
-#include "SDL3/SDL_scancode.h"
 
 namespace Raven3DEngineCore::Input::Key {
 
