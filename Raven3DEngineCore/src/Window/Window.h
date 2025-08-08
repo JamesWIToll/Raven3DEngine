@@ -38,6 +38,7 @@ namespace Raven3DEngineCore::Window {
             _context = nullptr;
             _surface = nullptr;
             _window = nullptr;
+            RAVEN_LOG_INFO("SDL Window Closed");
         }
 
         void Initialize(Rendering::RenderAPI api, const std::string &name, const int &pixelWidth, const int &pixelHeight) override;

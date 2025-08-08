@@ -8,11 +8,16 @@ using namespace Raven3DEngineCore::Window;
 void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const int &pixelWidth, const int &pixelHeight) {
     _renderAPI = api;
 
+    std::string rendererName = name;
+
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL);
         _context = SDL_GL_CreateContext(_window);
         SDL_GL_MakeCurrent(_window, _context);
+        rendererName = "OpenGL";
     }
+
+    RAVEN_LOG_INFO("SDL3 Window Initialized for {} Renderer", rendererName);
 }
 
 void SDLWindow::UpdateWindow() {

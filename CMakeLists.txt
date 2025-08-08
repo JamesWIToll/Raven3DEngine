@@ -13,6 +13,7 @@ add_subdirectory(ThirdParty/SDL/SDL3)
 
 
 add_library(Raven3DEngineCore SHARED
+        Raven3DEngineCore/src/Logging/Log.cpp
         Raven3DEngineCore/src/Window/SDLWindow.cpp
         Raven3DEngineCore/src/Rendering/OpenGLRenderer.cpp
         Raven3DEngineCore/src/RavenApp.cpp

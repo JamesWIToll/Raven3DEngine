@@ -8,15 +8,12 @@
 
 using namespace Raven3DEngineCore;
 
-RavenApp::RavenApp(const std::string& appName, const int &pixelWidth, const int &pixelHeight) {
-    auto loggerListener = new Logging::ConsoleLog();
-    RAVEN_REGISTER_LOG_LISTENER(loggerListener);
-    RAVEN_LOG_INFO("hello {}", appName);
-    RAVEN_LOG_DEBUG("debug {}", appName);
-    RAVEN_LOG_WARNING("warn {}, {}", appName, 1);
-    RAVEN_LOG_ERROR("error {}, {}", appName, 1);
-    RAVEN_LOG_FATAL("fatal {}, {}", appName, 1);
+static const auto loggerListener = new Logging::ConsoleLog();
 
+RavenApp::RavenApp(const std::string& appName, const int &pixelWidth, const int &pixelHeight) {
+    this->appName = appName;
+
+    RAVEN_REGISTER_LOG_LISTENER(loggerListener);
     _eventHandler = new Events::EventHandler();
     _eventHandler->RegisterEventListener(Events::EventType::WindowClosed, [this] (const Events::Event &) { quitApp(); });
     _window = new Window::SDLWindow();
@@ -29,9 +26,11 @@ RavenApp::RavenApp(const std::string& appName, const int &pixelWidth, const int 
 RavenApp::~RavenApp() {
     delete _renderer;
     delete _window;
+    RAVEN_LOG_INFO("{} - Application Exiting", this->appName);
 }
 
 void RavenApp::run() const {
+    RAVEN_LOG_INFO("{} - Application Running", this->appName);
     while (!_quit) {
         _window->UpdateWindow();
         _renderer->RenderFrame();

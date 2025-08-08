@@ -80,18 +80,28 @@ namespace Raven3DEngineCore::Logging {
             }
             return "\x1b[37m";
         }
-
     public:
         ConsoleLog() = default;
         void SubmitMessage(LogLevel level, const std::string &message) override {
-            const auto time = std::chrono::system_clock::now();
-            std::cout << GetMessageColor(level) << "LOG: <" << GetLevelName(level) << "> at (" << time << ") : " <<  message << "\x1b[0m" << std::endl;
+            if (watchesLevel(level)) {
+                const auto time = std::chrono::system_clock::now();
+                switch (level) {
+                    case LogLevel::Fatal:
+                    case LogLevel::Error:
+                        std::cerr << GetMessageColor(level) << "LOG: <<" << GetLevelName(level) << ">> (" << time << ") : " <<  message << "\x1b[0m" << std::endl;
+                        break;
+                    case LogLevel::Warning:
+                    case LogLevel::Debug:
+                    case LogLevel::Info:
+                        std::cout << GetMessageColor(level) << "LOG: [" << GetLevelName(level) << "] (" << time << ") : " <<  message << "\x1b[0m" << std::endl;
+                        break;
+                }
+            }
         }
     };
 
 
-
-    static std::vector<ILogListener*> listeners {};
+    extern std::vector<ILogListener*> listeners;
 
     static void RegisterListener(ILogListener* listener) {
         listeners.push_back(listener);

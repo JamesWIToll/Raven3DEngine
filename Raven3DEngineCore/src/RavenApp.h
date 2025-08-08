@@ -13,6 +13,8 @@ namespace Raven3DEngineCore {
         bool _quit = false;
 
     public:
+        std::string appName;
+
         RavenApp(const std::string &appName, const int &pixelWidth, const int &pixelHeight);
 
         ~RavenApp();

@@ -14,12 +14,8 @@ namespace Raven3DEngineCore::Rendering {
 
     class IRenderer {
     public:
-        SDL_Window* window = nullptr;
 
-        virtual ~IRenderer() {
-            SDL_DestroyWindow(window);
-            window = nullptr;
-        };
+        virtual ~IRenderer() = default;
 
         virtual void Initialize(const glm::vec3 & clearColor) = 0;
         virtual void RenderFrame() = 0;
@@ -27,14 +23,10 @@ namespace Raven3DEngineCore::Rendering {
 
 
     class OpenGLRenderer : public IRenderer {
-        SDL_GLContext context = nullptr;
     public:
         OpenGLRenderer() = default;
         ~OpenGLRenderer() override {
-            SDL_GL_DestroyContext(context);
-            SDL_DestroyWindow(window);
-            context = nullptr;
-            window = nullptr;
+            RAVEN_LOG_INFO("OpenGL Renderer Shut Down");
         }
         void Initialize(const glm::vec3 & clearColor) override;
         void RenderFrame() override;

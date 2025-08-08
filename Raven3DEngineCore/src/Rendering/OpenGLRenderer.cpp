@@ -8,6 +8,7 @@ using namespace Raven3DEngineCore::Rendering;
 void OpenGLRenderer::Initialize(const glm::vec3 &clearColor) {
     glewInit();
     glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
+    RAVEN_LOG_INFO("OpenGL Renderer Initialized");
 }
 
 void OpenGLRenderer::RenderFrame() {
