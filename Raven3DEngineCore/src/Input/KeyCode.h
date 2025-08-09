@@ -103,6 +103,7 @@ namespace Raven3DEngineCore::Input::Key {
         F10 = SDL_SCANCODE_F10,
         F11 = SDL_SCANCODE_F11,
         F12 = SDL_SCANCODE_F12,
+        SPACE = SDL_SCANCODE_SPACE,
     };
 
     static std::string getKeyName(const KeyCode code) {
@@ -202,6 +203,7 @@ namespace Raven3DEngineCore::Input::Key {
             case KeyCode::KP_ADD: return "KP_ADD";
             case KeyCode::KP_ENTER: return "KP_ENTER";
             case KeyCode::KP_EQUAL: return "KP_EQUAL";
+            case KeyCode::SPACE: return "SPACE";
             default: return "";
         }
     }

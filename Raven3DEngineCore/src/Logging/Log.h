@@ -80,20 +80,42 @@ namespace Raven3DEngineCore::Logging {
             }
             return "\x1b[37m";
         }
+
+        std::string _lastMessage;
+        bool _repeated;
+        long int _repeatCount = 0;
     public:
         ConsoleLog() = default;
-        void SubmitMessage(LogLevel level, const std::string &message) override {
+        void SubmitMessage(const LogLevel level, const std::string &message) override {
+            auto dateTime = std::chrono::system_clock::now();
             if (watchesLevel(level)) {
+                std::string output = std::format("\n{}Log: [{}] ({}) : {}\x1b[0m", GetMessageColor(level), GetLevelName(level), dateTime, message);
                 const auto time = std::chrono::system_clock::now();
+                if (_lastMessage == message && !_repeated) {
+                    _repeated = true;
+                    output = " [repeated]";
+                    _repeatCount++;
+                } else if (_lastMessage == message){
+                    output = "";
+                    _repeatCount++;
+                } else if (_repeated){
+                    output = std::format("<{} times>", _repeatCount) + output;
+                    _repeated = false;
+                    _repeatCount = 1;
+                } else {
+                    _repeated = false;
+                    _repeatCount = 1;
+                }
+                _lastMessage = message;
                 switch (level) {
                     case LogLevel::Fatal:
                     case LogLevel::Error:
-                        std::cerr << GetMessageColor(level) << "LOG: <<" << GetLevelName(level) << ">> (" << time << ") : " <<  message << "\x1b[0m" << std::endl;
+                        std::cerr << output;
                         break;
                     case LogLevel::Warning:
                     case LogLevel::Debug:
                     case LogLevel::Info:
-                        std::cout << GetMessageColor(level) << "LOG: [" << GetLevelName(level) << "] (" << time << ") : " <<  message << "\x1b[0m" << std::endl;
+                        std::cout << output;
                         break;
                 }
             }
