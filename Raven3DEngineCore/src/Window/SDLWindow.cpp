@@ -6,6 +6,7 @@
 using namespace Raven3DEngineCore::Window;
 
 void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const int &pixelWidth, const int &pixelHeight) {
+
     _renderAPI = api;
 
     std::string rendererName = name;
@@ -15,6 +16,17 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
         _context = SDL_GL_CreateContext(_window);
         SDL_GL_MakeCurrent(_window, _context);
         rendererName = "OpenGL";
+    }
+
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS);
+
+    int gamePadCount = 0;
+    const auto connectedGamePads = SDL_GetGamepads(&gamePadCount);
+
+    for (int i = 0; i < gamePadCount; ++i) {
+        const unsigned int gamePadId = connectedGamePads[i];
+        SDL_OpenGamepad(gamePadId);
+        _eventHandler.Notify(Events::GamepadConnectedEvent(gamePadId));
     }
 
     RAVEN_LOG_INFO("SDL3 Window Initialized for {} Renderer", rendererName);
@@ -64,14 +76,41 @@ void SDLWindow::UpdateWindow() {
                 _eventHandler.Notify(Events::KeyReleasedEvent(key_up));
                 break;
             }
+            case SDL_EVENT_GAMEPAD_ADDED: {
+                const auto gamePadId = event.gdevice.which;
+                SDL_OpenGamepad(gamePadId);
+                _eventHandler.Notify(Events::GamepadConnectedEvent(gamePadId));
+                break;
+            }
+            case SDL_EVENT_GAMEPAD_REMOVED: {
+                const auto gamePadId = event.gdevice.which;
+                _eventHandler.Notify(Events::GamepadDisconnectedEvent(gamePadId));
+                break;
+            }
+            case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
+                const auto button_down = static_cast<Input::Gamepad::GamepadButtonCode>(event.gbutton.button);
+                const auto gamepadId = event.gdevice.which;
+                _eventHandler.Notify(Events::GamepadButtonPressedEvent(button_down, gamepadId));
+                break;
+            }
+            case SDL_EVENT_GAMEPAD_BUTTON_UP: {
+                const auto button_up = static_cast<Input::Gamepad::GamepadButtonCode>(event.gbutton.button);
+                const auto gamepadId = event.gdevice.which;
+                _eventHandler.Notify(Events::GamepadButtonReleasedEvent(button_up, gamepadId));
+                break;
+            }
+            case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
+                const auto axis = static_cast<Input::Gamepad::GamepadAxisCode>(event.gaxis.axis);
+                const auto value = static_cast<float>(event.gaxis.value);
+                const auto gamepadId = event.gdevice.which;
+                _eventHandler.Notify(Events::GamepadAxisEvent(axis, value, gamepadId));
+            }
             default: break;
         }
     }
 }
 
 void SDLWindow::SwapWindow() {
-    if (_window == nullptr) { return; }
-
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         SDL_GL_SwapWindow(_window);
     }

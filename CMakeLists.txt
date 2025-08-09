@@ -34,7 +34,7 @@ target_include_directories(Raven3DEngineCore PUBLIC
 )
 
 target_precompile_headers(Raven3DEngineCore PUBLIC
-    Raven3DEngineCore/src/pch.h
+    Raven3DEngineCore/Include/pch.h
 )
 
 target_link_libraries(Raven3DEngineCore PRIVATE

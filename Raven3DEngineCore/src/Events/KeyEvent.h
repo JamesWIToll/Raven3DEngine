@@ -19,6 +19,7 @@ namespace Raven3DEngineCore::Events {
     };
 
     class KeyPressedEvent final : public KeyEvent {
+        bool _isRepeat;
     public:
         explicit KeyPressedEvent(const Input::Key::KeyCode code, const bool isRepeat = false) : KeyEvent(code), _isRepeat(isRepeat) {}
 
@@ -28,8 +29,9 @@ namespace Raven3DEngineCore::Events {
 
         EVENT_TYPE_GETTERS(KeyPressed);
 
-    private:
-        bool _isRepeat;
+        void logEvent() const override {
+            RAVEN_LOG_DEBUG("KeyPressed Event Triggered - Key: {}, Repeated: {}", Input::Key::getKeyName(_keyCode), _isRepeat ? "yes" : "no");
+        }
     };
 
     class KeyReleasedEvent final : public KeyEvent {
@@ -37,6 +39,10 @@ namespace Raven3DEngineCore::Events {
         explicit KeyReleasedEvent(const Input::Key::KeyCode code) : KeyEvent(code) {}
 
         EVENT_TYPE_GETTERS(KeyReleased);
+
+        void logEvent() const override {
+            RAVEN_LOG_DEBUG("KeyReleased Event Triggered - Key: {}", Input::Key::getKeyName(_keyCode));
+        }
     };
 }
 

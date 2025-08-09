@@ -4,7 +4,6 @@
 
 #ifndef MOUSEEVENT_H
 #define MOUSEEVENT_H
-#include <Raven3DEngineCore.h>
 
 namespace Raven3DEngineCore::Events {
     class MouseButtonEvent : public Event {
@@ -19,13 +18,21 @@ namespace Raven3DEngineCore::Events {
     class MousePressedEvent final : public MouseButtonEvent {
     public:
         explicit MousePressedEvent(const Input::Mouse::MouseCode button) : MouseButtonEvent(button) {}
-        EVENT_TYPE_GETTERS(MouseButtonPressed);
+        EVENT_TYPE_GETTERS(MouseButtonPressed)
+
+        void logEvent() const override {
+            RAVEN_LOG_DEBUG("MousePressed Event triggered by {} button", Input::Mouse::getMouseCodeName(_button));
+        }
     };
 
     class MouseReleasedEvent final : public MouseButtonEvent {
     public:
         explicit MouseReleasedEvent(const Input::Mouse::MouseCode button) : MouseButtonEvent(button) {}
         EVENT_TYPE_GETTERS(MouseButtonReleased);
+
+        void logEvent() const override {
+            RAVEN_LOG_DEBUG("MouseReleased Event triggered by {} button", Input::Mouse::getMouseCodeName(_button));
+        }
     };
 
     class MouseMovedEvent final : public Event {
@@ -37,6 +44,9 @@ namespace Raven3DEngineCore::Events {
         [[nodiscard]] float getY() const { return _yPos; }
 
         EVENT_TYPE_GETTERS(MouseMoved);
+        void logEvent() const override {
+            RAVEN_LOG_DEBUG("MouseMoved Event triggered - x: {}, y: {}", _xPos, _yPos);
+        }
     };
 
     class MouseScrolledEvent final : public Event {
@@ -48,6 +58,10 @@ namespace Raven3DEngineCore::Events {
         [[nodiscard]] float getYOffset() const { return _yOffset; }
 
         EVENT_TYPE_GETTERS(MouseScrolled);
+
+        void logEvent() const override {
+            RAVEN_LOG_DEBUG("MouseScrolled Event triggered - x: {}, y: {}", _xOffset, _yOffset);
+        }
     };
 
 }

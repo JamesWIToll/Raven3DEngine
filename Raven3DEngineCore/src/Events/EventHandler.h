@@ -39,6 +39,7 @@ namespace Raven3DEngineCore::Events {
 
         void Notify(const Event& event) const {
             const auto type = event.getEventType();
+            event.logEvent();
 
             if (!_listenerRegistry.contains(type)) { return; }
 

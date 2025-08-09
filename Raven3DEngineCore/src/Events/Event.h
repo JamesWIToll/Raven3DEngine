@@ -20,6 +20,11 @@ namespace Raven3DEngineCore::Events {
         WindowClosed,
         AppUpdate,
         AppRender,
+        GamePadButtonPressed,
+        GamePadButtonReleased,
+        GamePadAxisMoved,
+        GamePadConnected,
+        GamePadDisconnected,
     };
 
 #define EVENT_TYPE_GETTERS(type) static EventType getEventTypeStatic() { return EventType::type; } \
@@ -28,6 +33,8 @@ namespace Raven3DEngineCore::Events {
     class Event {
     public:
         virtual ~Event() = default;
+
+        virtual void logEvent() const = 0;
 
         [[nodiscard]] virtual EventType getEventType() const = 0;
     };

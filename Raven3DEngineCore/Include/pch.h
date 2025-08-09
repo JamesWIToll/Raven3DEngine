@@ -16,6 +16,7 @@
 #include <format>
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_gamepad.h>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <entt/entt.hpp>
