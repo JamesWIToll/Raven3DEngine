@@ -7,6 +7,10 @@
 
 #define BITSHIFT_TO_POS(x) (1 << x)
 
+#ifndef u_short
+#define u_short unsigned short
+#endif
+
 #include <pch.h>
 #include <Input/KeyCode.h>
 #include <Input/MouseCode.h>

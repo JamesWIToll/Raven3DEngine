@@ -4,7 +4,6 @@
 
 #include <Raven3DEngineCore.h>
 
-#include "assimp/Logger.hpp"
 
 using namespace Raven3DEngineCore;
 
