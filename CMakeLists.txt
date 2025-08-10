@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.31)
 project(Raven3DEngineCore)
+include(ExternalProject)
 
 set(CMAKE_CXX_STANDARD 20)
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -13,7 +14,7 @@ add_subdirectory(ThirdParty/entt)
 add_subdirectory(ThirdParty/glew/build/cmake)
 add_subdirectory(ThirdParty/glm)
 add_subdirectory(ThirdParty/SDL/SDL3)
-
+add_subdirectory(ThirdParty/lua)
 
 add_library(Raven3DEngineCore SHARED
         Raven3DEngineCore/src/Logging/Log.cpp
@@ -46,6 +47,7 @@ target_link_libraries(Raven3DEngineCore PRIVATE
         glew
         SDL3::SDL3
         assimp::assimp
+        LuaLib
 )
 
 
