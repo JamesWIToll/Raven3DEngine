@@ -23,6 +23,8 @@ namespace Raven3DEngineCore::Input::Gamepad {
         BTN_GUIDE = SDL_GAMEPAD_BUTTON_GUIDE,
         BTN_LEFT_SHOULDER = SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,
         BTN_RIGHT_SHOULDER = SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
+        BTN_RIGHT_THUMB = SDL_GAMEPAD_BUTTON_RIGHT_STICK,
+        BTN_LEFT_THUMB = SDL_GAMEPAD_BUTTON_LEFT_STICK,
     };
 
     enum class GamepadAxisCode : int {
@@ -52,6 +54,8 @@ namespace Raven3DEngineCore::Input::Gamepad {
             case GamepadButtonCode::BTN_LEFT_SHOULDER: return "Left Shoulder Button";
             case GamepadButtonCode::BTN_RIGHT_SHOULDER: return "Right Shoulder Button";
             case GamepadButtonCode::BTN_START: return "Start Button";
+            case GamepadButtonCode::BTN_RIGHT_THUMB: return "Right Thumb Stick Button";
+            case GamepadButtonCode::BTN_LEFT_THUMB: return "Left Thumb Stick Button";
             default: return "Unknown Button";
         }
     }

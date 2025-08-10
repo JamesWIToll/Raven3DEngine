@@ -4,16 +4,38 @@
 
 #ifndef KEYEVENT_H
 #define KEYEVENT_H
-#include <Raven3DEngineCore.h>
 
 namespace Raven3DEngineCore::Events {
-    class KeyEvent : public Event {
+
+    class KeyboardConnectedEvent final : public InputDeviceEvent {
+    public:
+        explicit KeyboardConnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
+
+        EVENT_TYPE_GETTERS(KeyboardConnected);
+
+        void logEvent() const override {
+            RAVEN_LOG_DEBUG("KeyboardConnected Event triggered by Device {} ( {} )", _deviceInfo.id, _deviceInfo.name);
+        }
+    };
+
+    class KeyboardDisconnectedEvent final : public InputDeviceEvent {
+    public:
+        explicit KeyboardDisconnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
+
+        EVENT_TYPE_GETTERS(KeyboardDisconnected);
+
+        void logEvent() const override {
+            RAVEN_LOG_DEBUG("KeyboardDisconnected Event triggered by Device {} ( {} )", _deviceInfo.id, _deviceInfo.name);
+        }
+    };
+
+    class KeyEvent : public InputDeviceEvent {
     public:
         [[nodiscard]] Input::Key::KeyCode getKeyCode() const {
             return _keyCode;
         }
     protected:
-        explicit KeyEvent(Input::Key::KeyCode code) : _keyCode(code) {}
+        explicit KeyEvent(const Input::Key::KeyCode code, const Input::DeviceInfo &device) : InputDeviceEvent(device), _keyCode(code) {}
 
         Input::Key::KeyCode _keyCode;
     };
@@ -21,7 +43,7 @@ namespace Raven3DEngineCore::Events {
     class KeyPressedEvent final : public KeyEvent {
         bool _isRepeat;
     public:
-        explicit KeyPressedEvent(const Input::Key::KeyCode code, const bool isRepeat = false) : KeyEvent(code), _isRepeat(isRepeat) {}
+        explicit KeyPressedEvent(const Input::Key::KeyCode code,  const Input::DeviceInfo &device, const bool isRepeat = false) : KeyEvent(code, device), _isRepeat(isRepeat) {}
 
         [[nodiscard]] bool isRepeatEvent() const {
             return _isRepeat;
@@ -30,18 +52,18 @@ namespace Raven3DEngineCore::Events {
         EVENT_TYPE_GETTERS(KeyPressed);
 
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("KeyPressed Event Triggered - Key: {}, Repeated: {}", Input::Key::getKeyName(_keyCode), _isRepeat ? "yes" : "no");
+            RAVEN_LOG_DEBUG("KeyPressed Event Triggered - Key: {}, Repeated: {} on Device {} ( {} )", Input::Key::getKeyName(_keyCode), _isRepeat ? "yes" : "no", _deviceInfo.id, _deviceInfo.name);
         }
     };
 
     class KeyReleasedEvent final : public KeyEvent {
     public:
-        explicit KeyReleasedEvent(const Input::Key::KeyCode code) : KeyEvent(code) {}
+        explicit KeyReleasedEvent(const Input::Key::KeyCode code, const Input::DeviceInfo &device) : KeyEvent(code, device) {}
 
         EVENT_TYPE_GETTERS(KeyReleased);
 
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("KeyReleased Event Triggered - Key: {}", Input::Key::getKeyName(_keyCode));
+            RAVEN_LOG_DEBUG("KeyReleased Event Triggered - Key: {} on Device {} ( {} )", Input::Key::getKeyName(_keyCode), _deviceInfo.id, _deviceInfo.name);
         }
     };
 }

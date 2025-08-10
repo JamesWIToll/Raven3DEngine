@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by wesley on 8/8/25.
 //
@@ -8,41 +10,33 @@
 
 namespace Raven3DEngineCore::Events {
 
-    class GamepadEvent : public Event {
-    protected:
-        unsigned int _id = 0;
-        explicit GamepadEvent(const unsigned int id) : _id(id) {}
+    class GamepadConnectedEvent final: public InputDeviceEvent {
     public:
-        [[nodiscard]] unsigned int getGamepadId() const { return _id; }
-    };
-
-    class GamepadConnectedEvent final: public GamepadEvent {
-    public:
-        explicit GamepadConnectedEvent(const unsigned int id) : GamepadEvent(id) {}
+        explicit GamepadConnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
 
         EVENT_TYPE_GETTERS(GamePadConnected)
 
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("GamepadConnected Event Triggered for gamepad: {}", _id);
+            RAVEN_LOG_DEBUG("GamepadConnected Event Triggered for Device {} ( {} )", _deviceInfo.id, _deviceInfo.name);
         }
     };
 
-    class GamepadDisconnectedEvent final: public GamepadEvent {
+    class GamepadDisconnectedEvent final: public InputDeviceEvent {
     public:
-        explicit GamepadDisconnectedEvent(const unsigned int id) : GamepadEvent(id) {}
+        explicit GamepadDisconnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
 
         EVENT_TYPE_GETTERS(GamePadDisconnected)
 
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("GamepadDisconnected Event Triggered for gamepad: {}", _id);
+            RAVEN_LOG_DEBUG("GamepadDisconnected Event Triggered for Device {}, ( {} )", _deviceInfo.id, _deviceInfo.name);
         }
     };
 
-    class GamepadButtonEvent : public GamepadEvent {
+    class GamepadButtonEvent : public InputDeviceEvent {
     protected:
         Input::Gamepad::GamepadButtonCode _button;
 
-        explicit GamepadButtonEvent(const Input::Gamepad::GamepadButtonCode button, const unsigned int id) :  GamepadEvent(id), _button(button) {}
+        explicit GamepadButtonEvent(const Input::Gamepad::GamepadButtonCode button, const Input::DeviceInfo &device) :  InputDeviceEvent(device), _button(button) {}
 
     public:
         [[nodiscard]] Input::Gamepad::GamepadButtonCode GetButton() const { return _button; }
@@ -50,31 +44,31 @@ namespace Raven3DEngineCore::Events {
 
     class GamepadButtonPressedEvent final : public GamepadButtonEvent {
     public:
-        explicit GamepadButtonPressedEvent(const Input::Gamepad::GamepadButtonCode button, const unsigned int id): GamepadButtonEvent(button, id) {}
+        explicit GamepadButtonPressedEvent(const Input::Gamepad::GamepadButtonCode button, const Input::DeviceInfo &device): GamepadButtonEvent(button, device) {}
 
         EVENT_TYPE_GETTERS(GamePadButtonPressed);
 
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("GamepadButtonPressed Event triggered with button: {}", Input::Gamepad::getButtonName(_button));
+            RAVEN_LOG_DEBUG("GamepadButtonPressed Event triggered with button: {} on Device {} ( {} )", Input::Gamepad::getButtonName(_button), _deviceInfo.id, _deviceInfo.name);
         }
     };
 
     class GamepadButtonReleasedEvent final : public GamepadButtonEvent {
     public:
-        explicit GamepadButtonReleasedEvent(const Input::Gamepad::GamepadButtonCode button, const unsigned int id): GamepadButtonEvent(button, id) {}
+        explicit GamepadButtonReleasedEvent(const Input::Gamepad::GamepadButtonCode button, const Input::DeviceInfo &device): GamepadButtonEvent(button, device) {}
 
         EVENT_TYPE_GETTERS(GamePadButtonReleased);
 
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("GamepadButtonReleased Event triggered with button: {}", Input::Gamepad::getButtonName(_button));
+            RAVEN_LOG_DEBUG("GamepadButtonReleased Event triggered with button: {} on Device {} ( {} )", Input::Gamepad::getButtonName(_button), _deviceInfo.id, _deviceInfo.name);
         }
     };
 
-    class GamepadAxisEvent final : public GamepadEvent {
+    class GamepadAxisEvent final : public InputDeviceEvent {
         Input::Gamepad::GamepadAxisCode _axis;
         float _value;
     public:
-        explicit GamepadAxisEvent(const Input::Gamepad::GamepadAxisCode axis, const float value, const unsigned int id): GamepadEvent(id), _axis(axis), _value(value) {}
+        explicit GamepadAxisEvent(const Input::Gamepad::GamepadAxisCode axis, const float value, const Input::DeviceInfo &device): InputDeviceEvent(device), _axis(axis), _value(value) {}
 
         [[nodiscard]] Input::Gamepad::GamepadAxisCode GetAxis() const { return _axis; }
         [[nodiscard]] float GetValue() const { return _value; }
@@ -82,7 +76,7 @@ namespace Raven3DEngineCore::Events {
         EVENT_TYPE_GETTERS(GamePadAxisMoved);
 
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("GamepadAxis Event triggered with axis: {}, value: {}", Input::Gamepad::getAxisName(_axis), _value);
+            RAVEN_LOG_DEBUG("GamepadAxis Event triggered with axis: {}, value: {} on Device {}, ( {} )", Input::Gamepad::getAxisName(_axis), _value, _deviceInfo.id, _deviceInfo.name);
         }
     };
 

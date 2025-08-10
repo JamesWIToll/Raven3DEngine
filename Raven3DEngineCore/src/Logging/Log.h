@@ -110,7 +110,7 @@ namespace Raven3DEngineCore::Logging {
                 switch (level) {
                     case LogLevel::Fatal:
                     case LogLevel::Error:
-                        std::cerr << output;
+                        std::cerr << output << std::endl << std::endl;
                         break;
                     case LogLevel::Warning:
                     case LogLevel::Debug:

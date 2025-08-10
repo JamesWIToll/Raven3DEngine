@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by wesley on 8/6/25.
 //
@@ -11,10 +13,14 @@ namespace Raven3DEngineCore::Events {
         None = 0,
         KeyPressed,
         KeyReleased,
+        KeyboardConnected,
+        KeyboardDisconnected,
         MouseButtonPressed,
         MouseButtonReleased,
         MouseMoved,
         MouseScrolled,
+        MouseConnected,
+        MouseDisconnected,
         WindowResized,
         WindowMoved,
         WindowClosed,
@@ -37,6 +43,14 @@ namespace Raven3DEngineCore::Events {
         virtual void logEvent() const = 0;
 
         [[nodiscard]] virtual EventType getEventType() const = 0;
+    };
+
+    class InputDeviceEvent : public Event {
+    protected:
+        Input::DeviceInfo _deviceInfo;
+        explicit InputDeviceEvent(Input::DeviceInfo  deviceInfo) : _deviceInfo(std::move(deviceInfo)) {}
+    public:
+        [[nodiscard]] Input::DeviceInfo getDeviceInfo() const { return _deviceInfo; }
     };
 }
 

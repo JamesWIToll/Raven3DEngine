@@ -20,13 +20,18 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS);
 
+    const auto kbInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::KEYBOARD, "SDL_KEYBOARD");
+    _eventHandler.Notify(Events::KeyboardConnectedEvent(*kbInfo));
+    const auto mouseInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::MOUSE, "SDL_MOUSE");
+    _eventHandler.Notify(Events::MouseConnectedEvent(*mouseInfo));
+
     int gamePadCount = 0;
     const auto connectedGamePads = SDL_GetGamepads(&gamePadCount);
-
-    for (int i = 0; i < gamePadCount; ++i) {
+    for (int i = 0; i < gamePadCount; i++) {
         const unsigned int gamePadId = connectedGamePads[i];
         SDL_OpenGamepad(gamePadId);
-        _eventHandler.Notify(Events::GamepadConnectedEvent(gamePadId));
+        const auto deviceInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::GAMEPAD, "SDL_GAMEPAD_" + std::to_string(gamePadId));
+        _eventHandler.Notify(Events::GamepadConnectedEvent(*deviceInfo));
     }
 
     RAVEN_LOG_INFO("SDL3 Window Initialized for {} Renderer", rendererName);
@@ -48,62 +53,76 @@ void SDLWindow::UpdateWindow() {
             }
             case SDL_EVENT_MOUSE_BUTTON_DOWN: {
                 const auto button_down = static_cast<Input::Mouse::MouseCode>(event.button.button);
-                _eventHandler.Notify(Events::MousePressedEvent(button_down));
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_MOUSE");
+                _eventHandler.Notify(Events::MousePressedEvent(button_down, *deviceInfo));
                 break;
             }
             case SDL_EVENT_MOUSE_BUTTON_UP: {
                 const auto button_up = static_cast<Input::Mouse::MouseCode>(event.button.button);
-                _eventHandler.Notify(Events::MouseReleasedEvent(button_up));
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_MOUSE");
+                _eventHandler.Notify(Events::MouseReleasedEvent(button_up, *deviceInfo));
                 break;
             }
             case SDL_EVENT_MOUSE_MOTION: {
-                float x, y; SDL_GetMouseState(&x, &y);
-                _eventHandler.Notify(Events::MouseMovedEvent(x, y));
+                float x = event.motion.x;
+                float y = event.motion.y;
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_MOUSE");
+                _eventHandler.Notify(Events::MouseMovedEvent(x, y, *deviceInfo));
                 break;
             }
             case SDL_EVENT_MOUSE_WHEEL: {
-                _eventHandler.Notify(Events::MouseScrolledEvent(event.wheel.x, event.wheel.y));
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_MOUSE");
+                _eventHandler.Notify(Events::MouseScrolledEvent(event.wheel.x, event.wheel.y, *deviceInfo));
                 break;
             }
             case SDL_EVENT_KEY_DOWN: {
                 const auto key_down = static_cast<Input::Key::KeyCode>(event.key.scancode);
-                _eventHandler.Notify(Events::KeyPressedEvent(key_down, event.key.repeat));
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_KEYBOARD");
+                _eventHandler.Notify(Events::KeyPressedEvent(key_down, *deviceInfo, event.key.repeat));
                 break;
 
             }
             case SDL_EVENT_KEY_UP: {
                 const auto key_up = static_cast<Input::Key::KeyCode>(event.key.scancode);
-                _eventHandler.Notify(Events::KeyReleasedEvent(key_up));
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_KEYBOARD");
+                _eventHandler.Notify(Events::KeyReleasedEvent(key_up, *deviceInfo));
                 break;
             }
             case SDL_EVENT_GAMEPAD_ADDED: {
                 const auto gamePadId = event.gdevice.which;
+                const auto deviceInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::GAMEPAD, "SDL_GAMEPAD_" + std::to_string(gamePadId));
                 SDL_OpenGamepad(gamePadId);
-                _eventHandler.Notify(Events::GamepadConnectedEvent(gamePadId));
+                _eventHandler.Notify(Events::GamepadConnectedEvent(*deviceInfo));
                 break;
             }
             case SDL_EVENT_GAMEPAD_REMOVED: {
                 const auto gamePadId = event.gdevice.which;
-                _eventHandler.Notify(Events::GamepadDisconnectedEvent(gamePadId));
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_GAMEPAD_" + std::to_string(gamePadId));
+                Input::InputDeviceRegistry::unregisterDevice(deviceInfo->id);
+                _eventHandler.Notify(Events::GamepadDisconnectedEvent(*deviceInfo));
                 break;
             }
             case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
                 const auto button_down = static_cast<Input::Gamepad::GamepadButtonCode>(event.gbutton.button);
-                const auto gamepadId = event.gdevice.which;
-                _eventHandler.Notify(Events::GamepadButtonPressedEvent(button_down, gamepadId));
+                const auto gamepadId = event.gbutton.which;
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_GAMEPAD_" + std::to_string(gamepadId));
+                _eventHandler.Notify(Events::GamepadButtonPressedEvent(button_down, *deviceInfo));
                 break;
             }
             case SDL_EVENT_GAMEPAD_BUTTON_UP: {
                 const auto button_up = static_cast<Input::Gamepad::GamepadButtonCode>(event.gbutton.button);
-                const auto gamepadId = event.gdevice.which;
-                _eventHandler.Notify(Events::GamepadButtonReleasedEvent(button_up, gamepadId));
+                const auto gamepadId = event.gbutton.which;
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_GAMEPAD_" + std::to_string(gamepadId));
+                _eventHandler.Notify(Events::GamepadButtonReleasedEvent(button_up, *deviceInfo));
                 break;
             }
             case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
                 const auto axis = static_cast<Input::Gamepad::GamepadAxisCode>(event.gaxis.axis);
                 const auto value = static_cast<float>(event.gaxis.value);
-                const auto gamepadId = event.gdevice.which;
-                _eventHandler.Notify(Events::GamepadAxisEvent(axis, value, gamepadId));
+                const auto gamepadId = event.gaxis.which;
+                const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_GAMEPAD_" + std::to_string(gamepadId));
+                _eventHandler.Notify(Events::GamepadAxisEvent(axis, value, *deviceInfo));
+                break;
             }
             default: break;
         }

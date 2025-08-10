@@ -12,10 +12,11 @@
 #endif
 
 #include <pch.h>
+#include <Logging/Log.h>
 #include <Input/KeyCode.h>
 #include <Input/MouseCode.h>
 #include <Input/GamepadCode.h>
-#include <Logging/Log.h>
+#include <Input/InputDeviceRegistry.h>
 #include <Events/Event.h>
 #include <Events/MouseEvent.h>
 #include <Events/WindowEvent.h>
