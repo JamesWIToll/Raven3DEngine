@@ -10,6 +10,7 @@ using namespace Raven3DEngineCore;
 static const auto loggerListener = new Logging::ConsoleLog();
 
 RavenApp::RavenApp(const std::string& appName, const int &pixelWidth, const int &pixelHeight) {
+
     this->appName = appName;
 
     RAVEN_REGISTER_LOG_LISTENER(loggerListener);
@@ -17,10 +18,13 @@ RavenApp::RavenApp(const std::string& appName, const int &pixelWidth, const int 
 
     _eventHandler = new Events::EventHandler();
     _eventHandler->RegisterEventListener(Events::EventType::WindowClosed, [this] (const Events::Event &) { quitApp(); });
+
     _window = new Window::SDLWindow();
-    _window->SetEventHandler(*_eventHandler);
+    _window->SetEventHandler(_eventHandler);
     _window->Initialize(Rendering::RenderAPI::OPENGL, appName, pixelWidth, pixelHeight);
+
     _renderer = new Rendering::OpenGLRenderer();
+    _renderer->SetEventHandler(_eventHandler);
     _renderer->Initialize(glm::vec3(0.1f, 0.3f, 0.4f));
 }
 

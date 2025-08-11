@@ -12,6 +12,7 @@
 #endif
 
 #include <pch.h>
+#include <Scene/Components/CoreComponents.h>
 #include <Logging/Log.h>
 #include <Input/KeyCode.h>
 #include <Input/MouseCode.h>
@@ -23,6 +24,8 @@
 #include <Events/KeyEvent.h>
 #include <Events/GamepadEvent.h>
 #include <Events/EventHandler.h>
+#include <Scene/SceneManager.h>
+#include <Scripting/ScriptManager.h>
 #include <Rendering/Renderer.h>
 #include <Window/Window.h>
 #include <RavenApp.h>

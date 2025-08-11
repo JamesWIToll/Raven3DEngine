@@ -7,27 +7,32 @@
 
 namespace Raven3DEngineCore::Rendering {
 
-
-    enum class RenderAPI {
+    enum class RenderAPI : ushort{
         OPENGL,
     };
 
-    class IRenderer {
+    class IRenderer : public Events::EventWatcher {
     public:
 
         virtual ~IRenderer() = default;
 
-        virtual void Initialize(const glm::vec3 & clearColor) = 0;
+        virtual void QueueForRender(RenderData *data, Scene::TransformData *transform) = 0;
+
+        virtual void Initialize(const glm::vec3 &clearColor) = 0;
         virtual void RenderFrame() = 0;
     };
 
 
-    class OpenGLRenderer : public IRenderer {
+    class OpenGLRenderer final : public IRenderer {
+        std::vector<std::pair<RenderData*, Scene::TransformData*>> _renderData {};
+        std::vector<std::pair<RenderData*, Scene::TransformData*>> _transparentRenderData {};
     public:
         OpenGLRenderer() = default;
         ~OpenGLRenderer() override {
             RAVEN_LOG_INFO("OpenGL Renderer Shut Down");
         }
+
+        void QueueForRender(RenderData *data, Scene::TransformData *transform) override;
         void Initialize(const glm::vec3 & clearColor) override;
         void RenderFrame() override;
     };

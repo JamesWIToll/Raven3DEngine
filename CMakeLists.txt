@@ -22,6 +22,8 @@ add_library(Raven3DEngineCore SHARED
         Raven3DEngineCore/src/Window/SDLWindow.cpp
         Raven3DEngineCore/src/Rendering/OpenGLRenderer.cpp
         Raven3DEngineCore/src/RavenApp.cpp
+        Raven3DEngineCore/src/Scene/SceneManager.cpp
+        Raven3DEngineCore/src/Scripting/LuaScriptManager.cpp
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -36,6 +38,7 @@ target_include_directories(Raven3DEngineCore PUBLIC
         ThirdParty/SDL/SDL3/include
         Raven3DEngineCore/Include
         Raven3DEngineCore/src
+        ThirdParty/lua
 )
 
 target_precompile_headers(Raven3DEngineCore PUBLIC

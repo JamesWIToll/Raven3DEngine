@@ -6,14 +6,9 @@
 #define WINDOW_H
 
 namespace Raven3DEngineCore::Window {
-    class IRenderWindow {
-    protected:
-        Events::EventHandler _eventHandler;
+    class IRenderWindow : public Events::EventWatcher {
     public:
         virtual ~IRenderWindow() = default;
-
-        void SetEventHandler(const Events::EventHandler handler) { _eventHandler = handler; }
-
         virtual void Initialize(Rendering::RenderAPI api, const std::string &name, const int &pixelWidth, const int &pixelHeight) = 0;
         virtual void UpdateWindow() = 0;
         virtual void SwapWindow() = 0;

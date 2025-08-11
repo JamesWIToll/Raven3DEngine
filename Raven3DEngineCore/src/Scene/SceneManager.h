@@ -1,0 +1,13 @@
+//
+// Created by wesley on 8/10/25.
+//
+
+#ifndef RAVEN3DENGINECORE_SCENEMANAGER_H
+#define RAVEN3DENGINECORE_SCENEMANAGER_H
+
+
+class SceneManager {
+};
+
+
+#endif //RAVEN3DENGINECORE_SCENEMANAGER_H

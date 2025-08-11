@@ -7,6 +7,8 @@
 
 namespace Raven3DEngineCore::Events {
 
+
+
     class Listener {
         std::vector<std::function<void(const Event&)>> _listeners {};
 
@@ -48,6 +50,16 @@ namespace Raven3DEngineCore::Events {
         }
 
     };
+
+    class EventWatcher {
+    protected:
+        EventHandler *_eventHandler {nullptr};
+    public:
+        void SetEventHandler(EventHandler *eventHandler) {
+            _eventHandler = eventHandler;
+        }
+    };
+
 }
 
 #endif //EVENTHANDLER_H
