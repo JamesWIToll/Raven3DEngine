@@ -5,6 +5,8 @@
 #ifndef PCH_H
 #define PCH_H
 
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <string>
 #include <vector>
 #include <functional>

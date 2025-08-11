@@ -16,7 +16,7 @@ namespace Raven3DEngineCore::Scripting {
         SceneManager* _sceneManager = nullptr;
         explicit IScriptManager(SceneManager* sceneManager) : _sceneManager(sceneManager) {}
     public:
-        virtual ~IScriptManager() = 0;
+        virtual ~IScriptManager() = default;
 
         virtual ScriptType getScriptType() = 0;
 
