@@ -9,6 +9,8 @@
 
 namespace Raven3DEngineCore::Events {
 
+    static auto EventClock = std::chrono::system_clock();
+
     enum class EventType {
         None = 0,
         KeyPressed,
@@ -25,7 +27,9 @@ namespace Raven3DEngineCore::Events {
         WindowMoved,
         WindowClosed,
         AppUpdate,
+        AppPostUpdate,
         AppRender,
+        AppPostRender,
         GamePadButtonPressed,
         GamePadButtonReleased,
         GamePadAxisMoved,

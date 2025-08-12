@@ -6,12 +6,14 @@
 #define RAVEN3DENGINECORE_SCENEMANAGER_H
 
 namespace Raven3DEngineCore::Scene {
-    class SceneManager {
+    class SceneManager final : public Events::EventNotifier {
         entt::basic_registry<Entity_T> _registry;
         Entity_T _root = entt::null;
     public:
         SceneManager();
-        ~SceneManager();
+        ~SceneManager() override;
+
+        void Initialize();
 
         void Update();
         void ProcessRenderables(Rendering::IRenderer *renderer);

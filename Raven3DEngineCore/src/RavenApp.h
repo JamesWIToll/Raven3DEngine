@@ -10,6 +10,8 @@ namespace Raven3DEngineCore {
         Rendering::IRenderer *_renderer;
         Window::IRenderWindow *_window;
         Events::EventHandler *_eventHandler;
+        Scripting::IScriptManager *_scriptManager;
+        Scene::SceneManager *_sceneManager;
         bool _quit = false;
 
     public:

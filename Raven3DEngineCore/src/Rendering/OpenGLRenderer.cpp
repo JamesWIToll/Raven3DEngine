@@ -15,6 +15,9 @@ void OpenGLRenderer::QueueForRender(RenderData *data, Scene::TransformData *tran
 
 
 void OpenGLRenderer::Initialize(const glm::vec3 &clearColor) {
+    _eventHandler->RegisterEventListener(Events::EventType::AppRender, [this] (const Events::Event &) { RenderFrame(); });
+
+    _renderData.clear();
     glewInit();
     glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
     RAVEN_LOG_INFO("OpenGL Renderer Initialized");

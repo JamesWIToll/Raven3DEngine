@@ -7,6 +7,9 @@ using namespace Raven3DEngineCore::Window;
 
 void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
 
+    _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { UpdateWindow(); });
+    _eventHandler->RegisterEventListener(Events::EventType::AppPostRender, [this] (const Events::Event &) { SwapWindow(); });
+
     _renderAPI = api;
 
     std::string rendererName = name;

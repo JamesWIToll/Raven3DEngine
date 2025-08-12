@@ -11,7 +11,7 @@ namespace Raven3DEngineCore::Rendering {
         OPENGL,
     };
 
-    class IRenderer : public Events::EventWatcher {
+    class IRenderer : public Events::EventNotifier {
     public:
 
         virtual ~IRenderer() = default;

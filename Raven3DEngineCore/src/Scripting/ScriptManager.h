@@ -11,18 +11,18 @@ namespace Raven3DEngineCore::Scripting {
         LUA,
     };
 
-    class IScriptManager {
+    class IScriptManager : public Events::EventNotifier {
     protected:
-        SceneManager* _sceneManager = nullptr;
-        explicit IScriptManager(SceneManager* sceneManager) : _sceneManager(sceneManager) {}
+        Scene::SceneManager* _sceneManager = nullptr;
+        explicit IScriptManager(Scene::SceneManager* sceneManager) : _sceneManager(sceneManager) {}
     public:
         virtual ~IScriptManager() = default;
 
-        virtual ScriptType getScriptType() = 0;
+        virtual void Initialize() = 0;
+        virtual ScriptType GetScriptType() = 0;
 
-        virtual void RunOnEvent(const Events::Event& event, RAVEN_FLOAT deltaTime) = 0;
+        virtual void RunOnEvent(const Events::Event& event) = 0;
     };
-
 
     class LuaScriptManager final : public IScriptManager {
         lua_State* _luaState = nullptr;
@@ -32,11 +32,13 @@ namespace Raven3DEngineCore::Scripting {
             _luaState = nullptr;
         }
 
-        explicit LuaScriptManager(SceneManager* sceneManager);
+        void Initialize() override;
 
-        ScriptType getScriptType() override { return ScriptType::LUA; }
+        explicit LuaScriptManager(Scene::SceneManager* sceneManager);
 
-        void RunOnEvent(const Events::Event& event, RAVEN_FLOAT deltaTime) override;
+        ScriptType GetScriptType() override { return ScriptType::LUA; }
+
+        void RunOnEvent(const Events::Event& event) override;
     };
 
 }

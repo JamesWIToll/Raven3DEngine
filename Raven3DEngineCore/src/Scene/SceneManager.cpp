@@ -18,16 +18,29 @@ SceneManager::SceneManager() {
         .id = _root,
         .name = "rootEntity"
     });
+    _registry.emplace<TransformData>(_root, TransformData{
+        .translation = glm::vec3(0.0f),
+        .rotation = glm::vec3(0.0f),
+        .scale = glm::vec3(1.0f)
+    });
 }
 
 SceneManager::~SceneManager(){
     _registry.clear();
 }
 
+void SceneManager::Initialize() {
+    _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { Update(); });
+}
+
 void SceneManager::Update() {
-    auto transformView = _registry.view<RelationshipData, TransformData>();
+    const auto transformView = _registry.view<RelationshipData, TransformData>();
 
     std::function<void(Entity_T)> UpdateChildTransform = [&](const Entity_T entity) {
+        if (!transformView.contains(entity)) {
+            RAVEN_LOG_ERROR("Entity {} does not have both a transform and relationship component", static_cast<RAVEN_ENTITY_TYPE>(entity));
+            return;
+        }
         auto [relData, transform] = transformView.get(entity);
         for (const auto children = relData.children; const auto child : children) {
             auto [childRelData, childTransform] = transformView.get(child);
@@ -133,7 +146,7 @@ bool SceneManager::DisconnectComponents(const Entity_T entity) {
 
 template<typename T_Comp>
 T_Comp SceneManager::GetComponent(Entity_T entity) const{
-    if (auto [ptr, valid] = _registry.try_get<T_Comp>(entity); valid) {
+    if (auto ptr = _registry.try_get<T_Comp>(entity); ptr != nullptr) {
         return *ptr;
     }
     RAVEN_LOG_ERROR("Entity {} does not have component {}", static_cast<RAVEN_ENTITY_TYPE>(entity), typeid(T_Comp).name());
@@ -142,16 +155,22 @@ T_Comp SceneManager::GetComponent(Entity_T entity) const{
 
 template<typename... T_Comps>
 std::tuple<T_Comps...> SceneManager::GetComponents(const Entity_T entity) const{
-    if (auto [ptr, valid] = _registry.try_get<T_Comps...>(entity); valid) {
-        return *ptr;
-    }
-    std::string typeNames;
+    std::tuple<T_Comps...> components;
+    std::string errorTypeNames;
     for ([[maybe_unused]] const auto type : {typeid(T_Comps)...}) {
-        typeNames += typeid(type).name();
-        typeNames += ", ";
+        auto ptr = _registry.try_get<type>(entity);
+        if (ptr != nullptr) {
+            components.emplace_back(*ptr);
+        } else {
+            errorTypeNames += typeid(type).name();
+            errorTypeNames += ", ";
+        }
     }
-    RAVEN_LOG_ERROR("Entity {} does not have components", static_cast<RAVEN_ENTITY_TYPE>(entity), typeNames);
-    return {};
+    if (!errorTypeNames.empty()) {
+        RAVEN_LOG_ERROR("Entity {} does not have components: {}", static_cast<RAVEN_ENTITY_TYPE>(entity), errorTypeNames);
+        return {};
+    }
+    return components;
 }
 
 

@@ -36,6 +36,7 @@
 #include <Events/WindowEvent.h>
 #include <Events/KeyEvent.h>
 #include <Events/GamepadEvent.h>
+#include <Events/AppEvent.h>
 #include <Events/EventHandler.h>
 #include <Rendering/Renderer.h>
 #include <Scene/SceneManager.h>

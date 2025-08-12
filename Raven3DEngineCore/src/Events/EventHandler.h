@@ -51,11 +51,13 @@ namespace Raven3DEngineCore::Events {
 
     };
 
-    class EventWatcher {
+    class EventNotifier {
     protected:
         EventHandler *_eventHandler {nullptr};
     public:
-        void SetEventHandler(EventHandler *eventHandler) {
+        virtual ~EventNotifier() = default;
+
+        virtual void SetEventHandler(EventHandler *eventHandler) {
             _eventHandler = eventHandler;
         }
     };
