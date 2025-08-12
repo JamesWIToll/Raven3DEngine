@@ -9,7 +9,7 @@ namespace Raven3DEngineCore::Window {
     class IRenderWindow : public Events::EventWatcher {
     public:
         virtual ~IRenderWindow() = default;
-        virtual void Initialize(Rendering::RenderAPI api, const std::string &name, const int &pixelWidth, const int &pixelHeight) = 0;
+        virtual void Initialize(Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) = 0;
         virtual void UpdateWindow() = 0;
         virtual void SwapWindow() = 0;
     };
@@ -36,7 +36,7 @@ namespace Raven3DEngineCore::Window {
             RAVEN_LOG_INFO("SDL Window Closed");
         }
 
-        void Initialize(Rendering::RenderAPI api, const std::string &name, const int &pixelWidth, const int &pixelHeight) override;
+        void Initialize(Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) override;
         void UpdateWindow() override;
         void SwapWindow() override;
 

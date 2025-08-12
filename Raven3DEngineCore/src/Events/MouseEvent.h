@@ -60,12 +60,12 @@ namespace Raven3DEngineCore::Events {
     };
 
     class MouseMovedEvent final : public InputDeviceEvent {
-        float _xPos, _yPos;
+        RAVEN_FLOAT _xPos, _yPos;
     public:
-        MouseMovedEvent(const float x, const float y, const Input::DeviceInfo &device): InputDeviceEvent(device), _xPos(x), _yPos(y) {}
+        MouseMovedEvent(const RAVEN_FLOAT x, const RAVEN_FLOAT y, const Input::DeviceInfo &device): InputDeviceEvent(device), _xPos(x), _yPos(y) {}
 
-        [[nodiscard]] float getX() const { return _xPos; }
-        [[nodiscard]] float getY() const { return _yPos; }
+        [[nodiscard]] RAVEN_FLOAT getX() const { return _xPos; }
+        [[nodiscard]] RAVEN_FLOAT getY() const { return _yPos; }
 
         EVENT_TYPE_GETTERS(MouseMoved);
         void logEvent() const override {
@@ -74,12 +74,12 @@ namespace Raven3DEngineCore::Events {
     };
 
     class MouseScrolledEvent final : public InputDeviceEvent {
-        float _xOffset, _yOffset;
+        RAVEN_FLOAT _xOffset, _yOffset;
     public:
-        MouseScrolledEvent(const float x, const float y, const Input::DeviceInfo &device): InputDeviceEvent(device), _xOffset(x), _yOffset(y) {}
+        MouseScrolledEvent(const RAVEN_FLOAT x, const RAVEN_FLOAT y, const Input::DeviceInfo &device): InputDeviceEvent(device), _xOffset(x), _yOffset(y) {}
 
-        [[nodiscard]] float getXOffset() const { return _xOffset; }
-        [[nodiscard]] float getYOffset() const { return _yOffset; }
+        [[nodiscard]] RAVEN_FLOAT getXOffset() const { return _xOffset; }
+        [[nodiscard]] RAVEN_FLOAT getYOffset() const { return _yOffset; }
 
         EVENT_TYPE_GETTERS(MouseScrolled);
 

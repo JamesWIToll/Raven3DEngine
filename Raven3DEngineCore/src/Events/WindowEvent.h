@@ -18,12 +18,12 @@ namespace Raven3DEngineCore::Events {
     };
 
     class WindowResizeEvent final: public Event {
-        unsigned int _width, _height;
+        RAVEN_U_INT _width, _height;
     public:
-        WindowResizeEvent(const int width, const int height) : _width(width), _height(height) {}
+        WindowResizeEvent(const RAVEN_INT width, const RAVEN_INT height) : _width(width), _height(height) {}
 
-        [[nodiscard]] unsigned int getWidth() const { return _width; }
-        [[nodiscard]] unsigned int getHeight() const { return _height; }
+        [[nodiscard]] RAVEN_U_INT getWidth() const { return _width; }
+        [[nodiscard]] RAVEN_U_INT getHeight() const { return _height; }
 
         EVENT_TYPE_GETTERS(WindowResized);
 

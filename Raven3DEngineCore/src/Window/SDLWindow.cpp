@@ -5,7 +5,7 @@
 
 using namespace Raven3DEngineCore::Window;
 
-void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const int &pixelWidth, const int &pixelHeight) {
+void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
 
     _renderAPI = api;
 
@@ -25,10 +25,10 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
     const auto mouseInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::MOUSE, "SDL_MOUSE");
     _eventHandler->Notify(Events::MouseConnectedEvent(*mouseInfo));
 
-    int gamePadCount = 0;
+    RAVEN_INT gamePadCount = 0;
     const auto connectedGamePads = SDL_GetGamepads(&gamePadCount);
-    for (int i = 0; i < gamePadCount; i++) {
-        const unsigned int gamePadId = connectedGamePads[i];
+    for (RAVEN_INT i = 0; i < gamePadCount; i++) {
+        const RAVEN_U_INT gamePadId = connectedGamePads[i];
         SDL_OpenGamepad(gamePadId);
         const auto deviceInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::GAMEPAD, "SDL_GAMEPAD_" + std::to_string(gamePadId));
         _eventHandler->Notify(Events::GamepadConnectedEvent(*deviceInfo));
@@ -46,7 +46,7 @@ void SDLWindow::UpdateWindow() {
                 break;
             }
             case SDL_EVENT_WINDOW_RESIZED: {
-                int newWidth, newHeight;
+                RAVEN_INT newWidth, newHeight;
                 SDL_GetWindowSize(_window, &newWidth, &newHeight);
                 _eventHandler->Notify(Events::WindowResizeEvent(newWidth, newHeight));
                 break;
@@ -64,8 +64,8 @@ void SDLWindow::UpdateWindow() {
                 break;
             }
             case SDL_EVENT_MOUSE_MOTION: {
-                float x = event.motion.x;
-                float y = event.motion.y;
+                RAVEN_FLOAT x = event.motion.x;
+                RAVEN_FLOAT y = event.motion.y;
                 const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_MOUSE");
                 _eventHandler->Notify(Events::MouseMovedEvent(x, y, *deviceInfo));
                 break;
@@ -118,7 +118,7 @@ void SDLWindow::UpdateWindow() {
             }
             case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
                 const auto axis = static_cast<Input::Gamepad::GamepadAxisCode>(event.gaxis.axis);
-                const auto value = static_cast<float>(event.gaxis.value);
+                const auto value = static_cast<RAVEN_FLOAT>(event.gaxis.value);
                 const auto gamepadId = event.gaxis.which;
                 const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_GAMEPAD_" + std::to_string(gamepadId));
                 _eventHandler->Notify(Events::GamepadAxisEvent(axis, value, *deviceInfo));

@@ -7,7 +7,7 @@
 
 namespace Raven3DEngineCore::Input::Key {
 
-    enum class KeyCode : unsigned int {
+    enum class KeyCode : RAVEN_U_INT {
         ONE = SDL_SCANCODE_1,
         TWO = SDL_SCANCODE_2,
         THREE = SDL_SCANCODE_3,

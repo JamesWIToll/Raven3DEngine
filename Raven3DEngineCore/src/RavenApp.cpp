@@ -9,7 +9,7 @@ using namespace Raven3DEngineCore;
 
 static const auto loggerListener = new Logging::ConsoleLog();
 
-RavenApp::RavenApp(const std::string& appName, const int &pixelWidth, const int &pixelHeight) {
+RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
 
     this->appName = appName;
 

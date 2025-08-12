@@ -7,9 +7,9 @@ using namespace Raven3DEngineCore::Rendering;
 
 void OpenGLRenderer::QueueForRender(RenderData *data, Scene::TransformData *transform) {
     if (data->material.opacity < 1.0f) {
-        _transparentRenderData.push_back(std::pair(data, transform));
+        _transparentRenderData.emplace_back(data, transform);
     } else {
-        _renderData.push_back(std::pair(data, transform));
+        _renderData.emplace_back(data, transform);
     }
 }
 

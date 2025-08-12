@@ -7,7 +7,7 @@
 
 namespace Raven3DEngineCore::Input::Mouse {
 
-    enum class MouseCode : unsigned int {
+    enum class MouseCode : RAVEN_U_INT {
         BUTTON_LEFT = SDL_BUTTON_LEFT,
         BUTTON_RIGHT = SDL_BUTTON_RIGHT,
         BUTTON_MIDDLE = SDL_BUTTON_MIDDLE,

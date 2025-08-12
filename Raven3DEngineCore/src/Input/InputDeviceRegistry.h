@@ -7,9 +7,9 @@
 
 namespace Raven3DEngineCore::Input {
 
-#define DEVICE_ID unsigned int
+#define DEVICE_ID RAVEN_U_INT
 
-    enum class DeviceType : unsigned short {
+    enum class DeviceType : RAVEN_U_SHORT {
         KEYBOARD,
         MOUSE,
         GAMEPAD,

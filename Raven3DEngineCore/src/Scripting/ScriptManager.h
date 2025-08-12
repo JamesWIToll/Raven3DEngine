@@ -20,7 +20,7 @@ namespace Raven3DEngineCore::Scripting {
 
         virtual ScriptType getScriptType() = 0;
 
-        virtual void RunOnEvent(const Events::Event& event, float deltaTime) = 0;
+        virtual void RunOnEvent(const Events::Event& event, RAVEN_FLOAT deltaTime) = 0;
     };
 
 
@@ -36,7 +36,7 @@ namespace Raven3DEngineCore::Scripting {
 
         ScriptType getScriptType() override { return ScriptType::LUA; }
 
-        void RunOnEvent(const Events::Event& event, float deltaTime) override;
+        void RunOnEvent(const Events::Event& event, RAVEN_FLOAT deltaTime) override;
     };
 
 }

@@ -15,7 +15,7 @@ namespace Raven3DEngineCore {
     public:
         std::string appName;
 
-        RavenApp(const std::string &appName, const int &pixelWidth, const int &pixelHeight);
+        RavenApp(const std::string &appName, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight);
 
         ~RavenApp();
         void run() const;

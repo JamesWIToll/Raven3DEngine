@@ -16,6 +16,7 @@
 #include <sstream>
 #include <chrono>
 #include <format>
+#include <cmath>
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_gamepad.h>

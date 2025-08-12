@@ -8,7 +8,7 @@
 
 namespace Raven3DEngineCore::Input::Gamepad {
 
-    enum class GamepadButtonCode : int {
+    enum class GamepadButtonCode : RAVEN_INT {
         BTN_INVALID = SDL_GAMEPAD_BUTTON_INVALID,
         BTN_DPAD_LEFT = SDL_GAMEPAD_BUTTON_DPAD_LEFT,
         BTN_DPAD_RIGHT = SDL_GAMEPAD_BUTTON_DPAD_RIGHT,
@@ -27,7 +27,7 @@ namespace Raven3DEngineCore::Input::Gamepad {
         BTN_LEFT_THUMB = SDL_GAMEPAD_BUTTON_LEFT_STICK,
     };
 
-    enum class GamepadAxisCode : int {
+    enum class GamepadAxisCode : RAVEN_INT {
         AXIS_INVALID = SDL_GAMEPAD_AXIS_INVALID,
         AXIS_LEFT_X = SDL_GAMEPAD_AXIS_LEFTX,
         AXIS_LEFT_Y = SDL_GAMEPAD_AXIS_LEFTY,

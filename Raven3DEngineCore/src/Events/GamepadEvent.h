@@ -66,12 +66,12 @@ namespace Raven3DEngineCore::Events {
 
     class GamepadAxisEvent final : public InputDeviceEvent {
         Input::Gamepad::GamepadAxisCode _axis;
-        float _value;
+        RAVEN_FLOAT _value;
     public:
-        explicit GamepadAxisEvent(const Input::Gamepad::GamepadAxisCode axis, const float value, const Input::DeviceInfo &device): InputDeviceEvent(device), _axis(axis), _value(value) {}
+        explicit GamepadAxisEvent(const Input::Gamepad::GamepadAxisCode axis, const RAVEN_FLOAT value, const Input::DeviceInfo &device): InputDeviceEvent(device), _axis(axis), _value(value) {}
 
         [[nodiscard]] Input::Gamepad::GamepadAxisCode GetAxis() const { return _axis; }
-        [[nodiscard]] float GetValue() const { return _value; }
+        [[nodiscard]] RAVEN_FLOAT GetValue() const { return _value; }
 
         EVENT_TYPE_GETTERS(GamePadAxisMoved);
 

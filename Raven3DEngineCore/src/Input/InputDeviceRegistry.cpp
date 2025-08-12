@@ -20,7 +20,7 @@ namespace Raven3DEngineCore::Input {
 
     void InputDeviceRegistry::unregisterDevice(DEVICE_ID deviceID) {
         bool found = false;
-        for (size_t i = 0; i < _inputDeviceRegistry.devices.size(); i++) {
+        for (auto i = 0; i < _inputDeviceRegistry.devices.size() && !found; i++) {
             if (_inputDeviceRegistry.devices[i].id == deviceID) {
                 RAVEN_LOG_DEBUG("Device {} ( {} ) unregistered from Device Registry", _inputDeviceRegistry.devices[i].id, _inputDeviceRegistry.devices[i].name);
                 _inputDeviceRegistry.devices.erase(_inputDeviceRegistry.devices.begin() + i);

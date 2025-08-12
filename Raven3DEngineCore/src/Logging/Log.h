@@ -37,27 +37,27 @@ namespace Raven3DEngineCore::Logging {
     };
 
     class ILogListener {
-        u_short _levelMask = static_cast<u_short>(LogLevel::Fatal)   |
-                             static_cast<u_short>(LogLevel::Error)   |
-                             static_cast<u_short>(LogLevel::Warning) |
-                             static_cast<u_short>(LogLevel::Debug)   |
-                             static_cast<u_short>(LogLevel::Info);
+        RAVEN_U_SHORT _levelMask = static_cast<RAVEN_U_SHORT>(LogLevel::Fatal)   |
+                             static_cast<RAVEN_U_SHORT>(LogLevel::Error)   |
+                             static_cast<RAVEN_U_SHORT>(LogLevel::Warning) |
+                             static_cast<RAVEN_U_SHORT>(LogLevel::Debug)   |
+                             static_cast<RAVEN_U_SHORT>(LogLevel::Info);
     public:
         virtual ~ILogListener() = default;
 
         bool watchesLevel(const LogLevel level) const {
-            return _levelMask & static_cast<u_short>(level);
+            return _levelMask & static_cast<RAVEN_U_SHORT>(level);
         }
 
         void addLevel(const LogLevel level) {
-            _levelMask |= static_cast<u_short>(level);
+            _levelMask |= static_cast<RAVEN_U_SHORT>(level);
         }
 
         void removeLevel(const LogLevel level) {
-            _levelMask &= ~static_cast<u_short>(level);
+            _levelMask &= ~static_cast<RAVEN_U_SHORT>(level);
         }
 
-        void setLevelMask(const u_short mask) {
+        void setLevelMask(const RAVEN_U_SHORT mask) {
             _levelMask = mask;
         }
 
@@ -83,7 +83,7 @@ namespace Raven3DEngineCore::Logging {
 
         std::string _lastMessage;
         bool _repeated;
-        long int _repeatCount = 0;
+        RAVEN_LONG _repeatCount = 0;
     public:
         ConsoleLog() = default;
         void SubmitMessage(const LogLevel level, const std::string &message) override {

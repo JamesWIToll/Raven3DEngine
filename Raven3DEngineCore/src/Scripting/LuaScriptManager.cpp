@@ -19,6 +19,6 @@ LuaScriptManager::LuaScriptManager(SceneManager *sceneManager) : IScriptManager(
 }
 
 
-void LuaScriptManager::RunOnEvent(const Events::Event &event, float deltaTime) {
+void LuaScriptManager::RunOnEvent(const Events::Event &event, RAVEN_FLOAT deltaTime) {
     
 }
