@@ -25,6 +25,15 @@
 #include "glm/detail/type_quat.hpp"
 #include <entt/entt.hpp>
 
+#include <assimp/config.h>
+#ifndef AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT
+#define AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT 10e-3f
+#endif
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include "assimp/cimport.h"
+
 extern "C" {
 #include <lua.h>
 #include <lauxlib.h>

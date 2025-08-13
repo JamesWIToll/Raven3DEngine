@@ -6,12 +6,16 @@
 
 using namespace Raven3DEngineCore::Scene;
 
+// Declared in CoreComponents.h
+// ReSharper disable once CppUseAuto
+Entity_T Raven3DEngineCore::Scene::NullEntity = static_cast<Entity_T>(RAVEN_ENTITY_NULL);
+
 SceneManager::SceneManager() {
     _registry = entt::basic_registry<Entity_T>();
     _root = _registry.create();
     _registry.emplace<RelationshipData>(_root, RelationshipData{
         .root = _root,
-        .parent = entt::null,
+        .parent = NullEntity,
         .children = {}
     });
     _registry.emplace<EntityMetaData>(_root, EntityMetaData{
@@ -19,9 +23,16 @@ SceneManager::SceneManager() {
         .name = "rootEntity"
     });
     _registry.emplace<TransformData>(_root, TransformData{
-        .translation = glm::vec3(0.0f),
-        .rotation = glm::vec3(0.0f),
-        .scale = glm::vec3(1.0f)
+        .localTransform {
+            glm::vec3(0.0f),
+            glm::quat(),
+            glm::vec3(1.0f)
+        },
+        .worldTransform {
+            glm::vec3(0.0f),
+            glm::quat(),
+            glm::vec3(1.0f)
+        }
     });
 }
 
@@ -44,7 +55,7 @@ void SceneManager::Update() {
         auto [relData, transform] = transformView.get(entity);
         for (const auto children = relData.children; const auto child : children) {
             auto [childRelData, childTransform] = transformView.get(child);
-            childTransform.Transform(transform.GetMatrix());
+            childTransform.TransformByMat(transform.GetMatrix());
             UpdateChildTransform(child);
         }
 
@@ -61,10 +72,12 @@ void SceneManager::ProcessRenderables(Rendering::IRenderer *renderer) {
 
 Entity_T SceneManager::CreateEntity(const EntityMetaData& data, const Entity_T parent) {
     const Entity_T entity = _registry.create();
-    _registry.emplace<EntityMetaData>(entity, data);
+    EntityMetaData metaData {data};
+    metaData.id = entity;
+    _registry.emplace<EntityMetaData>(entity, metaData);
     _registry.emplace<RelationshipData>(entity, RelationshipData{
         .root = _root,
-        .parent = parent == entt::null ? _root : parent,
+        .parent = parent == NullEntity ? _root : parent,
         .children = {}
     });
     return entity;
@@ -143,34 +156,3 @@ bool SceneManager::DisconnectComponents(const Entity_T entity) {
     _registry.remove<T_Comp1, T_Comps...>(entity);
     return true;
 }
-
-template<typename T_Comp>
-T_Comp SceneManager::GetComponent(Entity_T entity) const{
-    if (auto ptr = _registry.try_get<T_Comp>(entity); ptr != nullptr) {
-        return *ptr;
-    }
-    RAVEN_LOG_ERROR("Entity {} does not have component {}", static_cast<RAVEN_ENTITY_TYPE>(entity), typeid(T_Comp).name());
-    return {};
-}
-
-template<typename... T_Comps>
-std::tuple<T_Comps...> SceneManager::GetComponents(const Entity_T entity) const{
-    std::tuple<T_Comps...> components;
-    std::string errorTypeNames;
-    for ([[maybe_unused]] const auto type : {typeid(T_Comps)...}) {
-        auto ptr = _registry.try_get<type>(entity);
-        if (ptr != nullptr) {
-            components.emplace_back(*ptr);
-        } else {
-            errorTypeNames += typeid(type).name();
-            errorTypeNames += ", ";
-        }
-    }
-    if (!errorTypeNames.empty()) {
-        RAVEN_LOG_ERROR("Entity {} does not have components: {}", static_cast<RAVEN_ENTITY_TYPE>(entity), errorTypeNames);
-        return {};
-    }
-    return components;
-}
-
-

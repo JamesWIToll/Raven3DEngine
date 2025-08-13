@@ -6,9 +6,6 @@
 #define RAVENENGINECORE_H
 
 
-
-
-
 #include <pch.h>
 
 #define BITSHIFT_TO_POS(x) (1 << x)
@@ -23,7 +20,10 @@
 #define RAVEN_U_INT std::uint32_t
 #define RAVEN_U_LONG std::uint64_t
 
+#define RAVEN_U_INT_MAX 0xFFFFFFFF
+
 #define RAVEN_ENTITY_TYPE RAVEN_U_INT
+#define RAVEN_ENTITY_NULL RAVEN_U_INT_MAX
 
 #include <Scene/Components/CoreComponents.h>
 #include <Logging/Log.h>
@@ -40,6 +40,7 @@
 #include <Events/EventHandler.h>
 #include <Rendering/Renderer.h>
 #include <Scene/SceneManager.h>
+#include <Importer/Importer.h>
 #include <Scene/Components/CoreComponentGetters.h>
 #include <Scripting/ScriptManager.h>
 #include <Window/Window.h>

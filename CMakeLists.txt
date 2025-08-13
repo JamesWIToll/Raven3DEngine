@@ -17,14 +17,15 @@ add_subdirectory(ThirdParty/SDL/SDL3)
 add_subdirectory(ThirdParty/lua)
 
 add_library(Raven3DEngineCore SHARED
+        Raven3DEngineCore/src/RavenApp.cpp
         Raven3DEngineCore/src/Logging/Log.cpp
         Raven3DEngineCore/src/Input/InputDeviceRegistry.cpp
         Raven3DEngineCore/src/Window/SDLWindow.cpp
         Raven3DEngineCore/src/Rendering/OpenGLRenderer.cpp
-        Raven3DEngineCore/src/RavenApp.cpp
         Raven3DEngineCore/src/Scene/SceneManager.cpp
         Raven3DEngineCore/src/Scripting/LuaScriptManager.cpp
         Raven3DEngineCore/src/Events/AppEvent.cpp
+        Raven3DEngineCore/src/Importer/Importer.cpp
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -40,6 +41,7 @@ target_include_directories(Raven3DEngineCore PUBLIC
         Raven3DEngineCore/Include
         Raven3DEngineCore/src
         ThirdParty/lua
+        ThirdParty/Other
 )
 
 target_precompile_headers(Raven3DEngineCore PUBLIC
@@ -48,9 +50,9 @@ target_precompile_headers(Raven3DEngineCore PUBLIC
 
 
 target_link_libraries(Raven3DEngineCore PRIVATE
+        assimp::assimp
         glew
         SDL3::SDL3
-        assimp::assimp
         LuaLib
 )
 

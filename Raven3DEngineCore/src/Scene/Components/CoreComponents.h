@@ -25,8 +25,11 @@ namespace Raven3DEngineCore::Rendering {
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
         std::vector<glm::vec2> uvs_0;
+        std::vector<glm::vec2> uvs_1;
+        std::vector<glm::vec2> uvs_2;
+        std::vector<glm::vec2> uvs_3;
         std::vector<RAVEN_U_INT> indices;
-        RAVEN_INT VAO, VBO, NBO, IBO, UV_0_BO;
+        RAVEN_INT VAO, VBO, NBO, IBO, UV_0_BO, UV_1_BO, UV_2_BO, UV_3_BO;
         RAVEN_INT primitiveMode;
     };
 
@@ -35,23 +38,43 @@ namespace Raven3DEngineCore::Rendering {
 namespace Raven3DEngineCore::Scene {
 
     enum class Entity_T : RAVEN_ENTITY_TYPE {};
+    extern Entity_T NullEntity;
 
-    struct TransformData {
+    struct Transform {
         glm::vec3 translation;
         glm::quat rotation;
         glm::vec3 scale;
+    };
 
-        void Transform(const glm::mat4 &transformMat) {
-            this->translation = glm::vec3(transformMat * glm::vec4(translation, 1.0f));
-            this->rotation = glm::quat_cast(transformMat * glm::mat4(rotation));
-            this->scale = glm::vec3(transformMat * glm::vec4(scale, 1.0f));
+    static Transform GetTransformFromMat(const glm::mat4 &mat) {
+        return Transform{
+            .translation = glm::vec3(mat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
+            .rotation = glm::quat_cast(mat),
+            .scale = glm::vec3(glm::vec3(mat * glm::vec4(1.0f, 1.0f, 1.0f, 0.0f)))
+        };
+    }
+
+    struct TransformData {
+        Transform localTransform;
+        Transform worldTransform;
+
+        void SetLocalTransform(const Transform &transform) {
+            this->localTransform = transform;
+            this->localTransform.scale = transform.scale;
+            this->localTransform.rotation = transform.rotation;
+        }
+
+        void TransformByMat(const glm::mat4 &transformMat) {
+            this->worldTransform.translation = glm::vec3(transformMat * glm::vec4(localTransform.translation, 1.0f));
+            this->worldTransform.rotation = glm::quat_cast(transformMat * glm::mat4(localTransform.rotation));
+            this->worldTransform.scale = glm::vec3(transformMat * glm::vec4(localTransform.scale, 1.0f));
         }
 
         [[nodiscard]] glm::mat4 GetMatrix() const {
             auto result = glm::mat4(1.0f);
-            result = glm::translate(result, translation);
-            result = glm::toMat4(rotation) * result;
-            result = glm::scale(result, scale);
+            result = glm::translate(result, worldTransform.translation);
+            result = glm::toMat4(worldTransform.rotation) * result;
+            result = glm::scale(result, worldTransform.scale);
             return result;
         }
     };

@@ -6,29 +6,29 @@
 #define RAVEN3DENGINECORE_CORECOMPONENTGETTERS_H
 
 namespace Raven3DEngineCore::Scene {
-    static TransformData GetTransformData(const SceneManager &scene, const Entity_T &entity) {
+    static TransformData GetTransformData(SceneManager &scene, const Entity_T &entity) {
         const auto data = scene.GetComponent<TransformData>(entity);
-        return data;
+        return *data;
     }
 
-    static EntityMetaData GetEntityMetaData(const SceneManager &scene, const Entity_T &entity) {
+    static EntityMetaData GetEntityMetaData(SceneManager &scene, const Entity_T &entity) {
         const auto data = scene.GetComponent<EntityMetaData>(entity);
-        return data;
+        return *data;
     }
 
-    static RelationshipData GetRelationshipData(const SceneManager &scene, const Entity_T &entity) {
+    static RelationshipData GetRelationshipData(SceneManager &scene, const Entity_T &entity) {
         const auto data = scene.GetComponent<RelationshipData>(entity);
-        return data;
+        return *data;
     }
 
-    static Rendering::RenderData GetRenderData(const SceneManager &scene, const Entity_T &entity) {
+    static Rendering::RenderData GetRenderData(SceneManager &scene, const Entity_T &entity) {
         const auto data = scene.GetComponent<Rendering::RenderData>(entity);
-        return data;
+        return *data;
     }
 
-    static Rendering::MaterialData GetMaterialData(const SceneManager &scene, const Entity_T &entity) {
+    static Rendering::MaterialData GetMaterialData(SceneManager &scene, const Entity_T &entity) {
         const auto data = scene.GetComponent<Rendering::MaterialData>(entity);
-        return data;
+        return *data;
     }
 
 }

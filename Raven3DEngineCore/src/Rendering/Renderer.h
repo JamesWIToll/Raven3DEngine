@@ -17,6 +17,7 @@ namespace Raven3DEngineCore::Rendering {
         virtual ~IRenderer() = default;
 
         virtual void QueueForRender(RenderData *data, Scene::TransformData *transform) = 0;
+        virtual RAVEN_INT LoadTexture(RAVEN_INT width, RAVEN_INT height, RAVEN_BYTE* data, RAVEN_INT numComps) = 0;
 
         virtual void Initialize(const glm::vec3 &clearColor) = 0;
         virtual void RenderFrame() = 0;
@@ -33,6 +34,7 @@ namespace Raven3DEngineCore::Rendering {
         }
 
         void QueueForRender(RenderData *data, Scene::TransformData *transform) override;
+        RAVEN_INT LoadTexture(RAVEN_INT width, RAVEN_INT height, RAVEN_BYTE* data, RAVEN_INT numComps) override;
         void Initialize(const glm::vec3 & clearColor) override;
         void RenderFrame() override;
     };

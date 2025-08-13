@@ -6,9 +6,11 @@
 #define RAVEN3DENGINECORE_SCENEMANAGER_H
 
 namespace Raven3DEngineCore::Scene {
+
+
     class SceneManager final : public Events::EventNotifier {
         entt::basic_registry<Entity_T> _registry;
-        Entity_T _root = entt::null;
+        Entity_T _root = NullEntity;
     public:
         SceneManager();
         ~SceneManager() override;
@@ -18,7 +20,7 @@ namespace Raven3DEngineCore::Scene {
         void Update();
         void ProcessRenderables(Rendering::IRenderer *renderer);
 
-        Entity_T CreateEntity(const EntityMetaData& data, Entity_T parent = entt::null);
+        Entity_T CreateEntity(const EntityMetaData& data, Entity_T parent = NullEntity);
 
         bool DestroyEntity(Entity_T entity);
 
@@ -35,14 +37,34 @@ namespace Raven3DEngineCore::Scene {
         bool DisconnectComponents(Entity_T entity);
 
         template<typename T_Comp>
-        T_Comp GetComponent(Entity_T entity) const;
+        T_Comp *GetComponent(Entity_T entity) {
+            if (auto ptr = _registry.try_get<T_Comp>(entity); ptr != nullptr) {
+                return ptr;
+            }
+            RAVEN_LOG_ERROR("Entity {} does not have component {}", static_cast<RAVEN_ENTITY_TYPE>(entity), typeid(T_Comp).name());
+            return nullptr;
+        }
 
         template<typename... T_Comps>
-        std::tuple<T_Comps...> GetComponents(Entity_T entity) const;
-
-
+        std::tuple<T_Comps *...> GetComponents(Entity_T entity) {
+            std::tuple<T_Comps...> components;
+            std::string errorTypeNames;
+            for ([[maybe_unused]] const auto type : {typeid(T_Comps)...}) {
+                auto ptr = _registry.try_get<type>(entity);
+                if (ptr != nullptr) {
+                    components.emplace_back(*ptr);
+                } else {
+                    errorTypeNames += typeid(type).name();
+                    errorTypeNames += ", ";
+                }
+            }
+            if (!errorTypeNames.empty()) {
+                RAVEN_LOG_ERROR("Entity {} does not have components: {}", static_cast<RAVEN_ENTITY_TYPE>(entity), errorTypeNames);
+                return {};
+            }
+            return components;
+        }
         [[nodiscard]] Entity_T GetRootEntity() const {return _root;}
-
     };
 }
 
