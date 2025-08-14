@@ -12,6 +12,7 @@ namespace Raven3DEngineCore {
         Events::EventHandler *_eventHandler;
         Scripting::IScriptManager *_scriptManager;
         Scene::SceneManager *_sceneManager;
+        Importer::IImporter *_importer;
         bool _quit = false;
 
     public:

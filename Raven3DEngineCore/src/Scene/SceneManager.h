@@ -31,10 +31,16 @@ namespace Raven3DEngineCore::Scene {
 
 
         template<typename T_Comp1, typename... T_Comps>
-        bool ConnectComponents(Entity_T entity, T_Comp1 firstComponent, T_Comps... restComponents);
+        bool ConnectComponents(Entity_T entity, T_Comp1 firstComponent, T_Comps... restComponents) {
+            _registry.emplace<T_Comp1, T_Comps...>(entity, firstComponent, restComponents...);
+            return true;
+        }
 
         template<typename T_Comp1, typename... T_Comps>
-        bool DisconnectComponents(Entity_T entity);
+        bool DisconnectComponents(const Entity_T entity) {
+            _registry.remove<T_Comp1, T_Comps...>(entity);
+            return true;
+        }
 
         template<typename T_Comp>
         T_Comp *GetComponent(Entity_T entity) {

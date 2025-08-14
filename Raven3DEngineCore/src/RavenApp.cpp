@@ -33,6 +33,9 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
 
     _scriptManager = new Scripting::LuaScriptManager(_sceneManager);
     _scriptManager->SetEventHandler(_eventHandler);
+
+    _importer = new Importer::AssimpImporter();
+    _importer->Initialize(_sceneManager, _renderer);
 }
 
 RavenApp::~RavenApp() {

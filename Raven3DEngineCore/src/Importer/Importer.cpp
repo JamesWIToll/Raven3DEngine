@@ -6,34 +6,16 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-
 using namespace Raven3DEngineCore::Importer;
 using namespace Raven3DEngineCore::Scene;
 using namespace Raven3DEngineCore::Rendering;
 
-static RAVEN_INT LoadTexture(const std::string &path, const aiScene *ai_Scene, IRenderer &renderer) {
-    RAVEN_INT textureID {};
-    if (path[0] == '*') {
-        const auto Tex = ai_Scene->mTextures[std::stoi(path.substr(1))];
-        const int length = Tex->mHeight == 0 ? Tex->mWidth : Tex->mHeight * Tex->mWidth * sizeof(aiTexel);
-        int height, width, compPerPixel;
-        RAVEN_BYTE* TexData = stbi_load_from_memory(reinterpret_cast<RAVEN_BYTE*>(Tex->pcData), length, &width, &height, &compPerPixel, 0);
-        textureID = renderer.LoadTexture(width, height, TexData, compPerPixel);
-        stbi_image_free(TexData);
-    } else {
-        int height, width, compPerPixel;
-        RAVEN_BYTE* TexData = stbi_load(path.c_str(), &width, &height, &compPerPixel, 0);
-        textureID = renderer.LoadTexture(width, height, TexData, compPerPixel);
-        stbi_image_free(TexData);
-    }
-    return textureID;
-}
 
-bool Import3DFileToScene(const std::string &filePath, SceneManager &scene, IRenderer &renderer, Entity_T parent = NullEntity) {
+bool AssimpImporter::Import3DFile(const std::string &filePath, Entity_T parent) {
     Assimp::Importer importer;
 
     if (parent == NullEntity) {
-        parent = scene.GetRootEntity();
+        parent = _scene->GetRootEntity();
     }
 
     const auto ai_Scene = importer.ReadFile(filePath,
@@ -47,6 +29,24 @@ bool Import3DFileToScene(const std::string &filePath, SceneManager &scene, IRend
         return false;
     }
 
+    const std::function LoadTexture = [&](const std::string &texPath) -> RAVEN_U_INT {
+            RAVEN_U_INT textureID {};
+            if (texPath[0] == '*') {
+                const auto Tex = ai_Scene->mTextures[std::stoi(texPath.substr(1))];
+                const int length = Tex->mHeight == 0 ? Tex->mWidth : Tex->mHeight * Tex->mWidth * sizeof(aiTexel);
+                int height, width, compPerPixel;
+                RAVEN_BYTE* TexData = stbi_load_from_memory(reinterpret_cast<RAVEN_BYTE*>(Tex->pcData), length, &width, &height, &compPerPixel, 0);
+                textureID = _renderer->LoadTexture(width, height, TexData, compPerPixel);
+                stbi_image_free(TexData);
+            } else {
+                int height, width, compPerPixel;
+                RAVEN_BYTE* TexData = stbi_load(texPath.c_str(), &width, &height, &compPerPixel, 0);
+                textureID = _renderer->LoadTexture(width, height, TexData, compPerPixel);
+                stbi_image_free(TexData);
+            }
+            return textureID;
+    };
+
     std::function<Entity_T(const aiNode*)> loadNode;
     loadNode = [&](const aiNode *current) -> Entity_T{
         if (current == nullptr) {
@@ -56,18 +56,18 @@ bool Import3DFileToScene(const std::string &filePath, SceneManager &scene, IRend
         const auto mat = current->mTransformation;
         const auto glmMat = ConvertAssimpMatrix(mat);
 
-        const Entity_T entity = scene.CreateEntity(EntityMetaData{
+        const Entity_T entity = _scene->CreateEntity(EntityMetaData{
             .name = current->mName.C_Str()
         }, parent);
-        scene.GetComponent<TransformData>(entity)->SetLocalTransform(GetTransformFromMat(glmMat));
+        _scene->GetComponent<TransformData>(entity)->SetLocalTransform(GetTransformFromMat(glmMat));
 
         for (RAVEN_INT i=0; i < current->mNumMeshes; i++) {
             const auto mesh = ai_Scene->mMeshes[current->mMeshes[i]];
-            const auto meshEntity = scene.CreateEntity(EntityMetaData{
+            const auto meshEntity = _scene->CreateEntity(EntityMetaData{
                 .name = mesh->mName.C_Str()
             }, entity);
 
-            Raven3DEngineCore::Rendering::RenderData renderData {};
+            RenderData renderData {};
 
             for (RAVEN_INT v = 0; v < mesh->mNumVertices; v++) {
                 renderData.vertices.push_back(glm::vec3(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z));
@@ -101,24 +101,24 @@ bool Import3DFileToScene(const std::string &filePath, SceneManager &scene, IRend
 
             RAVEN_INT diffTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), diffTexIdx);
             aiString diffTexturePath; material->GetTexture(aiTextureType_DIFFUSE, diffTexIdx, &diffTexturePath);
-            auto diffTexID = LoadTexture(std::string(diffTexturePath.C_Str()), ai_Scene, renderer);
+            auto diffTexID = LoadTexture(std::string(diffTexturePath.C_Str()));
 
 
             RAVEN_INT specTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_SPECULAR(0), specTexIdx);
             aiString specTexturePath; material->GetTexture(aiTextureType_SPECULAR, specTexIdx, &specTexturePath);
-            auto specTexID = LoadTexture(std::string(specTexturePath.C_Str()), ai_Scene, renderer);
+            auto specTexID = LoadTexture(std::string(specTexturePath.C_Str()));
 
             RAVEN_INT ambTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_AMBIENT(0), ambTexIdx);
             aiString ambTexturePath; material->GetTexture(aiTextureType_AMBIENT, 0, &ambTexturePath);
-            auto ambTexID = LoadTexture(std::string(ambTexturePath.C_Str()), ai_Scene, renderer);
+            auto ambTexID = LoadTexture(std::string(ambTexturePath.C_Str()));
 
             RAVEN_INT emiTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_EMISSIVE(0), emiTexIdx);
             aiString emisTexturePath; material->GetTexture(aiTextureType_EMISSIVE, 0, &emisTexturePath);
-            auto emiTexID = LoadTexture(std::string(emisTexturePath.C_Str()), ai_Scene, renderer);
+            auto emiTexID = LoadTexture(std::string(emisTexturePath.C_Str()));
 
             RAVEN_INT normTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_NORMALS(0), normTexIdx);
             aiString normTexturePath; material->GetTexture(aiTextureType_NORMALS, 0, &normTexturePath);
-            auto normTexID = LoadTexture(std::string(normTexturePath.C_Str()), ai_Scene, renderer);
+            auto normTexID = LoadTexture(std::string(normTexturePath.C_Str()));
 
 
             materialData.diffuseColor = glm::vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b);
@@ -136,20 +136,22 @@ bool Import3DFileToScene(const std::string &filePath, SceneManager &scene, IRend
             materialData.normTex = normTexID;
 
             renderData.material = materialData;
-            scene.ConnectComponents<RenderData>(meshEntity, renderData);
+            _scene->ConnectComponents<RenderData>(meshEntity, renderData);
 
-            scene.AddChildEntity(entity, meshEntity);
+            _scene->AddChildEntity(entity, meshEntity);
         }
 
         for (RAVEN_INT i=0; i < current->mNumChildren; i++) {
             const auto childEntity = loadNode(current->mChildren[i]);
-            scene.AddChildEntity(entity, childEntity);
+            _scene->AddChildEntity(entity, childEntity);
         }
 
         return entity;
     };
 
     loadNode(ai_Scene->mRootNode);
+
+    RAVEN_LOG_DEBUG("Successfully imported 3D model: {}", filePath);
 
     return true;
 }

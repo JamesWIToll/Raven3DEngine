@@ -144,15 +144,3 @@ bool SceneManager::AddChildEntity(const Entity_T entity, const Entity_T child) {
     relData.children.push_back(child);
     return true;
 }
-
-template<typename T_Comp1, typename... T_Comps>
-bool SceneManager::ConnectComponents(const Entity_T entity, T_Comp1 firstComponent, T_Comps... restComponents) {
-    _registry.emplace<T_Comp1, T_Comps...>(entity, firstComponent, restComponents...);
-    return true;
-}
-
-template<typename T_Comp1, typename... T_Comps>
-bool SceneManager::DisconnectComponents(const Entity_T entity) {
-    _registry.remove<T_Comp1, T_Comps...>(entity);
-    return true;
-}
