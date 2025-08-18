@@ -7,7 +7,7 @@
 
 namespace Raven3DEngineCore::Rendering {
 
-    enum class RenderAPI : ushort{
+    enum class RenderAPI : RAVEN_U_SHORT{
         OPENGL,
     };
 

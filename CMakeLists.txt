@@ -45,6 +45,7 @@ target_include_directories(Raven3DEngineCore PUBLIC
         Raven3DEngineCore/src
         ThirdParty/lua
         ThirdParty/Other
+        ${CMAKE_CURRENT_BINARY_DIR}/ThirdParty/assimp/include
 )
 
 target_precompile_headers(Raven3DEngineCore PUBLIC

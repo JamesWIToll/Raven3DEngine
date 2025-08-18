@@ -4,9 +4,6 @@
 
 #ifndef RAVEN3DENGINECORE_APPEVENT_H
 #define RAVEN3DENGINECORE_APPEVENT_H
-#include <c++/14/chrono>
-
-#include "Raven3DEngineCore.h"
 
 namespace Raven3DEngineCore::Events {
 
