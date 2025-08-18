@@ -38,14 +38,29 @@ namespace Raven3DEngineCore::Events {
         [[nodiscard]] RAVEN_FLOAT getRenderTimeDelta() const {
             return _lastRenderDelta;
         }
+
+        std::chrono::time_point<std::chrono::high_resolution_clock> getLastUpdateTime() const {
+            return _lastUpdateTime;
+        }
+
+        std::chrono::time_point<std::chrono::high_resolution_clock> getLastRenderTime() const {
+            return _lastRenderTime;
+        }
+
+        static std::chrono::time_point<std::chrono::high_resolution_clock> getNow() {
+            return std::chrono::high_resolution_clock::now();
+        }
     };
 
     extern AppClock globalAppClock;
 }
 
-#define RAVEN_UPDATE_DELTA() globalAppClock.getUpdateTimeDelta()
-#define RAVEN_RENDER_DELTA() globalAppClock.getRenderTimeDelta()
-#define RAVEN_UPDATE_TIME_TICK() globalAppClock.OnUpdate()
-#define RAVEN_RENDER_TIME_TICK() globalAppClock.OnRender()
+#define RAVEN_UPDATE_DELTA()            Raven3DEngineCore::Events::globalAppClock.getUpdateTimeDelta()
+#define RAVEN_RENDER_DELTA()            Raven3DEngineCore::Events::globalAppClock.getRenderTimeDelta()
+#define RAVEN_UPDATE_TIME_TICK()        Raven3DEngineCore::Events::globalAppClock.OnUpdate()
+#define RAVEN_RENDER_TIME_TICK()        Raven3DEngineCore::Events::globalAppClock.OnRender()
+#define RAVEN_GET_NOW()                 Raven3DEngineCore::Events::AppClock::getNow()
+#define RAVEN_GET_LAST_UPDATE_TIME()    Raven3DEngineCore::Events::globalAppClock.getLastUpdateTime()
+#define RAVEN_GET_LAST_RENDER_TIME()    Raven3DEngineCore::Events::globalAppClock.getLastRenderTime()
 
 #endif //RAVEN3DENGINECORE_APPCLOCK_H

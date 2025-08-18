@@ -19,6 +19,7 @@ namespace Raven3DEngineCore::Events {
     public:
 
         AppUpdateEvent() {
+            RAVEN_LOG_FLUSH();
             RAVEN_UPDATE_TIME_TICK();
             _deltaTime = RAVEN_UPDATE_DELTA();
         }

@@ -3,4 +3,4 @@
 //
 #include <Raven3DEngineCore.h>
 
-Raven3DEngineCore::Events::AppClock globalAppClock = Raven3DEngineCore::Events::AppClock();
+Raven3DEngineCore::Events::AppClock Raven3DEngineCore::Events::globalAppClock {};

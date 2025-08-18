@@ -7,7 +7,7 @@ namespace Raven3DEngineCore::Rendering {
         virtual ~IShader() = default;
 
         unsigned int ID;
-        virtual void Initialize(const std::string &vertexPath, const std::string &fragmentPath) = 0;
+        virtual void Initialize(const std::string &vertex, const std::string &fragment, const bool &useAsPaths=true) = 0;
         virtual void use() const = 0;
         virtual void setBool(const std::string& name, bool value) const = 0;
         virtual void setInt(const std::string& name, int value) const = 0;
@@ -26,7 +26,7 @@ namespace Raven3DEngineCore::Rendering {
             glDeleteProgram(ID);
         }
 
-        void Initialize(const std::string &vertexPath, const std::string &fragmentPath) override;
+        void Initialize(const std::string &vertex, const std::string &fragment, const bool &useAsPaths=true) override;
         void use() const override;
         void setBool(const std::string &name, bool value) const override;
         void setInt(const std::string &name, int value) const override;

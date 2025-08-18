@@ -5,9 +5,6 @@
 
 using namespace Raven3DEngineCore::Window;
 
-static std::chrono::system_clock::time_point lastTime = std::chrono::system_clock::now();
-static int frameCount = 0;
-
 void SDLWindow::GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height) {
     SDL_GetWindowSize(_window, &out_width, &out_height);
 }
@@ -27,6 +24,7 @@ bool SDLWindow::MouseCaptured() {
 }
 
 void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
+    _name = name;
 
     _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { UpdateWindow(); });
     _eventHandler->RegisterEventListener(Events::EventType::AppPostRender, [this] (const Events::Event &) { SwapWindow(); });
@@ -170,14 +168,13 @@ void SDLWindow::UpdateWindow() {
 }
 
 void SDLWindow::SwapWindow() {
-    const auto currentTime = std::chrono::system_clock::now();
-    const auto deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
-    frameCount++;
-    if (deltaTime >= 500) {
-        const auto fps = 1000.0f * frameCount / deltaTime;
-        SDL_SetWindowTitle(_window, std::to_string(fps).c_str());
-        lastTime = currentTime;
-        frameCount = 0;
+    _deltaTime += RAVEN_UPDATE_DELTA();
+    _frameCount++;
+    if (_deltaTime >= 1.0f) {
+        const auto fps =  _frameCount / _deltaTime;
+        SDL_SetWindowTitle(_window, std::format( "{} : FPS = {}",_name, static_cast<RAVEN_INT>(fps)).c_str());
+        _frameCount = 0;
+        _deltaTime = 0.0f;
     }
 
 

@@ -7,6 +7,9 @@
 
 namespace Raven3DEngineCore::Window {
     class IRenderWindow : public Events::EventNotifier {
+    protected:
+        RAVEN_INT _frameCount = 0;
+        RAVEN_FLOAT _deltaTime = 0.0f;
     public:
         ~IRenderWindow() override = default;
         virtual void Initialize(Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) = 0;
@@ -27,6 +30,7 @@ namespace Raven3DEngineCore::Window {
 
         SDL_GLContext _context = nullptr;
         SDL_Surface *_surface = nullptr;
+        std::string _name {};
 
     public:
         ~SDLWindow() override {

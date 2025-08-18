@@ -87,9 +87,8 @@ namespace Raven3DEngineCore::Logging {
     public:
         ConsoleLog() = default;
         void SubmitMessage(const LogLevel level, const std::string &message) override {
-            auto dateTime = std::chrono::system_clock::now();
             if (watchesLevel(level)) {
-                std::string output = std::format("{}Log: [{}] ({}) : {}\x1b[0m", GetMessageColor(level), GetLevelName(level), dateTime, message);
+                std::string output = std::format("{}Log: [{}] ({}) : {}\x1b[0m", GetMessageColor(level), GetLevelName(level), RAVEN_GET_NOW(), message);
                 if (_lastMessage == message && !_repeated) {
                     _repeated = true;
                     output = " [repeated]";
@@ -112,15 +111,17 @@ namespace Raven3DEngineCore::Logging {
                 switch (level) {
                     case LogLevel::Fatal:
                     case LogLevel::Error:
-                        std::cerr << output << std::endl;
+                        std::cerr << output << "\n";
                         break;
                     case LogLevel::Warning:
                     case LogLevel::Debug:
                     case LogLevel::Info:
-                        std::cout << output << std::endl;
+                        std::cout << output << "\n";
                         break;
                 }
             }
+            std::flush(std::cout);
+            std::flush(std::cerr);
         }
     };
 
@@ -136,7 +137,11 @@ namespace Raven3DEngineCore::Logging {
             listener->SubmitMessage(level, message);
         }
     }
-    ;
+
+    static void FlushLog() {
+        std::cout.flush();
+        std::cerr.flush();
+    }
 }
 
 #define RAVEN_REGISTER_LOG_LISTENER(listener) Raven3DEngineCore::Logging::RegisterListener(listener);
@@ -152,5 +157,6 @@ namespace Raven3DEngineCore::Logging {
 #define RAVEN_LOG_DEBUG(format_str, ...)
 #endif
 
+#define RAVEN_LOG_FLUSH() Raven3DEngineCore::Logging::FlushLog()
 
 #endif //LOGHANDLER_H

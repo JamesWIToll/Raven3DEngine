@@ -3,70 +3,82 @@
 using namespace Raven3DEngineCore::Rendering;
 
 
-void GLShader::Initialize(const std::string &vertexPath, const std::string &fragmentPath) {
+void GLShader::Initialize(const std::string &vertex, const std::string &fragment, const bool &useAsPaths) {
     std::string vertexCode;
     std::string fragmentCode;
-    std::ifstream vShaderFile;
-    std::ifstream fShaderFile;
 
-    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try {
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-        std::stringstream vShaderStream, fShaderStream;
 
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
+    if (useAsPaths) {
+        std::ifstream vShaderFile;
+        std::ifstream fShaderFile;
 
-        vShaderFile.close();
-        fShaderFile.close();
+        vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try {
+            vShaderFile.open(vertex);
+            fShaderFile.open(fragment);
+            std::stringstream vShaderStream, fShaderStream;
 
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
+            vShaderStream << vShaderFile.rdbuf();
+            fShaderStream << fShaderFile.rdbuf();
+
+            vShaderFile.close();
+            fShaderFile.close();
+
+            vertexCode = vShaderStream.str();
+            fragmentCode = fShaderStream.str();
+        }
+        catch ([[maybe_unused]] std::ifstream::failure &e) {
+            RAVEN_LOG_ERROR("ERROR could not find shader files: {}, {}", vertex, fragment);
+            return;
+        }
+    } else {
+        vertexCode = vertex;
+        fragmentCode = fragment;
     }
-    catch ([[maybe_unused]] std::ifstream::failure &e) {
-        RAVEN_LOG_ERROR("ERROR could not find shader files: {}, {}", vertexPath, fragmentPath);
-    }
+
 
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
 
 
-    unsigned int vertex, fragment {};
+    unsigned int vertexID, fragmentID {};
     int success {};
     char infoLog[512] {};
 
-    vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vShaderCode, nullptr);
-    glCompileShader(vertex);
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+    vertexID = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexID, 1, &vShaderCode, nullptr);
+    glCompileShader(vertexID);
+    glGetShaderiv(vertexID, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(vertex, 512, nullptr, infoLog);
-        RAVEN_LOG_ERROR("ERROR failed to compile vertex shader {}: {}", vertexPath,  infoLog);
+        glGetShaderInfoLog(vertexID, 512, nullptr, infoLog);
+        RAVEN_LOG_ERROR("ERROR failed to compile vertex shader {}: {}", vertex,  infoLog);
+        return;
     }
 
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fShaderCode, nullptr);
-    glCompileShader(fragment);
-    glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
+    fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentID, 1, &fShaderCode, nullptr);
+    glCompileShader(fragmentID);
+    glGetShaderiv(fragmentID, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(fragment, 512, nullptr, infoLog);
-        RAVEN_LOG_ERROR("ERROR failed to compile frag shader {}: {}", fragmentPath,  infoLog);
+        glGetShaderInfoLog(fragmentID, 512, nullptr, infoLog);
+        RAVEN_LOG_ERROR("ERROR failed to compile frag shader {}: {}", fragment,  infoLog);
+        return;
     }
 
     ID = glCreateProgram();
-    glAttachShader(ID, vertex);
-    glAttachShader(ID, fragment);
+    glAttachShader(ID, vertexID);
+    glAttachShader(ID, fragmentID);
     glLinkProgram(ID);
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(ID, 512, nullptr, infoLog);
         RAVEN_LOG_ERROR("ERROR failed to link shader program: {}", infoLog);
+        return;
     }
 
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
+    glDeleteShader(vertexID);
+    glDeleteShader(fragmentID);
 }
 
 
