@@ -29,6 +29,7 @@
 #define RAVEN_RESOURCE_PATH "../Resources/"
 #endif
 
+#include <Events/AppClock.h>
 #include <Scene/Components/CoreComponents.h>
 #include <Logging/Log.h>
 #include <Input/KeyCode.h>
@@ -50,6 +51,7 @@
 #include <Scripting/ScriptManager.h>
 #include <Window/Window.h>
 #include <RavenApp.h>
+
 
 
 #endif //RAVENENGINECORE_H

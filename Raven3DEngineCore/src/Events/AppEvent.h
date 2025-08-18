@@ -17,12 +17,10 @@ namespace Raven3DEngineCore::Events {
 
     class AppUpdateEvent final : public AppEvent {
     public:
-        static std::chrono::system_clock::time_point _lastUpdateTime;
+
         AppUpdateEvent() {
-            const auto now = std::chrono::system_clock::now();
-            const auto deltaTime = std::chrono::duration_cast<std::chrono::duration<RAVEN_FLOAT> >(now - _lastUpdateTime).count();
-            _lastUpdateTime = now;
-            _deltaTime = deltaTime;
+            RAVEN_UPDATE_TIME_TICK();
+            _deltaTime = RAVEN_UPDATE_DELTA();
         }
 
         EVENT_TYPE_GETTERS(AppUpdate)
@@ -36,12 +34,8 @@ namespace Raven3DEngineCore::Events {
 
     class AppPostUpdateEvent final : public AppEvent {
     public:
-        static std::chrono::system_clock::time_point _lastPostUpdateTime;
         AppPostUpdateEvent() {
-            const auto now = std::chrono::system_clock::now();
-            const auto deltaTime = std::chrono::duration_cast<std::chrono::duration<RAVEN_FLOAT> >(now - _lastPostUpdateTime).count();
-            _lastPostUpdateTime = now;
-            _deltaTime = deltaTime;
+            _deltaTime = RAVEN_UPDATE_DELTA();
         }
 
         EVENT_TYPE_GETTERS(AppPostUpdate)
@@ -56,13 +50,10 @@ namespace Raven3DEngineCore::Events {
     class AppPreRenderEvent final : public AppEvent {
         Rendering::IRenderer *_renderer;
     public:
-        static std::chrono::system_clock::time_point _lastPreRenderTime;
 
         AppPreRenderEvent(Rendering::IRenderer *renderer) {
-            const auto now = std::chrono::system_clock::now();
-            const auto deltaTime = std::chrono::duration_cast<std::chrono::duration<RAVEN_FLOAT> >(now - _lastPreRenderTime).count();
-            _lastPreRenderTime = now;
-            _deltaTime = deltaTime;
+            RAVEN_RENDER_TIME_TICK();
+            _deltaTime = RAVEN_RENDER_DELTA();
             _renderer = renderer;
         }
 
@@ -79,12 +70,8 @@ namespace Raven3DEngineCore::Events {
 
     class AppRenderEvent final : public AppEvent {
     public:
-        static std::chrono::system_clock::time_point _lastRenderTime;
         AppRenderEvent() {
-            const auto now = std::chrono::system_clock::now();
-            const auto deltaTime = std::chrono::duration_cast<std::chrono::duration<RAVEN_FLOAT> >(now - _lastRenderTime).count();
-            _lastRenderTime = now;
-            _deltaTime = deltaTime;
+            _deltaTime = RAVEN_RENDER_DELTA();
         }
 
         EVENT_TYPE_GETTERS(AppRender)
@@ -98,12 +85,8 @@ namespace Raven3DEngineCore::Events {
 
     class AppPostRenderEvent final : public AppEvent {
     public:
-        static std::chrono::system_clock::time_point _lastPostRenderTime;
         AppPostRenderEvent() {
-            const auto now = std::chrono::system_clock::now();
-            const auto deltaTime = std::chrono::duration_cast<std::chrono::duration<RAVEN_FLOAT> >(now - _lastPostRenderTime).count();
-            _lastPostRenderTime = now;
-            _deltaTime = deltaTime;
+            _deltaTime = RAVEN_RENDER_DELTA();
         }
 
         EVENT_TYPE_GETTERS(AppPostRender)

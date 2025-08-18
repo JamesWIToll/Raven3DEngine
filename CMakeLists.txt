@@ -24,9 +24,9 @@ add_library(Raven3DEngineCore SHARED
         Raven3DEngineCore/src/Rendering/OpenGLRenderer.cpp
         Raven3DEngineCore/src/Scene/SceneManager.cpp
         Raven3DEngineCore/src/Scripting/LuaScriptManager.cpp
-        Raven3DEngineCore/src/Events/AppEvent.cpp
         Raven3DEngineCore/src/Importer/Importer.cpp
         Raven3DEngineCore/src/Rendering/GLShader.cpp
+        Raven3DEngineCore/src/Events/AppClock.cpp
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
