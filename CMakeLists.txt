@@ -14,7 +14,7 @@ add_subdirectory(ThirdParty/entt)
 add_subdirectory(ThirdParty/glew/build/cmake)
 add_subdirectory(ThirdParty/glm)
 add_subdirectory(ThirdParty/SDL/SDL3)
-add_subdirectory(ThirdParty/lua)
+add_subdirectory(ThirdParty/lua-cmake)
 
 add_library(Raven3DEngineCore SHARED
         Raven3DEngineCore/src/RavenApp.cpp
