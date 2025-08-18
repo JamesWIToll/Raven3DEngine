@@ -56,6 +56,30 @@ namespace Raven3DEngineCore::Events {
         }
     };
 
+    class AppPreRenderEvent final : public AppEvent {
+        Rendering::IRenderer *_renderer;
+    public:
+        static std::chrono::system_clock::time_point _lastPreRenderTime;
+
+        AppPreRenderEvent(Rendering::IRenderer *renderer) {
+            const auto now = std::chrono::system_clock::now();
+            const auto deltaTime = std::chrono::duration_cast<std::chrono::duration<RAVEN_FLOAT> >(now - _lastPreRenderTime).count();
+            _lastPreRenderTime = now;
+            _deltaTime = deltaTime;
+            _renderer = renderer;
+        }
+
+        [[nodiscard]] Rendering::IRenderer *getRenderer() const { return _renderer; }
+
+        EVENT_TYPE_GETTERS(AppPreRender)
+
+        void logEvent() const override {
+#ifdef RAVEN_DEBUG_LOG_APP_EVENTS
+            RAVEN_LOG_DEBUG("AppPreRender Event triggered with deltaTime: {} ", _deltaTime);
+#endif
+        }
+    };
+
     class AppRenderEvent final : public AppEvent {
     public:
         static std::chrono::system_clock::time_point _lastRenderTime;

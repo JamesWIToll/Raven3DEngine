@@ -10,3 +10,4 @@ std::chrono::system_clock::time_point AppUpdateEvent::_lastUpdateTime = std::chr
 std::chrono::system_clock::time_point AppRenderEvent::_lastRenderTime = std::chrono::system_clock::now();
 std::chrono::system_clock::time_point AppPostRenderEvent::_lastPostRenderTime = std::chrono::system_clock::now();
 std::chrono::system_clock::time_point AppPostUpdateEvent::_lastPostUpdateTime = std::chrono::system_clock::now();
+std::chrono::system_clock::time_point AppPreRenderEvent::_lastPreRenderTime = std::chrono::system_clock::now();

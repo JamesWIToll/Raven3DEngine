@@ -28,6 +28,7 @@ namespace Raven3DEngineCore::Events {
         WindowClosed,
         AppUpdate,
         AppPostUpdate,
+        AppPreRender,
         AppRender,
         AppPostRender,
         GamePadButtonPressed,

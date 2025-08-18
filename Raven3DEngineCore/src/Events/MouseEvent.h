@@ -60,16 +60,20 @@ namespace Raven3DEngineCore::Events {
     };
 
     class MouseMovedEvent final : public InputDeviceEvent {
-        RAVEN_FLOAT _xPos, _yPos;
+        RAVEN_FLOAT _xPos, _yPos, _xDelta, _yDelta;
     public:
-        MouseMovedEvent(const RAVEN_FLOAT x, const RAVEN_FLOAT y, const Input::DeviceInfo &device): InputDeviceEvent(device), _xPos(x), _yPos(y) {}
+        MouseMovedEvent(const RAVEN_FLOAT x, const RAVEN_FLOAT y, const RAVEN_FLOAT xDelta, const RAVEN_FLOAT yDelta,
+            const Input::DeviceInfo &device): InputDeviceEvent(device), _xPos(x), _yPos(y), _xDelta(xDelta), _yDelta(yDelta){}
 
         [[nodiscard]] RAVEN_FLOAT getX() const { return _xPos; }
         [[nodiscard]] RAVEN_FLOAT getY() const { return _yPos; }
+        [[nodiscard]] RAVEN_FLOAT getXDelta() const { return _xDelta; }
+        [[nodiscard]] RAVEN_FLOAT getYDelta() const { return _yDelta; }
 
         EVENT_TYPE_GETTERS(MouseMoved);
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("MouseMoved Event triggered - x: {}, y: {} on Device {} ( {} )", _xPos, _yPos, _deviceInfo.id, _deviceInfo.name);
+            RAVEN_LOG_DEBUG("MouseMoved Event triggered - x: {}, y: {}, xDelta: {}, yDelta: {} - on Device {} ( {} )",
+                _xPos, _yPos, _xDelta, _yDelta, _deviceInfo.id, _deviceInfo.name);
         }
     };
 

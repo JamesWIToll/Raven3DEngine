@@ -23,16 +23,8 @@ SceneManager::SceneManager() {
         .name = "rootEntity"
     });
     _registry.emplace<TransformData>(_root, TransformData{
-        .localTransform {
-            glm::vec3(0.0f),
-            glm::quat(),
-            glm::vec3(1.0f)
-        },
-        .worldTransform {
-            glm::vec3(0.0f),
-            glm::quat(),
-            glm::vec3(1.0f)
-        }
+        .localTransform {1.0f },
+        .worldTransform {1.0f }
     });
 }
 
@@ -42,6 +34,10 @@ SceneManager::~SceneManager(){
 
 void SceneManager::Initialize() {
     _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { Update(); });
+    _eventHandler->RegisterEventListener(Events::EventType::AppPreRender, [this] (const Events::Event &event) {
+        const auto preRenderEvent = dynamic_cast<const Events::AppPreRenderEvent&>(event);
+        ProcessRenderables(preRenderEvent.getRenderer());
+    });
 }
 
 void SceneManager::Update() {
@@ -55,7 +51,7 @@ void SceneManager::Update() {
         auto [relData, transform] = transformView.get(entity);
         for (const auto children = relData.children; const auto child : children) {
             auto [childRelData, childTransform] = transformView.get(child);
-            childTransform.TransformByMat(transform.GetMatrix());
+            childTransform.UpdateWorldTransform(transform.worldTransform);
             UpdateChildTransform(child);
         }
 
@@ -68,18 +64,34 @@ void SceneManager::ProcessRenderables(Rendering::IRenderer *renderer) {
     for (const auto renderView = _registry.view<Rendering::RenderData, TransformData>(); const auto [entity, renderData, transform] : renderView.each()) {
         renderer->QueueForRender(&renderData, &transform);
     }
+
+    bool foundCurrent = false;
+    for (const auto camView = _registry.view<Rendering::CameraData, TransformData>(); auto [entity, camData, transform] : camView.each()) {
+        camData.UpdateVectors(transform.worldTransform);
+        if (camData.current && !foundCurrent) {
+            foundCurrent = true;
+            renderer->SetActiveCam(&camData, &transform);
+        } else if (camData.current) {
+            camData.current = false;
+        }
+    }
 }
 
 Entity_T SceneManager::CreateEntity(const EntityMetaData& data, const Entity_T parent) {
+    auto parent_entity = parent;
+    if (parent == NullEntity) {
+        parent_entity = _root;
+    }
     const Entity_T entity = _registry.create();
     EntityMetaData metaData {data};
     metaData.id = entity;
     _registry.emplace<EntityMetaData>(entity, metaData);
     _registry.emplace<RelationshipData>(entity, RelationshipData{
         .root = _root,
-        .parent = parent == NullEntity ? _root : parent,
+        .parent = parent_entity,
         .children = {}
     });
+    this->GetComponent<RelationshipData>(parent_entity)->children.emplace_back(entity);
     return entity;
 }
 
@@ -113,19 +125,19 @@ bool SceneManager::ReparentEntity(const Entity_T entity, const Entity_T parent) 
         return false;
     }
 
-    auto relData = _registry.get<RelationshipData>(entity);
-    auto currParentRelData = _registry.get<RelationshipData>(parent);
-    auto newParentRelData = _registry.get<RelationshipData>(parent);
+    auto relData = _registry.try_get<RelationshipData>(entity);
+    auto currParentRelData = _registry.try_get<RelationshipData>(relData->parent);
+    auto newParentRelData = _registry.try_get<RelationshipData>(parent);
 
-    for (auto i=0; i < currParentRelData.children.size(); i++) {
-        if (currParentRelData.children[i] == entity) {
-            currParentRelData.children.erase(currParentRelData.children.begin() + i);
+    for (auto i=0; i < currParentRelData->children.size(); i++) {
+        if (currParentRelData->children[i] == entity) {
+            currParentRelData->children.erase(currParentRelData->children.begin() + i);
             break;
         }
     }
 
-    relData.parent = parent;
-    newParentRelData.children.push_back(entity);
+    relData->parent = parent;
+    newParentRelData->children.push_back(entity);
     return true;
 }
 
@@ -143,4 +155,20 @@ bool SceneManager::AddChildEntity(const Entity_T entity, const Entity_T child) {
     childRelData.parent = entity;
     relData.children.push_back(child);
     return true;
+}
+
+void SceneManager::PrintSceneGraph() const {
+    auto view = _registry.view<RelationshipData, EntityMetaData, TransformData>();
+
+    for (auto [entity, relData, metaData, transformData] : view.each()) {
+        std::string children;
+        for (const auto child : relData.children) {
+            children += std::to_string(static_cast<RAVEN_ENTITY_TYPE>(child)) + ", ";
+        }
+        RAVEN_LOG_DEBUG("Entity: {} - Name: {} - Local Translation: {}, {}, {} - children: {}",
+            static_cast<RAVEN_INT>(entity), metaData.name,
+            transformData.localTransform[3][0], transformData.localTransform[3][1], transformData.localTransform[3][2],
+            children);
+    }
+
 }

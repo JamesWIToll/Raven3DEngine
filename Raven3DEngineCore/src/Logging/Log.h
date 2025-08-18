@@ -89,8 +89,7 @@ namespace Raven3DEngineCore::Logging {
         void SubmitMessage(const LogLevel level, const std::string &message) override {
             auto dateTime = std::chrono::system_clock::now();
             if (watchesLevel(level)) {
-                std::string output = std::format("\n{}Log: [{}] ({}) : {}\x1b[0m", GetMessageColor(level), GetLevelName(level), dateTime, message);
-                const auto time = std::chrono::system_clock::now();
+                std::string output = std::format("{}Log: [{}] ({}) : {}\x1b[0m", GetMessageColor(level), GetLevelName(level), dateTime, message);
                 if (_lastMessage == message && !_repeated) {
                     _repeated = true;
                     output = " [repeated]";
@@ -99,7 +98,7 @@ namespace Raven3DEngineCore::Logging {
                     output = "";
                     _repeatCount++;
                 } else if (_repeated){
-                    output = std::format("<{} times>", _repeatCount) + output;
+                    output = std::format("<{} times>\n", _repeatCount) + output;
                     _repeated = false;
                     _repeatCount = 1;
                 } else {
@@ -107,15 +106,18 @@ namespace Raven3DEngineCore::Logging {
                     _repeatCount = 1;
                 }
                 _lastMessage = message;
+                if (output.empty()) {
+                    return;
+                }
                 switch (level) {
                     case LogLevel::Fatal:
                     case LogLevel::Error:
-                        std::cerr << output << std::endl << std::endl;
+                        std::cerr << output << std::endl;
                         break;
                     case LogLevel::Warning:
                     case LogLevel::Debug:
                     case LogLevel::Info:
-                        std::cout << output;
+                        std::cout << output << std::endl;
                         break;
                 }
             }

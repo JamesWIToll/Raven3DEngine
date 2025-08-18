@@ -11,22 +11,27 @@ using namespace Raven3DEngineCore::Scene;
 using namespace Raven3DEngineCore::Rendering;
 
 
-bool AssimpImporter::Import3DFile(const std::string &filePath, Entity_T parent) {
+Entity_T AssimpImporter::Import3DFile(const std::string &filePath, Entity_T parent) {
     Assimp::Importer importer;
 
-    if (parent == NullEntity) {
-        parent = _scene->GetRootEntity();
-    }
-
     const auto ai_Scene = importer.ReadFile(filePath,
-        aiProcess_JoinIdenticalVertices |
         aiProcess_Triangulate |
+        aiProcess_FlipUVs |
         aiProcess_EmbedTextures
     );
 
     if (!ai_Scene) {
         RAVEN_LOG_ERROR("Failed to load 3D model: {}", filePath);
-        return false;
+        return NullEntity;
+    }
+
+    if (parent == NullEntity) {
+        parent = _scene->CreateEntity(EntityMetaData{
+            .name = "Imported Scene ("  + std::string(ai_Scene->mName.C_Str()) + ")"
+        });
+        _scene->ConnectComponents<TransformData>(parent, TransformData{
+            .localTransform = { 1.0f }
+        });
     }
 
     const std::function LoadTexture = [&](const std::string &texPath) -> RAVEN_U_INT {
@@ -47,10 +52,13 @@ bool AssimpImporter::Import3DFile(const std::string &filePath, Entity_T parent) 
             return textureID;
     };
 
-    std::function<Entity_T(const aiNode*)> loadNode;
-    loadNode = [&](const aiNode *current) -> Entity_T{
+    std::function<Entity_T(const aiNode*, Entity_T _parent)> loadNode;
+    loadNode = [&](const aiNode *current, Entity_T _parent) -> Entity_T{
         if (current == nullptr) {
             return NullEntity;
+        }
+        if (_parent == NullEntity) {
+            _parent = parent;
         }
 
         const auto mat = current->mTransformation;
@@ -58,8 +66,16 @@ bool AssimpImporter::Import3DFile(const std::string &filePath, Entity_T parent) 
 
         const Entity_T entity = _scene->CreateEntity(EntityMetaData{
             .name = current->mName.C_Str()
-        }, parent);
-        _scene->GetComponent<TransformData>(entity)->SetLocalTransform(GetTransformFromMat(glmMat));
+        }, _parent);
+
+
+        if (_scene->HasComponent<TransformData>(entity)) {
+            _scene->GetComponent<TransformData>(entity)->localTransform = glmMat;
+        } else {
+            _scene->ConnectComponents<TransformData>(entity, TransformData{
+                .localTransform = glmMat
+            });
+        }
 
         for (RAVEN_INT i=0; i < current->mNumMeshes; i++) {
             const auto mesh = ai_Scene->mMeshes[current->mMeshes[i]];
@@ -70,18 +86,15 @@ bool AssimpImporter::Import3DFile(const std::string &filePath, Entity_T parent) 
             RenderData renderData {};
 
             for (RAVEN_INT v = 0; v < mesh->mNumVertices; v++) {
-                renderData.vertices.push_back(glm::vec3(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z));
-                renderData.normals.push_back(glm::vec3(mesh->mNormals[v].x, mesh->mNormals[v].y, mesh->mNormals[v].z));
-                renderData.uvs_0.push_back(glm::vec2(mesh->mTextureCoords[0][v].x, mesh->mTextureCoords[0][v].y));
-                renderData.uvs_1.push_back(glm::vec2(mesh->mTextureCoords[1][v].x, mesh->mTextureCoords[1][v].y));
-                renderData.uvs_2.push_back(glm::vec2(mesh->mTextureCoords[2][v].x, mesh->mTextureCoords[2][v].y));
-                renderData.uvs_3.push_back(glm::vec2(mesh->mTextureCoords[3][v].x, mesh->mTextureCoords[3][v].y));
+                renderData.vertices.emplace_back(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z);
+                renderData.normals.emplace_back(mesh->mNormals[v].x, mesh->mNormals[v].y, mesh->mNormals[v].z);
+                renderData.uvs_0.emplace_back(mesh->mTextureCoords[0][v].x, mesh->mTextureCoords[0][v].y);
             }
 
             for (RAVEN_INT f = 0; f < mesh->mNumFaces; f++) {
                 const auto face = mesh->mFaces[f];
                 for (RAVEN_INT j = 0; j < face.mNumIndices; j++) {
-                    renderData.indices.push_back(face.mIndices[j]);
+                    renderData.indices.emplace_back(face.mIndices[j]);
                 }
             }
 
@@ -136,22 +149,19 @@ bool AssimpImporter::Import3DFile(const std::string &filePath, Entity_T parent) 
             materialData.normTex = normTexID;
 
             renderData.material = materialData;
-            _scene->ConnectComponents<RenderData>(meshEntity, renderData);
-
-            _scene->AddChildEntity(entity, meshEntity);
+            _scene->ConnectComponents<RenderData, TransformData>(meshEntity, renderData, TransformData{});
         }
 
         for (RAVEN_INT i=0; i < current->mNumChildren; i++) {
-            const auto childEntity = loadNode(current->mChildren[i]);
-            _scene->AddChildEntity(entity, childEntity);
+            loadNode(current->mChildren[i], entity);
         }
 
         return entity;
     };
 
-    loadNode(ai_Scene->mRootNode);
+    loadNode(ai_Scene->mRootNode, NullEntity);
 
     RAVEN_LOG_DEBUG("Successfully imported 3D model: {}", filePath);
 
-    return true;
+    return parent;
 }

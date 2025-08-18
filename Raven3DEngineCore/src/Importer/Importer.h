@@ -16,7 +16,7 @@ namespace Raven3DEngineCore::Importer {
             _scene = scene;
             _renderer = renderer;
         };
-        virtual bool Import3DFile(const std::string &filePath, Scene::Entity_T parent = Scene::NullEntity) = 0;
+        virtual Scene::Entity_T Import3DFile(const std::string &filePath, Scene::Entity_T parent) = 0;
         virtual ~IImporter() = default;
     };
 
@@ -31,7 +31,7 @@ namespace Raven3DEngineCore::Importer {
         }
 
     public:
-        bool Import3DFile(const std::string &filePath, Scene::Entity_T parent = Scene::NullEntity) override;
+        Scene::Entity_T Import3DFile(const std::string &filePath, Scene::Entity_T parent) override;
     };
 
 }

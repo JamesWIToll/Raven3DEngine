@@ -5,6 +5,27 @@
 
 using namespace Raven3DEngineCore::Window;
 
+static std::chrono::system_clock::time_point lastTime = std::chrono::system_clock::now();
+static int frameCount = 0;
+
+void SDLWindow::GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height) {
+    SDL_GetWindowSize(_window, &out_width, &out_height);
+}
+
+void SDLWindow::CaptureMouse() {
+    SDL_SetWindowMouseGrab(_window, true);
+    SDL_HideCursor();
+}
+
+void SDLWindow::ReleaseMouse() {
+    SDL_SetWindowMouseGrab(_window, false);
+    SDL_ShowCursor();
+}
+
+bool SDLWindow::MouseCaptured() {
+    return SDL_GetWindowMouseGrab(_window);
+}
+
 void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
 
     _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { UpdateWindow(); });
@@ -41,7 +62,16 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 }
 
 void SDLWindow::UpdateWindow() {
+
     SDL_Event event;
+
+    RAVEN_INT currWidth, currHeight;
+    SDL_GetWindowSize(_window, &currWidth, &currHeight);
+
+    if (SDL_GetWindowMouseGrab(_window)) {
+        SDL_WarpMouseInWindow(_window, static_cast<float>(currWidth) / 2, static_cast<float>(currHeight) / 2);
+    }
+
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
@@ -69,8 +99,15 @@ void SDLWindow::UpdateWindow() {
             case SDL_EVENT_MOUSE_MOTION: {
                 RAVEN_FLOAT x = event.motion.x;
                 RAVEN_FLOAT y = event.motion.y;
+                RAVEN_FLOAT xRel = event.motion.xrel;
+                RAVEN_FLOAT yRel = event.motion.yrel;
+                if (xRel > -2 && xRel < 2) xRel = 0;
+                if (yRel > -2 && yRel < 2) yRel = 0;
+                if (xRel == 0 && yRel == 0) {
+                    break;
+                }
                 const auto deviceInfo = Input::InputDeviceRegistry::findFirstDeviceWithName("SDL_MOUSE");
-                _eventHandler->Notify(Events::MouseMovedEvent(x, y, *deviceInfo));
+                _eventHandler->Notify(Events::MouseMovedEvent(x, y, xRel, yRel, *deviceInfo));
                 break;
             }
             case SDL_EVENT_MOUSE_WHEEL: {
@@ -133,6 +170,19 @@ void SDLWindow::UpdateWindow() {
 }
 
 void SDLWindow::SwapWindow() {
+    const auto currentTime = std::chrono::system_clock::now();
+    const auto deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
+    frameCount++;
+    if (deltaTime >= 500) {
+        const auto fps = 1000.0f * frameCount / deltaTime;
+        SDL_SetWindowTitle(_window, std::to_string(fps).c_str());
+        lastTime = currentTime;
+        frameCount = 0;
+    }
+
+
+
+
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         SDL_GL_SwapWindow(_window);
     }

@@ -25,6 +25,10 @@
 #define RAVEN_ENTITY_TYPE RAVEN_U_INT
 #define RAVEN_ENTITY_NULL RAVEN_U_INT_MAX
 
+#ifndef RAVEN_RESOURCE_PATH
+#define RAVEN_RESOURCE_PATH "../Resources/"
+#endif
+
 #include <Scene/Components/CoreComponents.h>
 #include <Logging/Log.h>
 #include <Input/KeyCode.h>
@@ -36,9 +40,10 @@
 #include <Events/WindowEvent.h>
 #include <Events/KeyEvent.h>
 #include <Events/GamepadEvent.h>
-#include <Events/AppEvent.h>
 #include <Events/EventHandler.h>
+#include <Rendering/Shader.h>
 #include <Rendering/Renderer.h>
+#include <Events/AppEvent.h>
 #include <Scene/SceneManager.h>
 #include <Importer/Importer.h>
 #include <Scene/Components/CoreComponentGetters.h>

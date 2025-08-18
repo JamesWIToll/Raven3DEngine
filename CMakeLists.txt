@@ -26,11 +26,14 @@ add_library(Raven3DEngineCore SHARED
         Raven3DEngineCore/src/Scripting/LuaScriptManager.cpp
         Raven3DEngineCore/src/Events/AppEvent.cpp
         Raven3DEngineCore/src/Importer/Importer.cpp
+        Raven3DEngineCore/src/Rendering/GLShader.cpp
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(Raven3DEngineCore PRIVATE RAVEN_CORE_DEBUG)
 endif ()
+
+target_compile_definitions(Raven3DEngineCore PUBLIC RAVEN_RESOURCE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/Raven3DEngineCore/Resources/")
 
 target_include_directories(Raven3DEngineCore PUBLIC
         ThirdParty/assimp/include

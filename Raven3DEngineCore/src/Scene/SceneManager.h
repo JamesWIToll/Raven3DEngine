@@ -32,7 +32,10 @@ namespace Raven3DEngineCore::Scene {
 
         template<typename T_Comp1, typename... T_Comps>
         bool ConnectComponents(Entity_T entity, T_Comp1 firstComponent, T_Comps... restComponents) {
-            _registry.emplace<T_Comp1, T_Comps...>(entity, firstComponent, restComponents...);
+            _registry.emplace<T_Comp1>(entity, firstComponent);
+            if constexpr (sizeof...(restComponents) > 0) {
+                return ConnectComponents(entity, restComponents...);
+            }
             return true;
         }
 
@@ -43,7 +46,16 @@ namespace Raven3DEngineCore::Scene {
         }
 
         template<typename T_Comp>
-        T_Comp *GetComponent(Entity_T entity) {
+        bool HasComponent(const Entity_T entity) {
+            if (auto ptr = _registry.try_get<T_Comp>(entity); ptr != nullptr) {
+                return true;
+            }
+            return false;
+        }
+
+
+        template<typename T_Comp>
+        T_Comp *GetComponent(const Entity_T entity) {
             if (auto ptr = _registry.try_get<T_Comp>(entity); ptr != nullptr) {
                 return ptr;
             }
@@ -71,6 +83,9 @@ namespace Raven3DEngineCore::Scene {
             return components;
         }
         [[nodiscard]] Entity_T GetRootEntity() const {return _root;}
+
+
+        void PrintSceneGraph() const;
     };
 }
 
