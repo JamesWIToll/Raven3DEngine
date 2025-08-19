@@ -43,16 +43,21 @@ namespace Raven3DEngineCore::Rendering {
         RAVEN_FLOAT opacity {1.0f};
         RAVEN_FLOAT shininess;
         RAVEN_FLOAT shininessStrength;
-        RAVEN_U_INT diffTex, specTex, ambTex, emisTex, normTex;
+        RAVEN_FLOAT metallicFactor;
+        RAVEN_FLOAT roughnessFactor;
+        RAVEN_U_INT diffTex {0}, specTex {0},
+                    ambTex {0}, emisTex {0},
+                    normTex {0};
     };
 
     struct RenderData {
         MaterialData material;
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
+        std::vector<glm::vec3> tangents;
         std::vector<glm::vec2> uvs_0;
         std::vector<RAVEN_U_INT> indices;
-        RAVEN_U_INT VAO, VBO, NBO, IBO, UV_0_BO;
+        RAVEN_U_INT VAO, VBO, NBO, IBO, TBO, UV_0_BO;
         RAVEN_U_INT primitiveMode;
     };
 
@@ -79,14 +84,14 @@ namespace Raven3DEngineCore::Rendering {
 
     };
 
-    enum class LightType {
-        Directional,
-        Point
+    enum class LightType : RAVEN_U_INT {
+        Directional = 0,
+        Point = 1
     };
 
     struct LightData {
         LightType type { LightType::Point };
-        glm::vec3 direction {0.0, -1.0, 0.0}; //if directional
+        glm::vec3 posDir {0.0, 0.0, 0.0};
         glm::vec3 color {1.0f};
         RAVEN_FLOAT intensity {1.0f};
         RAVEN_FLOAT radius {10.0f}; //if point light

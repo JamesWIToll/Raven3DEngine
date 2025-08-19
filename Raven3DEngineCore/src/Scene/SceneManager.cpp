@@ -65,6 +65,13 @@ void SceneManager::ProcessRenderables(Rendering::IRenderer *renderer) {
         renderer->QueueForRender(&renderData, &transform);
     }
 
+    for (const auto lightView = _registry.view<Rendering::LightData, TransformData>(); const auto [entity, lightData, transform] : lightView.each()) {
+        if (lightData.type == Rendering::LightType::Point) {
+            lightData.posDir = glm::vec3(transform.worldTransform[3]);
+        }
+        renderer->AddLight(&lightData);
+    }
+
     bool foundCurrent = false;
     for (const auto camView = _registry.view<Rendering::CameraData, TransformData>(); auto [entity, camData, transform] : camView.each()) {
         camData.UpdateVectors(transform.worldTransform);

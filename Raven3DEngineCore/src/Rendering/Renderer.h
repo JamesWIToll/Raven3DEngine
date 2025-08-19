@@ -5,6 +5,8 @@
 #ifndef IRENDERER_H
 #define IRENDERER_H
 
+#define MAX_LIGHTS 50
+
 namespace Raven3DEngineCore::Rendering {
 
     enum class RenderAPI : RAVEN_U_SHORT{
@@ -12,10 +14,13 @@ namespace Raven3DEngineCore::Rendering {
     };
 
     class IRenderer : public Events::EventNotifier {
+    protected:
+        virtual void RenderMesh(RenderData &renderData, Scene::TransformData &transformData) = 0;
     public:
         ~IRenderer() override = default;
 
         virtual void QueueForRender(RenderData *data, Scene::TransformData *transform) = 0;
+        virtual void AddLight(LightData *data) = 0;
         virtual void SetActiveCam(CameraData *data, Scene::TransformData *camTransform) = 0;
         virtual RAVEN_U_INT LoadTexture(RAVEN_INT width, RAVEN_INT height, RAVEN_BYTE* data, RAVEN_INT numComps) = 0;
 
@@ -25,8 +30,13 @@ namespace Raven3DEngineCore::Rendering {
 
 
     class OpenGLRenderer final : public IRenderer {
+    protected:
+        void RenderMesh(RenderData &renderData, Scene::TransformData &transformData) override;
+
         std::vector<std::pair<RenderData*, Scene::TransformData*>> _renderData {};
         std::vector<std::pair<RenderData*, Scene::TransformData*>> _transparentRenderData {};
+        LightData *_lights[MAX_LIGHTS] {};
+        RAVEN_INT _numLights {};
 
         CameraData* _cameraData {};
         Scene::TransformData* _camTransform {};
@@ -37,11 +47,12 @@ namespace Raven3DEngineCore::Rendering {
         glm::vec3 _clearColor {};
 
         static void LoadBuffers(RenderData *data) {
-            GLuint VAO, VBO, NBO, IBO, UV_0_BO;
+            GLuint VAO, VBO, NBO, IBO, UV_0_BO, TBO;
             glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
             glGenBuffers(1, &NBO);
             glGenBuffers(1, &IBO);
+            glGenBuffers(1, &TBO);
             glGenBuffers(1, &UV_0_BO);
 
 
@@ -56,10 +67,15 @@ namespace Raven3DEngineCore::Rendering {
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
             glEnableVertexAttribArray(1);
 
+            glBindBuffer(GL_ARRAY_BUFFER, TBO);
+            glBufferData(GL_ARRAY_BUFFER, data->tangents.size() * sizeof(glm::vec3), data->tangents.data(), GL_STATIC_DRAW);
+            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glEnableVertexAttribArray(2);
+
             glBindBuffer(GL_ARRAY_BUFFER, UV_0_BO);
             glBufferData(GL_ARRAY_BUFFER, data->uvs_0.size() * sizeof(glm::vec2), data->uvs_0.data(), GL_STATIC_DRAW);
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glEnableVertexAttribArray(3);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, data->indices.size() * sizeof(RAVEN_U_INT), data->indices.data(), GL_STATIC_DRAW);
@@ -80,6 +96,7 @@ namespace Raven3DEngineCore::Rendering {
         }
 
         void QueueForRender(RenderData *data, Scene::TransformData *transform) override;
+        void AddLight(LightData *data) override;
         void SetActiveCam(CameraData *data, Scene::TransformData *camTransform) override;
         RAVEN_U_INT LoadTexture(RAVEN_INT width, RAVEN_INT height, RAVEN_BYTE* data, RAVEN_INT numComps) override;
         void Initialize(const glm::vec3 & clearColor, const RAVEN_INT &width, const RAVEN_INT &height) override;

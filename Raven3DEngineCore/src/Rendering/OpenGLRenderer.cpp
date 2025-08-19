@@ -6,7 +6,7 @@
 using namespace Raven3DEngineCore::Rendering;
 
 void OpenGLRenderer::QueueForRender(RenderData *data, Scene::TransformData *transform) {
-    if (data->VAO == 0 || data->VBO == 0 || data->NBO == 0 || data->UV_0_BO == 0 || data->IBO == 0) {
+    if (data->VAO == 0 || data->VBO == 0 || data->NBO == 0 || data->UV_0_BO == 0 || data->IBO == 0 || data->TBO == 0) {
         LoadBuffers(data);
     }
 
@@ -15,6 +15,15 @@ void OpenGLRenderer::QueueForRender(RenderData *data, Scene::TransformData *tran
     } else {
         _renderData.emplace_back(data, transform);
     }
+}
+
+void OpenGLRenderer::AddLight(LightData *data) {
+    if (_numLights >= MAX_LIGHTS) {
+        RAVEN_LOG_ERROR("Cannot add more lights to scene");
+        return;
+    }
+    _lights[_numLights] = data;
+    _numLights++;
 }
 
 void OpenGLRenderer::SetActiveCam(CameraData *data, Scene::TransformData *camTransform) {
@@ -55,8 +64,45 @@ void OpenGLRenderer::Initialize(const glm::vec3 &clearColor, const RAVEN_INT &wi
     RAVEN_LOG_INFO("OpenGL Renderer Initialized");
 }
 
-void OpenGLRenderer::RenderFrame() {
+void OpenGLRenderer::RenderMesh(RenderData &renderData, Scene::TransformData &transformData) {
+    _mainShader.setMat4("uModel", transformData.worldTransform);
+    _mainShader.setVec3("uMaterial.diffuseColor", renderData.material.diffuseColor);
+    _mainShader.setVec3("uMaterial.specularColor", renderData.material.specularColor);
+    _mainShader.setFloat("uMaterial.shininess", renderData.material.shininess);
+    _mainShader.setFloat("uMaterial.shininessStrength", renderData.material.shininessStrength);
+    _mainShader.setFloat("uMaterial.opacity", renderData.material.opacity);
+    _mainShader.setVec3("uMaterial.emissiveColor", renderData.material.emissiveColor);
+    _mainShader.setFloat("uMaterial.metallicFactor", renderData.material.metallicFactor);
+    _mainShader.setFloat("uMaterial.roughnessFactor", renderData.material.roughnessFactor);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.diffTex);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.specTex);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.ambTex);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.normTex);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.emisTex);
+    _mainShader.setInt("uMaterial.diffTex", 0);
+    _mainShader.setInt("uMaterial.specTex", 1);
+    _mainShader.setInt("uMaterial.ambTex", 2);
+    _mainShader.setInt("uMaterial.normTex", 3);
+    _mainShader.setInt("uMaterial.emisTex", 4);
+    _mainShader.setBool("uMaterial.useDiffTex", renderData.material.diffTex != 0);
+    _mainShader.setBool("uMaterial.useSpecTex", renderData.material.specTex != 0);
+    _mainShader.setBool("uMaterial.useAmbTex", renderData.material.ambTex != 0);
+    _mainShader.setBool("uMaterial.useNormTex", renderData.material.normTex != 0);
+    _mainShader.setBool("uMaterial.useEmisTex", renderData.material.emisTex != 0);
+    glBindVertexArray(renderData.VAO);
+    constexpr auto mode = GL_TRIANGLES;
+    //if (renderData.material.wireframe) { mode = GL_LINES;}
 
+    glDrawElements(mode, renderData.indices.size(), GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(0);
+}
+
+void OpenGLRenderer::RenderFrame() {
     _mainShader.use();
     glClearColor(_clearColor.x, _clearColor.y, _clearColor.z, 1.0f);
     glViewport(0, 0, _width, _height);
@@ -69,22 +115,22 @@ void OpenGLRenderer::RenderFrame() {
     _mainShader.setMat4("uProjection", projectionMat);
     _mainShader.setMat4("uView", viewMat );
 
+    _mainShader.setVec3("uCamPos", _camTransform->worldTransform[3]);
+
+    for (int i = 0; i < _numLights; i++) {
+        const auto light = _lights[i];
+        _mainShader.setVec3("uLights[" + std::to_string(i) + "].posDir", light->posDir);
+        _mainShader.setVec3("uLights[" + std::to_string(i) + "].color", light->color);
+        _mainShader.setFloat("uLights[" + std::to_string(i) + "].radius", light->radius);
+        _mainShader.setFloat("uLights[" + std::to_string(i) + "].intensity", light->intensity);
+        _mainShader.setInt("uLights[" + std::to_string(i) + "].type", static_cast<RAVEN_U_INT>(light->type));
+    }
+    _mainShader.setInt("uNumLights", _numLights);
+
     for (int i = 0; i < _renderData.size(); i++) {
         const auto renderData = _renderData[i].first;
         const auto transform = _renderData[i].second;
-
-        _mainShader.setMat4("uModel", transform->worldTransform);
-        _mainShader.setVec3("uMaterial.diffuseColor", renderData->material.diffuseColor);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, renderData->material.diffTex);
-        _mainShader.setInt("uMaterial.diffuseTex", 0);
-
-        glBindVertexArray(renderData->VAO);
-        constexpr auto mode = GL_TRIANGLES;
-        //if (renderData->material.wireframe) { mode = GL_LINES;}
-
-        glDrawElements(mode, renderData->indices.size(), GL_UNSIGNED_INT, nullptr);
-        glBindVertexArray(0);
+        RenderMesh(*renderData, *transform);
     }
     _renderData.clear();
 
@@ -95,24 +141,17 @@ void OpenGLRenderer::RenderFrame() {
         return camDistA > camDistB;
     });
 
-    // glEnable(GL_BLEND);
-    // for (int i = 0; i < _transparentRenderData.size(); i++) {
-    //     const auto renderData = _transparentRenderData[i].first;
-    //     const auto transform = _transparentRenderData[i].second;
-    //     _mainShader.setMat4("uModel", transform->GetMatrix());
-    //     _mainShader.setVec3("uMaterial.diffuseColor", renderData->material.diffuseColor);
-    //     glActiveTexture(GL_TEXTURE0);
-    //     glBindTexture(GL_TEXTURE_2D, renderData->material.diffTex);
-    //     _mainShader.setInt("uMaterial.diffuseTex", 0);
-    //
-    //     glBindVertexArray(renderData->VAO);
-    //     constexpr auto mode = GL_TRIANGLES;
-    //     //if (renderData->material.wireframe) { mode = GL_LINES;}
-    //     glDrawElements(mode, renderData->indices.size(), GL_UNSIGNED_INT, nullptr);
-    //     glBindVertexArray(0);
-    // }
-    // glDisable(GL_BLEND);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (int i = 0; i < _transparentRenderData.size(); i++) {
+        const auto renderData = _transparentRenderData[i].first;
+        renderData->material.diffuseColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        const auto transform = _transparentRenderData[i].second;
+        RenderMesh(*renderData, *transform);
+    }
+    glDisable(GL_BLEND);
 
+    _numLights = 0;
     _transparentRenderData.clear();
 
 }

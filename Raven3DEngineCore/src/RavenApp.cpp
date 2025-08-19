@@ -32,8 +32,9 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
     _sceneManager->Initialize();
     const auto light = _sceneManager->CreateEntity({Scene::NullEntity, "Light"});
     _sceneManager->ConnectComponents<Rendering::LightData, Scene::TransformData>(light,
-        Rendering::LightData{ .color = glm::vec3(0.8f, 0.4f, 0.2f), .radius = 10.0f,  },
-        Scene::TransformData{ .localTransform ={ 1.0f } });
+        Rendering::LightData{ .type = Rendering::LightType::Directional, .posDir = glm::vec3(10.0, -4.0f, 2.0f), .color = glm::vec3(0.8f, 0.7f, 0.6f), .intensity = 2.0f },
+        Scene::TransformData{ .localTransform =glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0, 0.0f)) } );
+
 
     const Scene::Entity_T camera = _sceneManager->CreateEntity({Scene::NullEntity, "Camera"});
     _sceneManager->ConnectComponents<Rendering::CameraData, Scene::TransformData>(camera,
