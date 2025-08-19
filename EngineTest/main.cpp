@@ -6,7 +6,7 @@
 #include "../Raven3DEngineCore/Include/Raven3DEngineCore.h"
 
 int main() {
-    const auto app = Raven3DEngineCore::RavenApp("Raven 3D app", 800, 600);
+    auto app = Raven3DEngineCore::RavenApp("Raven 3D app", 800, 600);
     app.run();
     return 0;
 }

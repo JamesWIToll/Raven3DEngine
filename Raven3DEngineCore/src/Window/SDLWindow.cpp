@@ -35,6 +35,9 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL);
+        RAVEN_INT glContextFlags = 0;
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &glContextFlags);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, glContextFlags | SDL_GL_CONTEXT_DEBUG_FLAG);
         _context = SDL_GL_CreateContext(_window);
         SDL_GL_MakeCurrent(_window, _context);
         rendererName = "OpenGL";
@@ -176,8 +179,6 @@ void SDLWindow::SwapWindow() {
         _frameCount = 0;
         _deltaTime = 0.0f;
     }
-
-
 
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {

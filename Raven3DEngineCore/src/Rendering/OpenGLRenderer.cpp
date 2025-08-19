@@ -5,6 +5,15 @@
 
 using namespace Raven3DEngineCore::Rendering;
 
+static void PollGLErrors() {
+    GLenum error = glGetError();
+    while (error != GL_NO_ERROR) {
+        const auto errorString = reinterpret_cast<const char *>(glewGetErrorString(error));
+        RAVEN_LOG_ERROR("OPENGL ERROR: {}", errorString);
+        error = glGetError();
+    }
+}
+
 void OpenGLRenderer::QueueForRender(RenderData *data, Scene::TransformData *transform) {
     if (data->VAO == 0 || data->VBO == 0 || data->NBO == 0 || data->UV_0_BO == 0 || data->IBO == 0 || data->TBO == 0) {
         LoadBuffers(data);
@@ -45,11 +54,14 @@ RAVEN_U_INT OpenGLRenderer::LoadTexture(const std::int32_t width, const std::int
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     }
     glGenerateMipmap(GL_TEXTURE_2D);
+    PollGLErrors();
     return textureID;
 }
 
 
 void OpenGLRenderer::Initialize(const glm::vec3 &clearColor, const RAVEN_INT &width, const RAVEN_INT &height) {
+    glewInit();
+
     _clearColor = clearColor;
     _width = width;
     _height = height;
@@ -57,9 +69,10 @@ void OpenGLRenderer::Initialize(const glm::vec3 &clearColor, const RAVEN_INT &wi
     _eventHandler->RegisterEventListener(Events::EventType::AppRender, [this] (const Events::Event &) { RenderFrame(); });
 
     _renderData.clear();
-    glewInit();
 
     _mainShader.Initialize(std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.vert", std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.frag");
+
+    PollGLErrors();
 
     RAVEN_LOG_INFO("OpenGL Renderer Initialized");
 }
@@ -100,6 +113,8 @@ void OpenGLRenderer::RenderMesh(RenderData &renderData, Scene::TransformData &tr
 
     glDrawElements(mode, renderData.indices.size(), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
+
+    PollGLErrors();
 }
 
 void OpenGLRenderer::RenderFrame() {
@@ -154,4 +169,5 @@ void OpenGLRenderer::RenderFrame() {
     _numLights = 0;
     _transparentRenderData.clear();
 
+    PollGLErrors();
 }

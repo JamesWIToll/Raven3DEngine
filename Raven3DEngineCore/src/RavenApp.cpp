@@ -96,19 +96,28 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
 }
 
 RavenApp::~RavenApp() {
+    delete _importer;
+    delete _sceneManager;
     delete _renderer;
     delete _window;
+    delete _eventHandler;
     RAVEN_LOG_INFO("{} - Application Exiting", this->appName);
 }
 
-void RavenApp::run() const {
+void RavenApp::run() {
     RAVEN_LOG_INFO("{} - Application Running", this->appName);
     while (!_quit) {
-        _eventHandler->Notify(Events::AppUpdateEvent());
-        _eventHandler->Notify(Events::AppPostUpdateEvent());
-        _eventHandler->Notify(Events::AppPreRenderEvent(_renderer));
-        _eventHandler->Notify(Events::AppRenderEvent());
-        _eventHandler->Notify(Events::AppPostRenderEvent());
+        try {
+            _eventHandler->Notify(Events::AppUpdateEvent());
+            _eventHandler->Notify(Events::AppPostUpdateEvent());
+            _eventHandler->Notify(Events::AppPreRenderEvent(_renderer));
+            _eventHandler->Notify(Events::AppRenderEvent());
+            _eventHandler->Notify(Events::AppPostRenderEvent());
+        } catch (const std::exception &e) {
+            RAVEN_LOG_ERROR("{} - Application Error: {}", this->appName, e.what());
+            _quit = true;
+        }
+
     }
 }
 

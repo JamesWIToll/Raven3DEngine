@@ -21,9 +21,6 @@ namespace Raven3DEngineCore::Window {
         virtual void SwapWindow() = 0;
     };
 
-
-
-
     class SDLWindow final: public IRenderWindow {
         Rendering::RenderAPI _renderAPI = Rendering::RenderAPI::OPENGL;
         SDL_Window *_window = nullptr;
@@ -35,7 +32,9 @@ namespace Raven3DEngineCore::Window {
     public:
         ~SDLWindow() override {
             if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-                SDL_GL_DestroyContext(_context);
+                if (auto success = SDL_GL_DestroyContext(_context); !success) {
+                    RAVEN_LOG_ERROR("SDL Window could not gracefully shut down OpenGL Context!");
+                }
             }
             SDL_DestroyWindow(_window);
             _context = nullptr;
