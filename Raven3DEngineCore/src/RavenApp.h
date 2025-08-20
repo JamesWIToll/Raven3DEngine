@@ -7,7 +7,6 @@
 
 namespace Raven3DEngineCore {
     class RavenApp {
-        Rendering::IRenderer *_renderer;
         Window::IRenderWindow *_window;
         Events::EventHandler *_eventHandler;
         Scripting::IScriptManager *_scriptManager;

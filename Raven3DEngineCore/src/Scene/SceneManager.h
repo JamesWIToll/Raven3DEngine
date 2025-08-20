@@ -11,8 +11,9 @@ namespace Raven3DEngineCore::Scene {
     class SceneManager final : public Events::EventNotifier {
         entt::basic_registry<Entity_T> _registry;
         Entity_T _root = NullEntity;
+        Window::IRenderWindow* _window = nullptr;
     public:
-        SceneManager();
+        explicit SceneManager(Window::IRenderWindow *window);
         ~SceneManager() override;
 
         void Initialize();

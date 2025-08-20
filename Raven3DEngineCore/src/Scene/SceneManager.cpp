@@ -6,11 +6,9 @@
 
 using namespace Raven3DEngineCore::Scene;
 
-// Declared in CoreComponents.h
-// ReSharper disable once CppUseAuto
 Entity_T Raven3DEngineCore::Scene::NullEntity = static_cast<Entity_T>(RAVEN_ENTITY_NULL);
 
-SceneManager::SceneManager() {
+SceneManager::SceneManager(Window::IRenderWindow *window): _window(window) {
     _registry = entt::basic_registry<Entity_T>();
     _root = _registry.create();
     _registry.emplace<RelationshipData>(_root, RelationshipData{
@@ -29,6 +27,9 @@ SceneManager::SceneManager() {
 }
 
 SceneManager::~SceneManager(){
+    for (const auto renderView = _registry.view<Rendering::RenderData>(); const auto [entity, data] : renderView.each()) {
+        _window->GetRenderer()->ReleaseRenderData(&data);
+    }
     _registry.clear();
 }
 
@@ -36,7 +37,7 @@ void SceneManager::Initialize() {
     _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { Update(); });
     _eventHandler->RegisterEventListener(Events::EventType::AppPreRender, [this] (const Events::Event &event) {
         const auto preRenderEvent = dynamic_cast<const Events::AppPreRenderEvent&>(event);
-        ProcessRenderables(preRenderEvent.getRenderer());
+        ProcessRenderables(_window->GetRenderer());
     });
 }
 

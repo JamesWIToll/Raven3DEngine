@@ -45,11 +45,11 @@
 #include <Rendering/Shader.h>
 #include <Rendering/Renderer.h>
 #include <Events/AppEvent.h>
+#include <Window/Window.h>
 #include <Scene/SceneManager.h>
 #include <Importer/Importer.h>
 #include <Scene/Components/CoreComponentGetters.h>
 #include <Scripting/ScriptManager.h>
-#include <Window/Window.h>
 #include <RavenApp.h>
 
 

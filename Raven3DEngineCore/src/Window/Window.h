@@ -19,11 +19,14 @@ namespace Raven3DEngineCore::Window {
         virtual void GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height) = 0;
         virtual void UpdateWindow() = 0;
         virtual void SwapWindow() = 0;
+
+        virtual Rendering::IRenderer* GetRenderer() = 0;
     };
 
     class SDLWindow final: public IRenderWindow {
         Rendering::RenderAPI _renderAPI = Rendering::RenderAPI::OPENGL;
         SDL_Window *_window = nullptr;
+        Rendering::IRenderer *_renderer = nullptr;
 
         SDL_GLContext _context = nullptr;
         SDL_Surface *_surface = nullptr;
@@ -31,6 +34,7 @@ namespace Raven3DEngineCore::Window {
 
     public:
         ~SDLWindow() override {
+            delete _renderer;
             if (_renderAPI == Rendering::RenderAPI::OPENGL) {
                 if (auto success = SDL_GL_DestroyContext(_context); !success) {
                     RAVEN_LOG_ERROR("SDL Window could not gracefully shut down OpenGL Context!");
@@ -50,6 +54,8 @@ namespace Raven3DEngineCore::Window {
         void Initialize(Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) override;
         void UpdateWindow() override;
         void SwapWindow() override;
+
+        Rendering::IRenderer* GetRenderer() override;
 
     };
 

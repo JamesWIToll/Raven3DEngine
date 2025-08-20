@@ -3,6 +3,8 @@
 //
 #include <Raven3DEngineCore.h>
 
+#include "glm/gtx/io.hpp"
+
 using namespace Raven3DEngineCore::Window;
 
 void SDLWindow::GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height) {
@@ -35,10 +37,14 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL);
+
+        _renderer = new Rendering::OpenGLRenderer();
+
         RAVEN_INT glContextFlags = 0;
         SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &glContextFlags);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, glContextFlags | SDL_GL_CONTEXT_DEBUG_FLAG);
         _context = SDL_GL_CreateContext(_window);
+
         SDL_GL_MakeCurrent(_window, _context);
         rendererName = "OpenGL";
     }
@@ -59,6 +65,14 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
         _eventHandler->Notify(Events::GamepadConnectedEvent(*deviceInfo));
     }
 
+
+    if (_renderer == nullptr) {
+        RAVEN_LOG_ERROR("SDL3 Window could not initialize a window for {} Renderer", rendererName);
+        return;
+    }
+
+    _renderer->SetEventHandler(_eventHandler);
+    _renderer->Initialize(glm::vec3(0.1f, 0.3f, 0.4f), pixelWidth, pixelHeight);
     RAVEN_LOG_INFO("SDL3 Window Initialized for {} Renderer", rendererName);
 }
 
@@ -184,5 +198,9 @@ void SDLWindow::SwapWindow() {
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         SDL_GL_SwapWindow(_window);
     }
+}
+
+Raven3DEngineCore::Rendering::IRenderer * SDLWindow::GetRenderer() {
+    return _renderer;
 }
 

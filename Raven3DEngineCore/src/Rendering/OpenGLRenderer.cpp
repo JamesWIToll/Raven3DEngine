@@ -14,6 +14,21 @@ static void PollGLErrors() {
     }
 }
 
+void OpenGLRenderer::ReleaseRenderData(RenderData *data) {
+    glDeleteVertexArrays(1, &data->VAO);
+    glDeleteBuffers(1, &data->VBO);
+    glDeleteBuffers(1, &data->IBO);
+    glDeleteBuffers(1, &data->NBO);
+    glDeleteBuffers(1, &data->IBO);
+    glDeleteBuffers(1, &data->TBO);
+
+    glDeleteTextures(1, &data->material.diffTex);
+    glDeleteTextures(1, &data->material.specTex);
+    glDeleteTextures(1, &data->material.ambTex);
+    glDeleteTextures(1, &data->material.normTex);
+    glDeleteTextures(1, &data->material.emisTex);
+}
+
 void OpenGLRenderer::QueueForRender(RenderData *data, Scene::TransformData *transform) {
     if (data->VAO == 0 || data->VBO == 0 || data->NBO == 0 || data->UV_0_BO == 0 || data->IBO == 0 || data->TBO == 0) {
         LoadBuffers(data);

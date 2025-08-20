@@ -23,13 +23,11 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
     _window->SetEventHandler(_eventHandler);
     _window->Initialize(Rendering::RenderAPI::OPENGL, appName, pixelWidth, pixelHeight);
 
-    _renderer = new Rendering::OpenGLRenderer();
-    _renderer->SetEventHandler(_eventHandler);
-    _renderer->Initialize(glm::vec3(0.1f, 0.3f, 0.4f), pixelWidth, pixelHeight);
 
-    _sceneManager = new Scene::SceneManager();
+    _sceneManager = new Scene::SceneManager(_window);
     _sceneManager->SetEventHandler(_eventHandler);
     _sceneManager->Initialize();
+
     const auto light = _sceneManager->CreateEntity({Scene::NullEntity, "Light"});
     _sceneManager->ConnectComponents<Rendering::LightData, Scene::TransformData>(light,
         Rendering::LightData{ .type = Rendering::LightType::Directional, .posDir = glm::vec3(10.0, -4.0f, 2.0f), .color = glm::vec3(0.8f, 0.7f, 0.6f), .intensity = 2.0f },
@@ -46,7 +44,7 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
     _scriptManager->SetEventHandler(_eventHandler);
 
     _importer = new Importer::AssimpImporter();
-    _importer->Initialize(_sceneManager, _renderer);
+    _importer->Initialize(_sceneManager, _window->GetRenderer());
     const auto importedEntity = _importer->Import3DFile(std::string(RAVEN_RESOURCE_PATH) + "3D/car.glb", Scene::NullEntity);
 
 
@@ -98,7 +96,6 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
 RavenApp::~RavenApp() {
     delete _importer;
     delete _sceneManager;
-    delete _renderer;
     delete _window;
     delete _eventHandler;
     RAVEN_LOG_INFO("{} - Application Exiting", this->appName);
@@ -110,7 +107,7 @@ void RavenApp::run() {
         try {
             _eventHandler->Notify(Events::AppUpdateEvent());
             _eventHandler->Notify(Events::AppPostUpdateEvent());
-            _eventHandler->Notify(Events::AppPreRenderEvent(_renderer));
+            _eventHandler->Notify(Events::AppPreRenderEvent());
             _eventHandler->Notify(Events::AppRenderEvent());
             _eventHandler->Notify(Events::AppPostRenderEvent());
         } catch (const std::exception &e) {

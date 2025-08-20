@@ -19,6 +19,8 @@ namespace Raven3DEngineCore::Rendering {
     public:
         ~IRenderer() override = default;
 
+        virtual void ReleaseRenderData(RenderData *data) = 0;
+
         virtual void QueueForRender(RenderData *data, Scene::TransformData *transform) = 0;
         virtual void AddLight(LightData *data) = 0;
         virtual void SetActiveCam(CameraData *data, Scene::TransformData *camTransform) = 0;
@@ -30,7 +32,6 @@ namespace Raven3DEngineCore::Rendering {
 
 
     class OpenGLRenderer final : public IRenderer {
-    protected:
         void RenderMesh(RenderData &renderData, Scene::TransformData &transformData) override;
 
         std::vector<std::pair<RenderData*, Scene::TransformData*>> _renderData {};
@@ -94,6 +95,8 @@ namespace Raven3DEngineCore::Rendering {
         ~OpenGLRenderer() override {
             RAVEN_LOG_INFO("OpenGL Renderer Shut Down");
         }
+
+        void ReleaseRenderData(RenderData *data) override;
 
         void QueueForRender(RenderData *data, Scene::TransformData *transform) override;
         void AddLight(LightData *data) override;

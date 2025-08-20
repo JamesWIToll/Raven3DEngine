@@ -49,16 +49,12 @@ namespace Raven3DEngineCore::Events {
     };
 
     class AppPreRenderEvent final : public AppEvent {
-        Rendering::IRenderer *_renderer;
     public:
 
-        AppPreRenderEvent(Rendering::IRenderer *renderer) {
+        AppPreRenderEvent() {
             RAVEN_RENDER_TIME_TICK();
             _deltaTime = RAVEN_RENDER_DELTA();
-            _renderer = renderer;
         }
-
-        [[nodiscard]] Rendering::IRenderer *getRenderer() const { return _renderer; }
 
         EVENT_TYPE_GETTERS(AppPreRender)
 
