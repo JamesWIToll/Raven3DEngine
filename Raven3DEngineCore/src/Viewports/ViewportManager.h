@@ -66,10 +66,10 @@ namespace Raven3DEngineCore::Viewports {
                 return nullptr;
             }
             return &_viewports[id];
-        };
+        }
     };
 
-    extern ViewportManager globalViewportManager;
+    extern ViewportManager *globalViewportManager;
 }
 
 

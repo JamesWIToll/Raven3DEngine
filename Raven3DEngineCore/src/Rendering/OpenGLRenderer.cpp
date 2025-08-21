@@ -129,7 +129,7 @@ void OpenGLRenderer::RenderMesh(RenderData &renderData, Scene::TransformData &tr
 }
 
 void OpenGLRenderer::RenderFrame() {
-    auto vp = Viewports::globalViewportManager.GetViewport(_viewportID);
+    auto vp = Viewports::globalViewportManager->GetViewport(_viewportID);
 
     _mainShader.use();
     glClearColor(vp->clearColor[0], vp->clearColor[1], vp->clearColor[2], vp->clearColor[3]);

@@ -9,8 +9,10 @@ using namespace Raven3DEngineCore;
 
 static const auto loggerListener = new Logging::ConsoleLog();
 
-RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
+Viewports::ViewportManager *Viewports::globalViewportManager;
 
+RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
+    Viewports::globalViewportManager = new Viewports::ViewportManager();
     this->appName = appName;
 
     RAVEN_REGISTER_LOG_LISTENER(loggerListener);
@@ -98,6 +100,7 @@ RavenApp::~RavenApp() {
     delete _sceneManager;
     delete _window;
     delete _eventHandler;
+    delete Viewports::globalViewportManager;
     RAVEN_LOG_INFO("{} - Application Exiting", this->appName);
 }
 

@@ -42,7 +42,7 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
     vp.x_offset = 0.0f;
     vp.y_offset = 0.0f;
     vp.renderAPI = _renderAPI;
-    const auto vpID = Viewports::globalViewportManager.AddViewport(vp);
+    const auto vpID = Viewports::globalViewportManager->AddViewport(vp);
     _viewports.emplace_back(vpID);
 
     std::string rendererName = name;
@@ -111,7 +111,7 @@ void SDLWindow::UpdateWindow() {
 
 
                 for (int i = 0; i < _viewports.size(); i++) {
-                    const auto viewport = Viewports::globalViewportManager.GetViewport(_viewports[i]);
+                    const auto viewport = Viewports::globalViewportManager->GetViewport(_viewports[i]);
                     const RAVEN_FLOAT vpWidthProportion = viewport->width / static_cast<RAVEN_FLOAT>(_width);
                     const RAVEN_FLOAT vpHeightProportion = viewport->height / static_cast<RAVEN_FLOAT>(_height);
                     viewport->width = static_cast<RAVEN_U_INT>(vpWidthProportion * newWidth);
