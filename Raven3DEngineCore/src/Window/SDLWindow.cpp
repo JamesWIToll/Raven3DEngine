@@ -33,12 +33,24 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 
     _renderAPI = api;
 
+    _width = pixelWidth;
+    _height = pixelHeight;
+
+    auto vp = Viewports::Viewport();
+    vp.width = _width;
+    vp.height = _height;
+    vp.x_offset = 0.0f;
+    vp.y_offset = 0.0f;
+    vp.renderAPI = _renderAPI;
+    const auto vpID = Viewports::globalViewportManager.AddViewport(vp);
+    _viewports.emplace_back(vpID);
+
     std::string rendererName = name;
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-        _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL);
+        _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
-        _renderer = new Rendering::OpenGLRenderer();
+        _renderer = new Rendering::OpenGLRenderer(vpID);
 
         RAVEN_INT glContextFlags = 0;
         SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &glContextFlags);
@@ -72,7 +84,7 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
     }
 
     _renderer->SetEventHandler(_eventHandler);
-    _renderer->Initialize(glm::vec3(0.1f, 0.3f, 0.4f), pixelWidth, pixelHeight);
+    _renderer->Initialize();
     RAVEN_LOG_INFO("SDL3 Window Initialized for {} Renderer", rendererName);
 }
 
@@ -96,6 +108,19 @@ void SDLWindow::UpdateWindow() {
             case SDL_EVENT_WINDOW_RESIZED: {
                 RAVEN_INT newWidth, newHeight;
                 SDL_GetWindowSize(_window, &newWidth, &newHeight);
+
+
+                for (int i = 0; i < _viewports.size(); i++) {
+                    const auto viewport = Viewports::globalViewportManager.GetViewport(_viewports[i]);
+                    const RAVEN_FLOAT vpWidthProportion = viewport->width / static_cast<RAVEN_FLOAT>(_width);
+                    const RAVEN_FLOAT vpHeightProportion = viewport->height / static_cast<RAVEN_FLOAT>(_height);
+                    viewport->width = static_cast<RAVEN_U_INT>(vpWidthProportion * newWidth);
+                    viewport->height = static_cast<RAVEN_U_INT>(vpHeightProportion * newHeight);
+                }
+
+                _width = newWidth;
+                _height = newHeight;
+
                 _eventHandler->Notify(Events::WindowResizeEvent(newWidth, newHeight));
                 break;
             }

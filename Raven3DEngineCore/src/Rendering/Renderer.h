@@ -9,14 +9,13 @@
 
 namespace Raven3DEngineCore::Rendering {
 
-    enum class RenderAPI : RAVEN_U_SHORT{
-        OPENGL,
-    };
-
     class IRenderer : public Events::EventNotifier {
     protected:
+        RAVEN_U_INT _viewportID;
+
         virtual void RenderMesh(RenderData &renderData, Scene::TransformData &transformData) = 0;
     public:
+        explicit IRenderer(const RAVEN_U_INT viewportID) : _viewportID(viewportID) {}
         ~IRenderer() override = default;
 
         virtual void ReleaseRenderData(RenderData *data) = 0;
@@ -26,8 +25,10 @@ namespace Raven3DEngineCore::Rendering {
         virtual void SetActiveCam(CameraData *data, Scene::TransformData *camTransform) = 0;
         virtual RAVEN_U_INT LoadTexture(RAVEN_INT width, RAVEN_INT height, RAVEN_BYTE* data, RAVEN_INT numComps) = 0;
 
-        virtual void Initialize(const glm::vec3 &clearColor, const RAVEN_INT &width, const RAVEN_INT &height) = 0;
+        virtual void Initialize() = 0;
         virtual void RenderFrame() = 0;
+
+        RAVEN_U_INT GetViewportID () const  { return _viewportID; };
     };
 
 
@@ -43,9 +44,6 @@ namespace Raven3DEngineCore::Rendering {
         Scene::TransformData* _camTransform {};
 
         GLShader _mainShader {};
-
-        RAVEN_INT _width {}, _height {};
-        glm::vec3 _clearColor {};
 
         static void LoadBuffers(RenderData *data) {
             GLuint VAO, VBO, NBO, IBO, UV_0_BO, TBO;
@@ -91,7 +89,7 @@ namespace Raven3DEngineCore::Rendering {
         }
 
     public:
-        OpenGLRenderer() = default;
+        explicit OpenGLRenderer(const RAVEN_U_INT viewportID) : IRenderer(viewportID)  {}
         ~OpenGLRenderer() override {
             RAVEN_LOG_INFO("OpenGL Renderer Shut Down");
         }
@@ -102,7 +100,7 @@ namespace Raven3DEngineCore::Rendering {
         void AddLight(LightData *data) override;
         void SetActiveCam(CameraData *data, Scene::TransformData *camTransform) override;
         RAVEN_U_INT LoadTexture(RAVEN_INT width, RAVEN_INT height, RAVEN_BYTE* data, RAVEN_INT numComps) override;
-        void Initialize(const glm::vec3 & clearColor, const RAVEN_INT &width, const RAVEN_INT &height) override;
+        void Initialize() override;
         void RenderFrame() override;
     };
 }

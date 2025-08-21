@@ -29,6 +29,8 @@
 #define RAVEN_RESOURCE_PATH "../Resources/"
 #endif
 
+#include <Rendering/RenderAPIs.h>
+#include <Viewports/ViewportManager.h>
 #include <Events/AppClock.h>
 #include <Scene/Components/CoreComponents.h>
 #include <Logging/Log.h>

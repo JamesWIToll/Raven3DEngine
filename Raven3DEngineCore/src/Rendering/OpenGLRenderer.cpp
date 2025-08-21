@@ -74,12 +74,8 @@ RAVEN_U_INT OpenGLRenderer::LoadTexture(const std::int32_t width, const std::int
 }
 
 
-void OpenGLRenderer::Initialize(const glm::vec3 &clearColor, const RAVEN_INT &width, const RAVEN_INT &height) {
+void OpenGLRenderer::Initialize() {
     glewInit();
-
-    _clearColor = clearColor;
-    _width = width;
-    _height = height;
 
     _eventHandler->RegisterEventListener(Events::EventType::AppRender, [this] (const Events::Event &) { RenderFrame(); });
 
@@ -133,13 +129,15 @@ void OpenGLRenderer::RenderMesh(RenderData &renderData, Scene::TransformData &tr
 }
 
 void OpenGLRenderer::RenderFrame() {
+    auto vp = Viewports::globalViewportManager.GetViewport(_viewportID);
+
     _mainShader.use();
-    glClearColor(_clearColor.x, _clearColor.y, _clearColor.z, 1.0f);
-    glViewport(0, 0, _width, _height);
+    glClearColor(vp->clearColor[0], vp->clearColor[1], vp->clearColor[2], vp->clearColor[3]);
+    glViewport(vp->x_offset, vp->y_offset, vp->width, vp->height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    const glm::mat4 projectionMat = _cameraData->GetProjectionMatrix(_width, _height);
+    const glm::mat4 projectionMat = _cameraData->GetProjectionMatrix(vp->width, vp->height);
     const glm::mat4 viewMat = _cameraData->GetViewMatrix();
 
     _mainShader.setMat4("uProjection", projectionMat);

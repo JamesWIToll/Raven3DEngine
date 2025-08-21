@@ -9,7 +9,9 @@ namespace Raven3DEngineCore::Window {
     class IRenderWindow : public Events::EventNotifier {
     protected:
         RAVEN_INT _frameCount = 0;
+        RAVEN_U_INT _width = 0, _height = 0;
         RAVEN_FLOAT _deltaTime = 0.0f;
+        std::vector<RAVEN_U_INT> _viewports;
     public:
         ~IRenderWindow() override = default;
         virtual void Initialize(Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) = 0;
@@ -36,7 +38,7 @@ namespace Raven3DEngineCore::Window {
         ~SDLWindow() override {
             delete _renderer;
             if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-                if (auto success = SDL_GL_DestroyContext(_context); !success) {
+                if (const auto success = SDL_GL_DestroyContext(_context); !success) {
                     RAVEN_LOG_ERROR("SDL Window could not gracefully shut down OpenGL Context!");
                 }
             }

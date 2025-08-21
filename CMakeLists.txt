@@ -27,6 +27,8 @@ add_library(Raven3DEngineCore SHARED
         Raven3DEngineCore/src/Importer/Importer.cpp
         Raven3DEngineCore/src/Rendering/GLShader.cpp
         Raven3DEngineCore/src/Events/AppClock.cpp
+        Raven3DEngineCore/src/Rendering/RenderAPIs.h
+        Raven3DEngineCore/src/Viewports/ViewportManager.cpp
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -63,6 +65,8 @@ target_link_libraries(Raven3DEngineCore PRIVATE
 
 add_executable(EngineTest
         EngineTest/main.cpp
+        Raven3DEngineCore/src/Viewports/ViewportManager.h
+        Raven3DEngineCore/src/Viewports/ViewportManager.cpp
 )
 
 target_link_libraries(EngineTest PUBLIC Raven3DEngineCore)
