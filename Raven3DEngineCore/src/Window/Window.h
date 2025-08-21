@@ -35,19 +35,7 @@ namespace Raven3DEngineCore::Window {
         std::string _name {};
 
     public:
-        ~SDLWindow() override {
-            delete _renderer;
-            if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-                if (const auto success = SDL_GL_DestroyContext(_context); !success) {
-                    RAVEN_LOG_ERROR("SDL Window could not gracefully shut down OpenGL Context!");
-                }
-            }
-            SDL_DestroyWindow(_window);
-            _context = nullptr;
-            _surface = nullptr;
-            _window = nullptr;
-            RAVEN_LOG_INFO("SDL Window Closed");
-        }
+        ~SDLWindow() override;
 
         void GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height) override;
         void CaptureMouse() override;

@@ -8,8 +8,9 @@ using namespace Raven3DEngineCore::Rendering;
 static void PollGLErrors() {
     GLenum error = glGetError();
     while (error != GL_NO_ERROR) {
+        const auto glVersionString = reinterpret_cast<const char*>( glGetString(GL_VERSION));
         const auto errorString = reinterpret_cast<const char *>(glewGetErrorString(error));
-        RAVEN_LOG_ERROR("OPENGL ERROR: {}", errorString);
+        RAVEN_LOG_ERROR("OPENGL V: {} - ERROR: {} - {}", glVersionString, error, errorString);
         error = glGetError();
     }
 }
@@ -84,8 +85,9 @@ void OpenGLRenderer::Initialize() {
     _mainShader.Initialize(std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.vert", std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.frag");
 
     PollGLErrors();
+    const auto glVersionString = reinterpret_cast<const char*>( glGetString(GL_VERSION));
 
-    RAVEN_LOG_INFO("OpenGL Renderer Initialized");
+    RAVEN_LOG_INFO("OpenGL (version: {}) Renderer Initialized", glVersionString);
 }
 
 void OpenGLRenderer::RenderMesh(RenderData &renderData, Scene::TransformData &transformData) {
@@ -132,10 +134,19 @@ void OpenGLRenderer::RenderFrame() {
     auto vp = Viewports::globalViewportManager->GetViewport(_viewportID);
 
     _mainShader.use();
-    glClearColor(vp->clearColor[0], vp->clearColor[1], vp->clearColor[2], vp->clearColor[3]);
-    glViewport(vp->x_offset, vp->y_offset, vp->width, vp->height);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_SCISSOR_TEST);
+
+    glViewport(vp->x_offset, vp->y_offset, vp->width, vp->height);
+    glScissor(vp->x_offset, vp->y_offset, vp->width, vp->height);
+    glClearColor(vp->borderColor[0], vp->borderColor[1], vp->borderColor[2], vp->borderColor[3]);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glScissor(vp->x_offset + vp->borderWidth, vp->y_offset + vp->borderWidth, vp->width - vp->borderWidth*2, vp->height - vp->borderWidth*2);
+    glClearColor(vp->clearColor[0], vp->clearColor[1], vp->clearColor[2], vp->clearColor[3]);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 
     const glm::mat4 projectionMat = _cameraData->GetProjectionMatrix(vp->width, vp->height);
     const glm::mat4 viewMat = _cameraData->GetViewMatrix();
@@ -183,4 +194,7 @@ void OpenGLRenderer::RenderFrame() {
     _transparentRenderData.clear();
 
     PollGLErrors();
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_SCISSOR_TEST);
 }

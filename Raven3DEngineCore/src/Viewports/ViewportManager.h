@@ -9,9 +9,11 @@
 namespace Raven3DEngineCore::Viewports {
 
     struct Viewport {
-        RAVEN_U_INT width, height;
-        RAVEN_INT x_offset, y_offset;
+        RAVEN_U_INT width{}, height{};
+        RAVEN_INT x_offset{}, y_offset{};
         RAVEN_FLOAT clearColor[4] {0.1, 0.3, 0.5, 1.0}; //rgba 0.0 -> 1.0
+        RAVEN_FLOAT borderColor[4] {0.0, 0.0, 0.0, 1.0};
+        RAVEN_U_INT borderWidth = 0;
         Rendering::RenderAPI renderAPI;
     };
 

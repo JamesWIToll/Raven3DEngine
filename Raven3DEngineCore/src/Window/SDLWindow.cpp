@@ -7,18 +7,36 @@
 
 using namespace Raven3DEngineCore::Window;
 
+static bool SDLCheck(const bool success) {
+    if (!success) {
+        RAVEN_LOG_ERROR("SDL3 - ERROR: {}", SDL_GetError());
+    }
+    return success;
+}
+
+SDLWindow::~SDLWindow()  {
+    delete _renderer;
+    if (_renderAPI == Rendering::RenderAPI::OPENGL) {
+        SDLCheck(SDL_GL_DestroyContext(_context));
+    }
+    SDL_DestroyWindow(_window);
+    _context = nullptr;
+    _surface = nullptr;
+    _window = nullptr;
+    RAVEN_LOG_INFO("SDL Window Closed");
+}
 void SDLWindow::GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height) {
-    SDL_GetWindowSize(_window, &out_width, &out_height);
+    SDLCheck(SDL_GetWindowSize(_window, &out_width, &out_height));
 }
 
 void SDLWindow::CaptureMouse() {
-    SDL_SetWindowMouseGrab(_window, true);
-    SDL_HideCursor();
+    SDLCheck(SDL_SetWindowMouseGrab(_window, true));
+    SDLCheck(SDL_HideCursor());
 }
 
 void SDLWindow::ReleaseMouse() {
-    SDL_SetWindowMouseGrab(_window, false);
-    SDL_ShowCursor();
+    SDLCheck(SDL_SetWindowMouseGrab(_window, false));
+    SDLCheck(SDL_ShowCursor());
 }
 
 bool SDLWindow::MouseCaptured() {
@@ -37,11 +55,16 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
     _height = pixelHeight;
 
     auto vp = Viewports::Viewport();
-    vp.width = _width;
-    vp.height = _height;
-    vp.x_offset = 0.0f;
-    vp.y_offset = 0.0f;
+    vp.width = _width/2;
+    vp.height = _height/2;
+    vp.x_offset = 5;
+    vp.y_offset = 5;
     vp.renderAPI = _renderAPI;
+    vp.borderWidth = 5;
+    vp.borderColor[0] = 0.05f;
+    vp.borderColor[1] = 0.1f;
+    vp.borderColor[2] = 0.2f;
+    vp.borderColor[3] = 1.0f;
     const auto vpID = Viewports::globalViewportManager->AddViewport(vp);
     _viewports.emplace_back(vpID);
 
@@ -49,19 +72,21 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+        SDLCheck(_window != nullptr);
 
         _renderer = new Rendering::OpenGLRenderer(vpID);
 
         RAVEN_INT glContextFlags = 0;
-        SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &glContextFlags);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, glContextFlags | SDL_GL_CONTEXT_DEBUG_FLAG);
+        SDLCheck(SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &glContextFlags));
+        SDLCheck(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, glContextFlags | SDL_GL_CONTEXT_DEBUG_FLAG));
         _context = SDL_GL_CreateContext(_window);
+        SDLCheck(_context != nullptr);
 
-        SDL_GL_MakeCurrent(_window, _context);
+        SDLCheck(SDL_GL_MakeCurrent(_window, _context));
         rendererName = "OpenGL";
     }
 
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS);
+    SDLCheck(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS));
 
     const auto kbInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::KEYBOARD, "SDL_KEYBOARD");
     _eventHandler->Notify(Events::KeyboardConnectedEvent(*kbInfo));
@@ -70,9 +95,10 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 
     RAVEN_INT gamePadCount = 0;
     const auto connectedGamePads = SDL_GetGamepads(&gamePadCount);
+    SDLCheck(connectedGamePads != nullptr);
     for (RAVEN_INT i = 0; i < gamePadCount; i++) {
         const RAVEN_U_INT gamePadId = connectedGamePads[i];
-        SDL_OpenGamepad(gamePadId);
+        SDLCheck(SDL_OpenGamepad(gamePadId));
         const auto deviceInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::GAMEPAD, "SDL_GAMEPAD_" + std::to_string(gamePadId));
         _eventHandler->Notify(Events::GamepadConnectedEvent(*deviceInfo));
     }
@@ -93,7 +119,7 @@ void SDLWindow::UpdateWindow() {
     SDL_Event event;
 
     RAVEN_INT currWidth, currHeight;
-    SDL_GetWindowSize(_window, &currWidth, &currHeight);
+    SDLCheck(SDL_GetWindowSize(_window, &currWidth, &currHeight));
 
     if (SDL_GetWindowMouseGrab(_window)) {
         SDL_WarpMouseInWindow(_window, static_cast<float>(currWidth) / 2, static_cast<float>(currHeight) / 2);
@@ -107,7 +133,7 @@ void SDLWindow::UpdateWindow() {
             }
             case SDL_EVENT_WINDOW_RESIZED: {
                 RAVEN_INT newWidth, newHeight;
-                SDL_GetWindowSize(_window, &newWidth, &newHeight);
+                SDLCheck(SDL_GetWindowSize(_window, &newWidth, &newHeight));
 
 
                 for (int i = 0; i < _viewports.size(); i++) {
@@ -171,7 +197,7 @@ void SDLWindow::UpdateWindow() {
             case SDL_EVENT_GAMEPAD_ADDED: {
                 const auto gamePadId = event.gdevice.which;
                 const auto deviceInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::GAMEPAD, "SDL_GAMEPAD_" + std::to_string(gamePadId));
-                SDL_OpenGamepad(gamePadId);
+                SDLCheck(SDL_OpenGamepad(gamePadId));
                 _eventHandler->Notify(Events::GamepadConnectedEvent(*deviceInfo));
                 break;
             }
@@ -214,14 +240,14 @@ void SDLWindow::SwapWindow() {
     _frameCount++;
     if (_deltaTime >= 1.0f) {
         const auto fps =  _frameCount / _deltaTime;
-        SDL_SetWindowTitle(_window, std::format( "{} : FPS = {}",_name, static_cast<RAVEN_INT>(fps)).c_str());
+        SDLCheck(SDL_SetWindowTitle(_window, std::format( "{} : FPS = {}",_name, static_cast<RAVEN_INT>(fps)).c_str()));
         _frameCount = 0;
         _deltaTime = 0.0f;
     }
 
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-        SDL_GL_SwapWindow(_window);
+        SDLCheck(SDL_GL_SwapWindow(_window));
     }
 }
 

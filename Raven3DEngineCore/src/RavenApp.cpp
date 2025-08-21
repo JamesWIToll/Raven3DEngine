@@ -45,9 +45,9 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
     _scriptManager = new Scripting::LuaScriptManager(_sceneManager);
     _scriptManager->SetEventHandler(_eventHandler);
 
-    _importer = new Importer::AssimpImporter();
-    _importer->Initialize(_sceneManager, _window->GetRenderer());
-    const auto importedEntity = _importer->Import3DFile(std::string(RAVEN_RESOURCE_PATH) + "3D/car.glb", Scene::NullEntity);
+    // _importer = new Importer::AssimpImporter();
+    // _importer->Initialize(_sceneManager, _window->GetRenderer());
+    // const auto importedEntity = _importer->Import3DFile(std::string(RAVEN_RESOURCE_PATH) + "3D/car.glb", Scene::NullEntity);
 
 
      _eventHandler->RegisterEventListener(Events::EventType::KeyPressed, [=, this] (const Events::Event &e) {
