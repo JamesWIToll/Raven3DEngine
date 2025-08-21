@@ -15,6 +15,7 @@ static bool SDLCheck(const bool success) {
 }
 
 SDLWindow::~SDLWindow()  {
+    ReleaseMouse();
     delete _renderer;
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         SDLCheck(SDL_GL_DestroyContext(_context));
@@ -248,6 +249,8 @@ void SDLWindow::SwapWindow() {
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         SDLCheck(SDL_GL_SwapWindow(_window));
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
     }
 }
 
