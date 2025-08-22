@@ -9,7 +9,7 @@ namespace Raven3DEngineCore::Events {
 
     class MouseConnectedEvent final : public InputDeviceEvent {
     public:
-        explicit MouseConnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
+        explicit MouseConnectedEvent(const Input::DeviceInfo &device, Window::IRenderWindow * window) : InputDeviceEvent(device, window) {}
 
         EVENT_TYPE_GETTERS(MouseConnected);
 
@@ -20,7 +20,7 @@ namespace Raven3DEngineCore::Events {
 
     class MouseDisconnectedEvent final : public InputDeviceEvent {
     public:
-        explicit MouseDisconnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
+        explicit MouseDisconnectedEvent(const Input::DeviceInfo &device, Window::IRenderWindow * window) : InputDeviceEvent(device, window) {}
 
         EVENT_TYPE_GETTERS(MouseDisconnected);
 
@@ -33,7 +33,7 @@ namespace Raven3DEngineCore::Events {
     class MouseButtonEvent : public InputDeviceEvent {
     protected:
         Input::Mouse::MouseCode _button;
-        explicit MouseButtonEvent(const Input::Mouse::MouseCode button, const Input::DeviceInfo &device) : InputDeviceEvent(device), _button(button) {}
+        explicit MouseButtonEvent(const Input::Mouse::MouseCode button, const Input::DeviceInfo &device, Window::IRenderWindow * window) : InputDeviceEvent(device, window), _button(button) {}
     public:
 
         [[nodiscard]] Input::Mouse::MouseCode getButton() const { return _button; }
@@ -41,7 +41,7 @@ namespace Raven3DEngineCore::Events {
 
     class MousePressedEvent final : public MouseButtonEvent {
     public:
-        explicit MousePressedEvent(const Input::Mouse::MouseCode button, const Input::DeviceInfo &device) : MouseButtonEvent(button, device) {}
+        explicit MousePressedEvent(const Input::Mouse::MouseCode button, const Input::DeviceInfo &device, Window::IRenderWindow * window) : MouseButtonEvent(button, device, window) {}
         EVENT_TYPE_GETTERS(MouseButtonPressed)
 
         void logEvent() const override {
@@ -51,7 +51,7 @@ namespace Raven3DEngineCore::Events {
 
     class MouseReleasedEvent final : public MouseButtonEvent {
     public:
-        explicit MouseReleasedEvent(const Input::Mouse::MouseCode button, const Input::DeviceInfo &device) : MouseButtonEvent(button, device) {}
+        explicit MouseReleasedEvent(const Input::Mouse::MouseCode button, const Input::DeviceInfo &device, Window::IRenderWindow * window) : MouseButtonEvent(button, device, window) {}
         EVENT_TYPE_GETTERS(MouseButtonReleased);
 
         void logEvent() const override {
@@ -63,7 +63,7 @@ namespace Raven3DEngineCore::Events {
         RAVEN_FLOAT _xPos, _yPos, _xDelta, _yDelta;
     public:
         MouseMovedEvent(const RAVEN_FLOAT x, const RAVEN_FLOAT y, const RAVEN_FLOAT xDelta, const RAVEN_FLOAT yDelta,
-            const Input::DeviceInfo &device): InputDeviceEvent(device), _xPos(x), _yPos(y), _xDelta(xDelta), _yDelta(yDelta){}
+            const Input::DeviceInfo &device, Window::IRenderWindow * window): InputDeviceEvent(device, window), _xPos(x), _yPos(y), _xDelta(xDelta), _yDelta(yDelta){}
 
         [[nodiscard]] RAVEN_FLOAT getX() const { return _xPos; }
         [[nodiscard]] RAVEN_FLOAT getY() const { return _yPos; }
@@ -80,7 +80,7 @@ namespace Raven3DEngineCore::Events {
     class MouseScrolledEvent final : public InputDeviceEvent {
         RAVEN_FLOAT _xOffset, _yOffset;
     public:
-        MouseScrolledEvent(const RAVEN_FLOAT x, const RAVEN_FLOAT y, const Input::DeviceInfo &device): InputDeviceEvent(device), _xOffset(x), _yOffset(y) {}
+        MouseScrolledEvent(const RAVEN_FLOAT x, const RAVEN_FLOAT y, const Input::DeviceInfo &device, Window::IRenderWindow * window): InputDeviceEvent(device, window), _xOffset(x), _yOffset(y) {}
 
         [[nodiscard]] RAVEN_FLOAT getXOffset() const { return _xOffset; }
         [[nodiscard]] RAVEN_FLOAT getYOffset() const { return _yOffset; }

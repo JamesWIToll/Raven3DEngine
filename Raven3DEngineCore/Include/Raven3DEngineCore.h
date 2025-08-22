@@ -32,6 +32,7 @@
 #include <Events/AppClock.h>
 #include <Logging/Log.h>
 #include <Scene/Components/CoreComponents.h>
+#include <Rendering/RenderAPIs.h>
 #include <Scene/Components/RenderComponents.h>
 #include <Input/KeyCode.h>
 #include <Input/MouseCode.h>
@@ -39,11 +40,11 @@
 #include <Input/InputDeviceRegistry.h>
 #include <Events/Event.h>
 #include <Events/EventHandler.h>
-#include <Rendering/RenderAPIs.h>
+#include <Window/Window.h>
+#include <Events/InputDeviceEvent.h>
 #include <Rendering/Renderer.h>
 #include <Rendering/Shader.h>
 #include <Rendering/OpenglRenderer.h>
-#include <Window/Window.h>
 #include <Viewports/ViewportManager.h>
 #include <Events/MouseEvent.h>
 #include <Events/WindowEvent.h>

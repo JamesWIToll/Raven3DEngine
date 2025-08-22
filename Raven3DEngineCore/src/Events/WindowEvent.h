@@ -7,20 +7,31 @@
 #include <Raven3DEngineCore.h>
 
 namespace Raven3DEngineCore::Events {
-    class WindowCloseEvent final: public Event {
+
+    class WindowEvent : public Event {
+    protected:
+        Window::IRenderWindow *_window = nullptr;
     public:
+        explicit WindowEvent(Window::IRenderWindow *window) : _window(window) {}
+
+        Window::IRenderWindow *getWindow() const { return _window; }
+    };
+
+    class WindowCloseEvent final: public WindowEvent {
+    public:
+        WindowCloseEvent(Window::IRenderWindow *window): WindowEvent(window) {}
 
         EVENT_TYPE_GETTERS(WindowClosed)
 
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("WindowClose Event Triggered");
+            RAVEN_LOG_DEBUG("WindowClose Event Triggered for window: {}", _window->GetName());
         }
     };
 
-    class WindowResizeEvent final: public Event {
+    class WindowResizeEvent final: public WindowEvent {
         RAVEN_U_INT _width, _height;
     public:
-        WindowResizeEvent(const RAVEN_INT width, const RAVEN_INT height) : _width(width), _height(height) {}
+        WindowResizeEvent(const RAVEN_INT width, const RAVEN_INT height, Window::IRenderWindow * window) : WindowEvent(window), _width(width), _height(height) {}
 
         [[nodiscard]] RAVEN_U_INT getWidth() const { return _width; }
         [[nodiscard]] RAVEN_U_INT getHeight() const { return _height; }
@@ -28,7 +39,7 @@ namespace Raven3DEngineCore::Events {
         EVENT_TYPE_GETTERS(WindowResized);
 
         void logEvent() const override {
-            RAVEN_LOG_DEBUG("WindowResizeEvent Event Triggered with new width {} and height {}", _width, _height);
+            RAVEN_LOG_DEBUG("WindowResizeEvent Event Triggered with new width {} and height {} for window {}", _width, _height, _window->GetName());
         }
     };
 

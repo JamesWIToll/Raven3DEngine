@@ -48,14 +48,6 @@ namespace Raven3DEngineCore::Events {
 
         [[nodiscard]] virtual EventType getEventType() const = 0;
     };
-
-    class InputDeviceEvent : public Event {
-    protected:
-        Input::DeviceInfo _deviceInfo;
-        explicit InputDeviceEvent(Input::DeviceInfo  deviceInfo) : _deviceInfo(std::move(deviceInfo)) {}
-    public:
-        [[nodiscard]] Input::DeviceInfo getDeviceInfo() const { return _deviceInfo; }
-    };
 }
 
 #endif //EVENT_H

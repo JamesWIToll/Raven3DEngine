@@ -23,6 +23,7 @@ namespace Raven3DEngineCore::Window {
         virtual void GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height) = 0;
         virtual void UpdateWindow() = 0;
         virtual void SwapWindow() = 0;
+        virtual std::string GetName() = 0;
     };
 
 }

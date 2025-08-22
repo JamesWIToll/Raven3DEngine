@@ -9,7 +9,7 @@ namespace Raven3DEngineCore::Events {
 
     class KeyboardConnectedEvent final : public InputDeviceEvent {
     public:
-        explicit KeyboardConnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
+        explicit KeyboardConnectedEvent(const Input::DeviceInfo &device, Window::IRenderWindow * window) : InputDeviceEvent(device, window) {}
 
         EVENT_TYPE_GETTERS(KeyboardConnected);
 
@@ -20,7 +20,7 @@ namespace Raven3DEngineCore::Events {
 
     class KeyboardDisconnectedEvent final : public InputDeviceEvent {
     public:
-        explicit KeyboardDisconnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
+        explicit KeyboardDisconnectedEvent(const Input::DeviceInfo &device, Window::IRenderWindow * window) : InputDeviceEvent(device, window) {}
 
         EVENT_TYPE_GETTERS(KeyboardDisconnected);
 
@@ -35,7 +35,7 @@ namespace Raven3DEngineCore::Events {
             return _keyCode;
         }
     protected:
-        explicit KeyEvent(const Input::Key::KeyCode code, const Input::DeviceInfo &device) : InputDeviceEvent(device), _keyCode(code) {}
+        explicit KeyEvent(const Input::Key::KeyCode code, const Input::DeviceInfo &device, Window::IRenderWindow * window) : InputDeviceEvent(device, window), _keyCode(code) {}
 
         Input::Key::KeyCode _keyCode;
     };
@@ -43,7 +43,7 @@ namespace Raven3DEngineCore::Events {
     class KeyPressedEvent final : public KeyEvent {
         bool _isRepeat;
     public:
-        explicit KeyPressedEvent(const Input::Key::KeyCode code,  const Input::DeviceInfo &device, const bool isRepeat = false) : KeyEvent(code, device), _isRepeat(isRepeat) {}
+        explicit KeyPressedEvent(const Input::Key::KeyCode code,  const Input::DeviceInfo &device, Window::IRenderWindow * window, const bool isRepeat = false) : KeyEvent(code, device, window), _isRepeat(isRepeat) {}
 
         [[nodiscard]] bool isRepeatEvent() const {
             return _isRepeat;
@@ -58,7 +58,7 @@ namespace Raven3DEngineCore::Events {
 
     class KeyReleasedEvent final : public KeyEvent {
     public:
-        explicit KeyReleasedEvent(const Input::Key::KeyCode code, const Input::DeviceInfo &device) : KeyEvent(code, device) {}
+        explicit KeyReleasedEvent(const Input::Key::KeyCode code, const Input::DeviceInfo &device, Window::IRenderWindow * window) : KeyEvent(code, device, window) {}
 
         EVENT_TYPE_GETTERS(KeyReleased);
 

@@ -12,7 +12,7 @@ namespace Raven3DEngineCore::Events {
 
     class GamepadConnectedEvent final: public InputDeviceEvent {
     public:
-        explicit GamepadConnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
+        explicit GamepadConnectedEvent(const Input::DeviceInfo &device, Window::IRenderWindow * window) : InputDeviceEvent(device, window) {}
 
         EVENT_TYPE_GETTERS(GamePadConnected)
 
@@ -23,7 +23,7 @@ namespace Raven3DEngineCore::Events {
 
     class GamepadDisconnectedEvent final: public InputDeviceEvent {
     public:
-        explicit GamepadDisconnectedEvent(const Input::DeviceInfo &device) : InputDeviceEvent(device) {}
+        explicit GamepadDisconnectedEvent(const Input::DeviceInfo &device, Window::IRenderWindow * window) : InputDeviceEvent(device, window) {}
 
         EVENT_TYPE_GETTERS(GamePadDisconnected)
 
@@ -36,7 +36,7 @@ namespace Raven3DEngineCore::Events {
     protected:
         Input::Gamepad::GamepadButtonCode _button;
 
-        explicit GamepadButtonEvent(const Input::Gamepad::GamepadButtonCode button, const Input::DeviceInfo &device) :  InputDeviceEvent(device), _button(button) {}
+        explicit GamepadButtonEvent(const Input::Gamepad::GamepadButtonCode button, const Input::DeviceInfo &device, Window::IRenderWindow * window) :  InputDeviceEvent(device, window), _button(button) {}
 
     public:
         [[nodiscard]] Input::Gamepad::GamepadButtonCode GetButton() const { return _button; }
@@ -44,7 +44,7 @@ namespace Raven3DEngineCore::Events {
 
     class GamepadButtonPressedEvent final : public GamepadButtonEvent {
     public:
-        explicit GamepadButtonPressedEvent(const Input::Gamepad::GamepadButtonCode button, const Input::DeviceInfo &device): GamepadButtonEvent(button, device) {}
+    explicit GamepadButtonPressedEvent(const Input::Gamepad::GamepadButtonCode button, const Input::DeviceInfo &device, Window::IRenderWindow * window): GamepadButtonEvent(button, device, window) {}
 
         EVENT_TYPE_GETTERS(GamePadButtonPressed);
 
@@ -55,7 +55,7 @@ namespace Raven3DEngineCore::Events {
 
     class GamepadButtonReleasedEvent final : public GamepadButtonEvent {
     public:
-        explicit GamepadButtonReleasedEvent(const Input::Gamepad::GamepadButtonCode button, const Input::DeviceInfo &device): GamepadButtonEvent(button, device) {}
+        explicit GamepadButtonReleasedEvent(const Input::Gamepad::GamepadButtonCode button, const Input::DeviceInfo &device, Window::IRenderWindow * window): GamepadButtonEvent(button, device, window) {}
 
         EVENT_TYPE_GETTERS(GamePadButtonReleased);
 
@@ -68,7 +68,7 @@ namespace Raven3DEngineCore::Events {
         Input::Gamepad::GamepadAxisCode _axis;
         RAVEN_FLOAT _value;
     public:
-        explicit GamepadAxisEvent(const Input::Gamepad::GamepadAxisCode axis, const RAVEN_FLOAT value, const Input::DeviceInfo &device): InputDeviceEvent(device), _axis(axis), _value(value) {}
+        explicit GamepadAxisEvent(const Input::Gamepad::GamepadAxisCode axis, const RAVEN_FLOAT value, const Input::DeviceInfo &device, Window::IRenderWindow * window): InputDeviceEvent(device, window), _axis(axis), _value(value) {}
 
         [[nodiscard]] Input::Gamepad::GamepadAxisCode GetAxis() const { return _axis; }
         [[nodiscard]] RAVEN_FLOAT GetValue() const { return _value; }

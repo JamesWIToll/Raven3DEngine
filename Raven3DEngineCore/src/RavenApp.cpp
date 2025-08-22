@@ -23,7 +23,7 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
 
     _window = new Window::SDLWindow();
     _window->SetEventHandler(_eventHandler);
-    const auto vp = _window->Initialize(Rendering::RenderAPI::OPENGL, appName, pixelWidth, pixelHeight);
+    const auto vp = _window->Initialize(Rendering::RenderAPI::OPENGL, appName + " [SDL Window 0]", pixelWidth, pixelHeight);
 
     _sceneManager = new Scene::SceneManager(vp);
     _sceneManager->SetEventHandler(_eventHandler);

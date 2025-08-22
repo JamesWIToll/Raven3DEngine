@@ -25,6 +25,7 @@ namespace Raven3DEngineCore::Window {
         RAVEN_U_INT Initialize(Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) override;
         void UpdateWindow() override;
         void SwapWindow() override;
+        std::string GetName() override { return _name; }
 
     };
 }
