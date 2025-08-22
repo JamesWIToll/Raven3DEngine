@@ -56,8 +56,8 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
     _height = pixelHeight;
 
     auto vp = Viewports::Viewport();
-    vp.width = _width/2;
-    vp.height = _height/2;
+    vp.width = _width - 10;
+    vp.height = _height - 10;
     vp.x_offset = 5;
     vp.y_offset = 5;
     vp.renderAPI = _renderAPI;

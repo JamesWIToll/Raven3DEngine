@@ -119,6 +119,9 @@ bool SceneManager::DestroyEntity(const Entity_T entity) {
             parentRelData.children.erase(parentRelData.children.begin() + i);
         }
     }
+    if (const auto renderData = _registry.try_get<Rendering::RenderData>(entity); renderData != nullptr) {
+        _window->GetRenderer()->ReleaseRenderData(renderData);
+    }
     _registry.destroy(entity);
     return true;
 }

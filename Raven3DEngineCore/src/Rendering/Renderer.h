@@ -86,6 +86,7 @@ namespace Raven3DEngineCore::Rendering {
             data->NBO = NBO;
             data->IBO = IBO;
             data->UV_0_BO = UV_0_BO;
+            data->TBO = TBO;
         }
 
     public:
