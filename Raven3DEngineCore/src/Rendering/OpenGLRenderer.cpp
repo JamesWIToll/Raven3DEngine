@@ -15,6 +15,58 @@ static void PollGLErrors() {
     }
 }
 
+void OpenGLRenderer::LoadBuffers(RenderData *data) {
+    GLuint VAO, VBO, NBO, IBO, UV_0_BO, TBO;
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &NBO);
+    glDeleteBuffers(1, &IBO);
+    glDeleteBuffers(1, &UV_0_BO);
+    glDeleteBuffers(1, &TBO);
+    glDeleteVertexArrays(1, &VAO);
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &NBO);
+    glGenBuffers(1, &IBO);
+    glGenBuffers(1, &TBO);
+    glGenBuffers(1, &UV_0_BO);
+
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, data->vertices.size() * sizeof(glm::vec3), data->vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, NBO);
+    glBufferData(GL_ARRAY_BUFFER, data->normals.size() * sizeof(glm::vec3), data->normals.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, TBO);
+    glBufferData(GL_ARRAY_BUFFER, data->tangents.size() * sizeof(glm::vec3), data->tangents.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, UV_0_BO);
+    glBufferData(GL_ARRAY_BUFFER, data->uvs_0.size() * sizeof(glm::vec2), data->uvs_0.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(3);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data->indices.size() * sizeof(RAVEN_U_INT), data->indices.data(), GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+    data->VAO = VAO;
+    data->VBO = VBO;
+    data->NBO = NBO;
+    data->IBO = IBO;
+    data->UV_0_BO = UV_0_BO;
+    data->TBO = TBO;
+    PollGLErrors();
+}
+
 void OpenGLRenderer::ReleaseRenderData(RenderData *data) {
     glDeleteVertexArrays(1, &data->VAO);
     glDeleteBuffers(1, &data->VBO);
@@ -28,6 +80,7 @@ void OpenGLRenderer::ReleaseRenderData(RenderData *data) {
     glDeleteTextures(1, &data->material.ambTex);
     glDeleteTextures(1, &data->material.normTex);
     glDeleteTextures(1, &data->material.emisTex);
+    PollGLErrors();
 }
 
 void OpenGLRenderer::QueueForRender(RenderData *data, Scene::TransformData *transform) {

@@ -28,7 +28,7 @@ namespace Raven3DEngineCore::Rendering {
         virtual void Initialize() = 0;
         virtual void RenderFrame() = 0;
 
-        RAVEN_U_INT GetViewportID () const  { return _viewportID; };
+        [[nodiscard]] RAVEN_U_INT GetViewportID () const  { return _viewportID; };
     };
 
 
@@ -45,49 +45,7 @@ namespace Raven3DEngineCore::Rendering {
 
         GLShader _mainShader {};
 
-        static void LoadBuffers(RenderData *data) {
-            GLuint VAO, VBO, NBO, IBO, UV_0_BO, TBO;
-            glGenVertexArrays(1, &VAO);
-            glGenBuffers(1, &VBO);
-            glGenBuffers(1, &NBO);
-            glGenBuffers(1, &IBO);
-            glGenBuffers(1, &TBO);
-            glGenBuffers(1, &UV_0_BO);
-
-
-            glBindVertexArray(VAO);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, data->vertices.size() * sizeof(glm::vec3), data->vertices.data(), GL_STATIC_DRAW);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glEnableVertexAttribArray(0);
-
-            glBindBuffer(GL_ARRAY_BUFFER, NBO);
-            glBufferData(GL_ARRAY_BUFFER, data->normals.size() * sizeof(glm::vec3), data->normals.data(), GL_STATIC_DRAW);
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glEnableVertexAttribArray(1);
-
-            glBindBuffer(GL_ARRAY_BUFFER, TBO);
-            glBufferData(GL_ARRAY_BUFFER, data->tangents.size() * sizeof(glm::vec3), data->tangents.data(), GL_STATIC_DRAW);
-            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glEnableVertexAttribArray(2);
-
-            glBindBuffer(GL_ARRAY_BUFFER, UV_0_BO);
-            glBufferData(GL_ARRAY_BUFFER, data->uvs_0.size() * sizeof(glm::vec2), data->uvs_0.data(), GL_STATIC_DRAW);
-            glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glEnableVertexAttribArray(3);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, data->indices.size() * sizeof(RAVEN_U_INT), data->indices.data(), GL_STATIC_DRAW);
-
-            glBindVertexArray(0);
-
-            data->VAO = VAO;
-            data->VBO = VBO;
-            data->NBO = NBO;
-            data->IBO = IBO;
-            data->UV_0_BO = UV_0_BO;
-            data->TBO = TBO;
-        }
+        static void LoadBuffers(RenderData *data);
 
     public:
         explicit OpenGLRenderer(const RAVEN_U_INT viewportID) : IRenderer(viewportID)  {}
