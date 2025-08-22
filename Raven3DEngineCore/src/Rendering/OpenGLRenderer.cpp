@@ -17,12 +17,12 @@ static void PollGLErrors() {
 
 void OpenGLRenderer::LoadBuffers(RenderData *data) {
     GLuint VAO, VBO, NBO, IBO, UV_0_BO, TBO;
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &NBO);
-    glDeleteBuffers(1, &IBO);
-    glDeleteBuffers(1, &UV_0_BO);
-    glDeleteBuffers(1, &TBO);
-    glDeleteVertexArrays(1, &VAO);
+    if (data->VAO != 0)         glDeleteVertexArrays(1, &data->VAO);
+    if (data->VBO != 0)         glDeleteBuffers(1, &data->VBO);
+    if (data->NBO != 0)         glDeleteBuffers(1, &data->NBO);
+    if (data->IBO != 0)         glDeleteBuffers(1, &data->IBO);
+    if (data->UV_0_BO != 0)     glDeleteBuffers(1, &data->UV_0_BO);
+    if (data->TBO != 0)         glDeleteBuffers(1, &data->TBO);
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
