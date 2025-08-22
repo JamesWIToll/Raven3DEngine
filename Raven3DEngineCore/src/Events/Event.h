@@ -9,7 +9,6 @@
 
 namespace Raven3DEngineCore::Events {
 
-    static auto EventClock = std::chrono::system_clock();
 
     enum class EventType {
         None = 0,

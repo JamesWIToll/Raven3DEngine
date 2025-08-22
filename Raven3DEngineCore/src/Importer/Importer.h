@@ -12,9 +12,9 @@ namespace Raven3DEngineCore::Importer {
         Scene::SceneManager *_scene {nullptr};
         Rendering::IRenderer *_renderer {nullptr};
     public:
-        void Initialize(Scene::SceneManager *scene, Rendering::IRenderer *renderer) {
+        void Initialize(Scene::SceneManager *scene) {
             _scene = scene;
-            _renderer = renderer;
+            _renderer = Viewports::globalViewportManager->GetViewport(scene->GetViewportId())->renderer;
         };
         virtual Scene::Entity_T Import3DFile(const std::string &filePath, Scene::Entity_T parent) = 0;
         virtual ~IImporter() = default;

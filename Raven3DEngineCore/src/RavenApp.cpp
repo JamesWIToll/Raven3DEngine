@@ -23,10 +23,9 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
 
     _window = new Window::SDLWindow();
     _window->SetEventHandler(_eventHandler);
-    _window->Initialize(Rendering::RenderAPI::OPENGL, appName, pixelWidth, pixelHeight);
+    const auto vp = _window->Initialize(Rendering::RenderAPI::OPENGL, appName, pixelWidth, pixelHeight);
 
-
-    _sceneManager = new Scene::SceneManager(_window);
+    _sceneManager = new Scene::SceneManager(vp);
     _sceneManager->SetEventHandler(_eventHandler);
     _sceneManager->Initialize();
 
@@ -46,7 +45,7 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
     _scriptManager->SetEventHandler(_eventHandler);
 
     _importer = new Importer::AssimpImporter();
-    _importer->Initialize(_sceneManager, _window->GetRenderer());
+    _importer->Initialize(_sceneManager);
     const auto importedEntity = _importer->Import3DFile(std::string(RAVEN_RESOURCE_PATH) + "3D/car.glb", Scene::NullEntity);
 
 

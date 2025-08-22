@@ -60,6 +60,10 @@ namespace Raven3DEngineCore::Events {
         virtual void SetEventHandler(EventHandler *eventHandler) {
             _eventHandler = eventHandler;
         }
+
+        virtual EventHandler *GetEventHandler() const {
+            return _eventHandler;
+        }
     };
 
 }

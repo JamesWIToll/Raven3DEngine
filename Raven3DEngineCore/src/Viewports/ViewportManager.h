@@ -15,6 +15,8 @@ namespace Raven3DEngineCore::Viewports {
         RAVEN_FLOAT borderColor[4] {0.0, 0.0, 0.0, 1.0};
         RAVEN_U_INT borderWidth = 0;
         Rendering::RenderAPI renderAPI;
+        Rendering::IRenderer* renderer;
+        Window::IRenderWindow* window;
     };
 
     class ViewportManager {
@@ -24,7 +26,18 @@ namespace Raven3DEngineCore::Viewports {
 
         RAVEN_U_INT AddViewport(Viewport vp) {
             const RAVEN_U_INT newID = _nextID++;
+
+            if (vp.renderAPI == Rendering::RenderAPI::OPENGL) {
+                vp.renderer = new Rendering::OpenGLRenderer(newID);
+            }
             _viewports.emplace(newID, vp);
+
+            if (vp.renderer == nullptr || vp.window == nullptr) {
+                RAVEN_LOG_FATAL("Could not setup a renderer or window for VP: {}", newID);
+                return newID;
+            }
+            vp.renderer->SetEventHandler(vp.window->GetEventHandler());
+            vp.renderer->Initialize();
             return newID;
         }
 
@@ -32,6 +45,7 @@ namespace Raven3DEngineCore::Viewports {
             if (!_viewports.contains(id)) {
                 return false;
             }
+            delete _viewports[id].renderer;
             _viewports.erase(id);
             return true;
         }
@@ -68,6 +82,16 @@ namespace Raven3DEngineCore::Viewports {
                 return nullptr;
             }
             return &_viewports[id];
+        }
+
+        std::vector<RAVEN_U_INT> GetViewportsForWindow(const Window::IRenderWindow *window) {
+            std::vector<RAVEN_U_INT> viewports;
+            for (auto [id, viewport] : _viewports) {
+                if (viewport.window == window) {
+                    viewports.push_back(id);
+                }
+            }
+            return viewports;
         }
     };
 

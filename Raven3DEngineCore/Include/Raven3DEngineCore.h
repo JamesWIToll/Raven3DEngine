@@ -29,28 +29,30 @@
 #define RAVEN_RESOURCE_PATH "../Resources/"
 #endif
 
-#include <Rendering/RenderAPIs.h>
-#include <Viewports/ViewportManager.h>
 #include <Events/AppClock.h>
-#include <Scene/Components/CoreComponents.h>
 #include <Logging/Log.h>
+#include <Scene/Components/CoreComponents.h>
+#include <Scene/Components/RenderComponents.h>
 #include <Input/KeyCode.h>
 #include <Input/MouseCode.h>
 #include <Input/GamepadCode.h>
 #include <Input/InputDeviceRegistry.h>
 #include <Events/Event.h>
+#include <Events/EventHandler.h>
+#include <Rendering/RenderAPIs.h>
+#include <Rendering/Renderer.h>
+#include <Rendering/Shader.h>
+#include <Rendering/OpenglRenderer.h>
+#include <Window/Window.h>
+#include <Viewports/ViewportManager.h>
 #include <Events/MouseEvent.h>
 #include <Events/WindowEvent.h>
 #include <Events/KeyEvent.h>
 #include <Events/GamepadEvent.h>
-#include <Events/EventHandler.h>
-#include <Rendering/Shader.h>
-#include <Rendering/Renderer.h>
 #include <Events/AppEvent.h>
-#include <Window/Window.h>
+#include <Window/SDLWindow.h>
 #include <Scene/SceneManager.h>
 #include <Importer/Importer.h>
-#include <Scene/Components/CoreComponentGetters.h>
 #include <Scripting/ScriptManager.h>
 #include <RavenApp.h>
 

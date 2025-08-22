@@ -16,7 +16,6 @@ static bool SDLCheck(const bool success) {
 
 SDLWindow::~SDLWindow()  {
     ReleaseMouse();
-    delete _renderer;
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         SDLCheck(SDL_GL_DestroyContext(_context));
     }
@@ -28,6 +27,12 @@ SDLWindow::~SDLWindow()  {
 }
 void SDLWindow::GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height) {
     SDLCheck(SDL_GetWindowSize(_window, &out_width, &out_height));
+}
+
+void SDLWindow::MakeCurrent() {
+    if (_renderAPI == Rendering::RenderAPI::OPENGL) {
+        SDLCheck(SDL_GL_MakeCurrent(_window, _context));
+    }
 }
 
 void SDLWindow::CaptureMouse() {
@@ -44,7 +49,9 @@ bool SDLWindow::MouseCaptured() {
     return SDL_GetWindowMouseGrab(_window);
 }
 
-void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
+RAVEN_U_INT SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
+    SDLCheck(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS));
+
     _name = name;
 
     _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { UpdateWindow(); });
@@ -54,6 +61,22 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 
     _width = pixelWidth;
     _height = pixelHeight;
+
+    std::string rendererName = name;
+
+    if (_renderAPI == Rendering::RenderAPI::OPENGL) {
+        _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+        SDLCheck(_window != nullptr);
+
+        RAVEN_INT glContextFlags = 0;
+        SDLCheck(SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &glContextFlags));
+        SDLCheck(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, glContextFlags | SDL_GL_CONTEXT_DEBUG_FLAG));
+        _context = SDL_GL_CreateContext(_window);
+        SDLCheck(_context != nullptr);
+
+        SDLCheck(SDL_GL_MakeCurrent(_window, _context));
+        rendererName = "OpenGL";
+    }
 
     auto vp = Viewports::Viewport();
     vp.width = _width - 10;
@@ -66,28 +89,8 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
     vp.borderColor[1] = 0.1f;
     vp.borderColor[2] = 0.2f;
     vp.borderColor[3] = 1.0f;
+    vp.window = this;
     const auto vpID = Viewports::globalViewportManager->AddViewport(vp);
-    _viewports.emplace_back(vpID);
-
-    std::string rendererName = name;
-
-    if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-        _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-        SDLCheck(_window != nullptr);
-
-        _renderer = new Rendering::OpenGLRenderer(vpID);
-
-        RAVEN_INT glContextFlags = 0;
-        SDLCheck(SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &glContextFlags));
-        SDLCheck(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, glContextFlags | SDL_GL_CONTEXT_DEBUG_FLAG));
-        _context = SDL_GL_CreateContext(_window);
-        SDLCheck(_context != nullptr);
-
-        SDLCheck(SDL_GL_MakeCurrent(_window, _context));
-        rendererName = "OpenGL";
-    }
-
-    SDLCheck(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS));
 
     const auto kbInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::KEYBOARD, "SDL_KEYBOARD");
     _eventHandler->Notify(Events::KeyboardConnectedEvent(*kbInfo));
@@ -104,18 +107,12 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
         _eventHandler->Notify(Events::GamepadConnectedEvent(*deviceInfo));
     }
 
-
-    if (_renderer == nullptr) {
-        RAVEN_LOG_ERROR("SDL3 Window could not initialize a window for {} Renderer", rendererName);
-        return;
-    }
-
-    _renderer->SetEventHandler(_eventHandler);
-    _renderer->Initialize();
     RAVEN_LOG_INFO("SDL3 Window Initialized for {} Renderer", rendererName);
+    return vpID;
 }
 
 void SDLWindow::UpdateWindow() {
+    const auto windowViewports = Viewports::globalViewportManager->GetViewportsForWindow(this);
 
     SDL_Event event;
 
@@ -137,8 +134,8 @@ void SDLWindow::UpdateWindow() {
                 SDLCheck(SDL_GetWindowSize(_window, &newWidth, &newHeight));
 
 
-                for (int i = 0; i < _viewports.size(); i++) {
-                    const auto viewport = Viewports::globalViewportManager->GetViewport(_viewports[i]);
+                for (int i = 0; i < windowViewports.size(); i++) {
+                    const auto viewport = Viewports::globalViewportManager->GetViewport(windowViewports[i]);
                     const RAVEN_FLOAT vpWidthProportion = viewport->width / static_cast<RAVEN_FLOAT>(_width);
                     const RAVEN_FLOAT vpHeightProportion = viewport->height / static_cast<RAVEN_FLOAT>(_height);
                     viewport->width = static_cast<RAVEN_U_INT>(vpWidthProportion * newWidth);
@@ -252,9 +249,5 @@ void SDLWindow::SwapWindow() {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
     }
-}
-
-Raven3DEngineCore::Rendering::IRenderer * SDLWindow::GetRenderer() {
-    return _renderer;
 }
 

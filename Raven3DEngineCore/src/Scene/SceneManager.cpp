@@ -8,7 +8,7 @@ using namespace Raven3DEngineCore::Scene;
 
 Entity_T Raven3DEngineCore::Scene::NullEntity = static_cast<Entity_T>(RAVEN_ENTITY_NULL);
 
-SceneManager::SceneManager(Window::IRenderWindow *window): _window(window) {
+SceneManager::SceneManager(RAVEN_U_INT vpID): _viewportId(vpID) {
     _registry = entt::basic_registry<Entity_T>();
     _root = _registry.create();
     _registry.emplace<RelationshipData>(_root, RelationshipData{
@@ -28,7 +28,7 @@ SceneManager::SceneManager(Window::IRenderWindow *window): _window(window) {
 
 SceneManager::~SceneManager(){
     for (const auto renderView = _registry.view<Rendering::RenderData>(); const auto [entity, data] : renderView.each()) {
-        _window->GetRenderer()->ReleaseRenderData(&data);
+        Viewports::globalViewportManager->GetViewport(_viewportId)->renderer->ReleaseRenderData(&data);
     }
     _registry.clear();
 }
@@ -37,7 +37,7 @@ void SceneManager::Initialize() {
     _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { Update(); });
     _eventHandler->RegisterEventListener(Events::EventType::AppPreRender, [this] (const Events::Event &event) {
         const auto preRenderEvent = dynamic_cast<const Events::AppPreRenderEvent&>(event);
-        ProcessRenderables(_window->GetRenderer());
+        ProcessRenderables(Viewports::globalViewportManager->GetViewport(_viewportId)->renderer);
     });
 }
 
@@ -120,7 +120,7 @@ bool SceneManager::DestroyEntity(const Entity_T entity) {
         }
     }
     if (const auto renderData = _registry.try_get<Rendering::RenderData>(entity); renderData != nullptr) {
-        _window->GetRenderer()->ReleaseRenderData(renderData);
+        Viewports::globalViewportManager->GetViewport(_viewportId)->renderer->ReleaseRenderData(renderData);
     }
     _registry.destroy(entity);
     return true;

@@ -11,10 +11,12 @@ namespace Raven3DEngineCore::Scene {
     class SceneManager final : public Events::EventNotifier {
         entt::basic_registry<Entity_T> _registry;
         Entity_T _root = NullEntity;
-        Window::IRenderWindow* _window = nullptr;
+        RAVEN_U_INT _viewportId;
     public:
-        explicit SceneManager(Window::IRenderWindow *window);
+        explicit SceneManager(RAVEN_U_INT viewportId);
         ~SceneManager() override;
+
+        RAVEN_U_INT GetViewportId() const { return _viewportId; }
 
         void Initialize();
 

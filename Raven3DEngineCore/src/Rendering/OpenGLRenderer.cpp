@@ -109,7 +109,7 @@ void OpenGLRenderer::SetActiveCam(CameraData *data, Scene::TransformData *camTra
     _camTransform = camTransform;
 }
 
-RAVEN_U_INT OpenGLRenderer::LoadTexture(const std::int32_t width, const std::int32_t height, std::uint8_t *data, const std::int32_t numComps) {
+RAVEN_U_INT OpenGLRenderer::LoadTexture(const RAVEN_INT width, const RAVEN_INT height, RAVEN_BYTE *data, const RAVEN_INT numComps) {
     RAVEN_U_INT textureID {};
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -129,6 +129,8 @@ RAVEN_U_INT OpenGLRenderer::LoadTexture(const std::int32_t width, const std::int
 
 
 void OpenGLRenderer::Initialize() {
+    Viewports::globalViewportManager->GetViewport(_viewportID)->window->MakeCurrent();
+
     glewInit();
 
     _eventHandler->RegisterEventListener(Events::EventType::AppRender, [this] (const Events::Event &) { RenderFrame(); });
@@ -174,8 +176,8 @@ void OpenGLRenderer::RenderMesh(RenderData &renderData, Scene::TransformData &tr
     _mainShader.setBool("uMaterial.useNormTex", renderData.material.normTex != 0);
     _mainShader.setBool("uMaterial.useEmisTex", renderData.material.emisTex != 0);
     glBindVertexArray(renderData.VAO);
-    constexpr auto mode = GL_TRIANGLES;
-    //if (renderData.material.wireframe) { mode = GL_LINES;}
+    auto mode = GL_TRIANGLES;
+    if (renderData.material.wireframe) { mode = GL_LINES;}
 
     glDrawElements(mode, renderData.indices.size(), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
@@ -184,6 +186,7 @@ void OpenGLRenderer::RenderMesh(RenderData &renderData, Scene::TransformData &tr
 }
 
 void OpenGLRenderer::RenderFrame() {
+    Viewports::globalViewportManager->GetViewport(_viewportID)->window->MakeCurrent();
     auto vp = Viewports::globalViewportManager->GetViewport(_viewportID);
 
     _mainShader.use();
