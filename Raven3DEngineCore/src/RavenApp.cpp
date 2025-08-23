@@ -23,9 +23,23 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
 
     _window = new Window::SDLWindow();
     _window->SetEventHandler(_eventHandler);
-    const auto vp = _window->Initialize(Rendering::RenderAPI::OPENGL, appName + " [SDL Window 0]", pixelWidth, pixelHeight);
+    _window->Initialize(Rendering::RenderAPI::OPENGL, appName + " [SDL Window 0]", pixelWidth, pixelHeight);
 
-    _sceneManager = new Scene::SceneManager(vp);
+    auto vp = Viewports::Viewport();
+    vp.width = pixelWidth - 10;
+    vp.height = pixelHeight - 10;
+    vp.x_offset = 5;
+    vp.y_offset = 5;
+    vp.renderAPI = Rendering::RenderAPI::OPENGL;
+    vp.borderWidth = 5;
+    vp.borderColor[0] = 0.05f;
+    vp.borderColor[1] = 0.1f;
+    vp.borderColor[2] = 0.2f;
+    vp.borderColor[3] = 1.0f;
+    vp.window = _window;
+    const auto vpID = Viewports::globalViewportManager->AddViewport(vp);
+
+    _sceneManager = new Scene::SceneManager(vpID);
     _sceneManager->SetEventHandler(_eventHandler);
     _sceneManager->Initialize();
 
@@ -70,20 +84,28 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
          } else if (keyEvent.getKeyCode() == Input::Key::KeyCode::E) {
              auto *transform =_sceneManager->GetComponent<Scene::TransformData>(camera);
              transform->localTransform = glm::translate(transform->localTransform,  glm::vec3(0.0f, 1.0f, 0.0f));
+         } else if (keyEvent.getKeyCode() == Input::Key::KeyCode::SPACE) {
+             auto *vp1 =Viewports::globalViewportManager->GetViewport(vpID);
+             auto *window = new Window::SDLWindow();
+             window->SetEventHandler(_eventHandler);
+             window->Initialize(vp1->renderAPI, "SDL Window", vp1->width, vp1->height);
+             vp1->window = window;
+             vp1->x_offset = 0;
+             vp1->y_offset = 0;
          }
      });
      _eventHandler->RegisterEventListener(Events::EventType::MouseButtonPressed, [this] (const Events::Event &e) {
          if (const auto mouseEvent = dynamic_cast<const Events::MousePressedEvent &>(e); mouseEvent.getButton() == Input::Mouse::MouseCode::BUTTON_LEFT) {
-             _window->CaptureMouse();
+             mouseEvent.GetWindow()->CaptureMouse();
          } else if (mouseEvent.getButton() == Input::Mouse::MouseCode::BUTTON_RIGHT) {
-             _window->ReleaseMouse();
+             mouseEvent.GetWindow()->ReleaseMouse();
          }
      });
      _eventHandler->RegisterEventListener(Events::EventType::MouseMoved, [=, this] (const Events::Event &e) {
-         if (!_window->MouseCaptured()) {
+         const auto mouseEvent = dynamic_cast<const Events::MouseMovedEvent &>(e);
+         if (!mouseEvent.GetWindow()->MouseCaptured()) {
              return;
          }
-         const auto mouseEvent = dynamic_cast<const Events::MouseMovedEvent &>(e);
          auto *transform =_sceneManager->GetComponent<Scene::TransformData>(camera);
          transform->localTransform = glm::rotate(transform->localTransform, glm::radians(mouseEvent.getXDelta()*-0.1f), glm::vec3(0.0f, 1.0f, 0.0f));
          transform->localTransform = glm::rotate(transform->localTransform, glm::radians(mouseEvent.getYDelta()*-0.1f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -97,8 +119,8 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
 RavenApp::~RavenApp() {
     delete _importer;
     delete _sceneManager;
-    delete _window;
     delete _eventHandler;
+    Window::ShutdownSharedSDLWindowData();
     delete Viewports::globalViewportManager;
     RAVEN_LOG_INFO("{} - Application Exiting", this->appName);
 }

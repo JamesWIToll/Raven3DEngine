@@ -7,31 +7,31 @@
 
 using namespace Raven3DEngineCore::Window;
 
-static bool SDLCheck(const bool success) {
+SDL_GLContext Raven3DEngineCore::Window::sharedSDLGLContext = nullptr;
+
+bool SDLWindow::SDLCheck(const bool success) {
     if (!success) {
-        RAVEN_LOG_ERROR("SDL3 - ERROR: {}", SDL_GetError());
+        RAVEN_LOG_ERROR("SDL3 Window ({}) - ERROR: {}", _name, SDL_GetError());
     }
     return success;
 }
 
 SDLWindow::~SDLWindow()  {
     ReleaseMouse();
-    if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-        SDLCheck(SDL_GL_DestroyContext(_context));
-    }
     SDL_DestroyWindow(_window);
-    _context = nullptr;
+    sharedSDLGLContext = nullptr;
     _surface = nullptr;
     _window = nullptr;
     RAVEN_LOG_INFO("SDL Window Closed");
 }
+
 void SDLWindow::GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height) {
     SDLCheck(SDL_GetWindowSize(_window, &out_width, &out_height));
 }
 
 void SDLWindow::MakeCurrent() {
-    if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-        SDLCheck(SDL_GL_MakeCurrent(_window, _context));
+    if (_renderAPI == Rendering::RenderAPI::OPENGL && SDL_GL_GetCurrentWindow() != _window) {
+        SDLCheck(SDL_GL_MakeCurrent(_window, sharedSDLGLContext));
     }
 }
 
@@ -49,7 +49,7 @@ bool SDLWindow::MouseCaptured() {
     return SDL_GetWindowMouseGrab(_window);
 }
 
-RAVEN_U_INT SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
+void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
     SDLCheck(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS));
 
     _name = name;
@@ -71,26 +71,12 @@ RAVEN_U_INT SDLWindow::Initialize(const Rendering::RenderAPI api, const std::str
         RAVEN_INT glContextFlags = 0;
         SDLCheck(SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &glContextFlags));
         SDLCheck(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, glContextFlags | SDL_GL_CONTEXT_DEBUG_FLAG));
-        _context = SDL_GL_CreateContext(_window);
-        SDLCheck(_context != nullptr);
-
-        SDLCheck(SDL_GL_MakeCurrent(_window, _context));
+        if (sharedSDLGLContext == nullptr) {
+            sharedSDLGLContext = SDL_GL_CreateContext(_window);
+            SDLCheck(sharedSDLGLContext != nullptr);
+        }
         rendererName = "OpenGL";
     }
-
-    auto vp = Viewports::Viewport();
-    vp.width = _width - 10;
-    vp.height = _height - 10;
-    vp.x_offset = 5;
-    vp.y_offset = 5;
-    vp.renderAPI = _renderAPI;
-    vp.borderWidth = 5;
-    vp.borderColor[0] = 0.05f;
-    vp.borderColor[1] = 0.1f;
-    vp.borderColor[2] = 0.2f;
-    vp.borderColor[3] = 1.0f;
-    vp.window = this;
-    const auto vpID = Viewports::globalViewportManager->AddViewport(vp);
 
     const auto kbInfo = Input::InputDeviceRegistry::registerDevice(Input::DeviceType::KEYBOARD, "SDL_KEYBOARD - " + GetName());
     _eventHandler->Notify(Events::KeyboardConnectedEvent(*kbInfo, this));
@@ -108,7 +94,6 @@ RAVEN_U_INT SDLWindow::Initialize(const Rendering::RenderAPI api, const std::str
     }
 
     RAVEN_LOG_INFO("SDL3 Window Initialized for {} Renderer", rendererName);
-    return vpID;
 }
 
 void SDLWindow::UpdateWindow() {
@@ -243,7 +228,7 @@ void SDLWindow::SwapWindow() {
         _deltaTime = 0.0f;
     }
 
-
+    MakeCurrent();
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
         SDLCheck(SDL_GL_SwapWindow(_window));
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -251,3 +236,9 @@ void SDLWindow::SwapWindow() {
     }
 }
 
+void Raven3DEngineCore::Window::ShutdownSharedSDLWindowData() {
+    if (!SDL_GL_DestroyContext(sharedSDLGLContext)) {
+        RAVEN_LOG_ERROR("Failed to destroy SDL_GLContext");
+    }
+    sharedSDLGLContext = nullptr;
+}

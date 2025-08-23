@@ -15,7 +15,7 @@ namespace Raven3DEngineCore::Window {
     public:
         ~IRenderWindow() override = default;
         //returns created viewport ID
-        virtual RAVEN_U_INT Initialize(Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) = 0;
+        virtual void Initialize(Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) = 0;
         virtual void MakeCurrent() = 0;
         virtual void CaptureMouse() = 0;
         virtual void ReleaseMouse() = 0;

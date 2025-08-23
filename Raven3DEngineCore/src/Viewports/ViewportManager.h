@@ -4,6 +4,7 @@
 
 #ifndef RAVEN3DENGINECORE_VIEWPORTMANAGER_H
 #define RAVEN3DENGINECORE_VIEWPORTMANAGER_H
+#include "Window/SDLWindow.h"
 
 
 namespace Raven3DEngineCore::Viewports {
@@ -23,6 +24,13 @@ namespace Raven3DEngineCore::Viewports {
         std::map<RAVEN_U_INT, Viewport> _viewports {};
         RAVEN_U_INT _nextID {0};
     public:
+        ~ViewportManager() {
+            for (auto vp: _viewports | std::views::values) {
+                delete vp.renderer;
+                delete vp.window;
+            }
+            _viewports.clear();
+        }
 
         RAVEN_U_INT AddViewport(Viewport vp) {
             const RAVEN_U_INT newID = _nextID++;
@@ -92,6 +100,22 @@ namespace Raven3DEngineCore::Viewports {
                 }
             }
             return viewports;
+        }
+
+        Window::IRenderWindow *GetWindow(const RAVEN_U_INT id) {
+            if (!_viewports.contains(id)) {
+                return nullptr;
+            }
+            return _viewports[id].window;
+        }
+
+        Window::IRenderWindow *MoveToNewWindow(const RAVEN_U_INT id) {
+            if (!_viewports.contains(id)) {
+                return nullptr;
+            }
+            auto vp = GetViewport(id);
+            auto *window = new Window::SDLWindow();
+
         }
     };
 
