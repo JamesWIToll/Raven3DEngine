@@ -32,6 +32,9 @@
 #include <assimp/postprocess.h>
 #include "assimp/cimport.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 extern "C" {
 #include <lua.h>
 #include <lauxlib.h>

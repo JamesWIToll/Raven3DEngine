@@ -17,3 +17,6 @@
 [submodule "ThirdParty/lua"]
 	path = ThirdParty/lua
 	url = https://github.com/lua/lua
+[submodule "ThirdParty/freetype"]
+	path = ThirdParty/freetype
+	url = https://gitlab.freedesktop.org/freetype/freetype

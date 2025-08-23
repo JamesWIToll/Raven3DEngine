@@ -15,6 +15,7 @@ add_subdirectory(ThirdParty/glew/build/cmake)
 add_subdirectory(ThirdParty/glm)
 add_subdirectory(ThirdParty/SDL/SDL3)
 add_subdirectory(ThirdParty/lua-cmake)
+add_subdirectory(ThirdParty/freetype)
 
 add_library(Raven3DEngineCore SHARED
         Raven3DEngineCore/src/RavenApp.cpp
@@ -47,6 +48,8 @@ target_include_directories(Raven3DEngineCore PUBLIC
         Raven3DEngineCore/src
         ThirdParty/lua
         ThirdParty/Other
+        ThirdParty/freetype/include
+        ${CMAKE_CURRENT_BINARY_DIR}/ThirdParty/freetype/include
         ${CMAKE_CURRENT_BINARY_DIR}/ThirdParty/assimp/include
 )
 
@@ -60,6 +63,7 @@ target_link_libraries(Raven3DEngineCore PRIVATE
         glew
         SDL3::SDL3
         LuaLib
+        freetype
 )
 
 
@@ -76,3 +80,4 @@ set_target_properties(LuaLib PROPERTIES RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURREN
 set_target_properties(EngineTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set_target_properties(SDL3-shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set_target_properties(assimp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set_target_properties(freetype PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
