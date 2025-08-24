@@ -16,7 +16,7 @@ namespace Raven3DEngineCore::Importer {
             _scene = scene;
             _renderer = Viewports::globalViewportManager->GetViewport(scene->GetViewportId())->renderer;
         };
-        virtual Scene::Entity_T Import3DFile(const std::string &filePath, Scene::Entity_T parent) = 0;
+        virtual Scene::Entity_T ImportFile(const std::string &filePath, Scene::Entity_T parent) = 0;
         virtual ~IImporter() = default;
     };
 
@@ -31,7 +31,12 @@ namespace Raven3DEngineCore::Importer {
         }
 
     public:
-        Scene::Entity_T Import3DFile(const std::string &filePath, Scene::Entity_T parent) override;
+        Scene::Entity_T ImportFile(const std::string &filePath, Scene::Entity_T parent) override;
+    };
+
+    class FontImporter final : public IImporter {
+    public:
+        Scene::Entity_T ImportFile(const std::string &filePath, Scene::Entity_T parent) override;
     };
 
 }

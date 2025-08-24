@@ -30,6 +30,7 @@ namespace Raven3DEngineCore::Events {
         AppPreRender,
         AppRender,
         AppPostRender,
+        ViewportTearDown,
         GamePadButtonPressed,
         GamePadButtonReleased,
         GamePadAxisMoved,

@@ -11,7 +11,7 @@ using namespace Raven3DEngineCore::Scene;
 using namespace Raven3DEngineCore::Rendering;
 
 
-Entity_T AssimpImporter::Import3DFile(const std::string &filePath, Entity_T parent) {
+Entity_T AssimpImporter::ImportFile(const std::string &filePath, Entity_T parent) {
     Assimp::Importer importer;
 
     const auto ai_Scene = importer.ReadFile(filePath,
@@ -30,7 +30,7 @@ Entity_T AssimpImporter::Import3DFile(const std::string &filePath, Entity_T pare
         parent = _scene->CreateEntity(EntityMetaData{
             .name = "Imported Scene ("  + std::string(ai_Scene->mName.C_Str()) + ")"
         });
-        _scene->ConnectComponents<TransformData>(parent, TransformData{
+        _scene->ConnectComponents<TransformData3D>(parent, TransformData3D{
             .localTransform = { 1.0f }
         });
     }
@@ -70,10 +70,10 @@ Entity_T AssimpImporter::Import3DFile(const std::string &filePath, Entity_T pare
         }, _parent);
 
 
-        if (_scene->HasComponent<TransformData>(entity)) {
-            _scene->GetComponent<TransformData>(entity)->localTransform = glmMat;
+        if (_scene->HasComponent<TransformData3D>(entity)) {
+            _scene->GetComponent<TransformData3D>(entity)->localTransform = glmMat;
         } else {
-            _scene->ConnectComponents<TransformData>(entity, TransformData{
+            _scene->ConnectComponents<TransformData3D>(entity, TransformData3D{
                 .localTransform = glmMat
             });
         }
@@ -84,7 +84,7 @@ Entity_T AssimpImporter::Import3DFile(const std::string &filePath, Entity_T pare
                 .name = mesh->mName.C_Str()
             }, entity);
 
-            RenderData renderData {};
+            RenderData3D renderData {};
 
             for (RAVEN_INT v = 0; v < mesh->mNumVertices; v++) {
                 renderData.vertices.emplace_back(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z);
@@ -100,7 +100,7 @@ Entity_T AssimpImporter::Import3DFile(const std::string &filePath, Entity_T pare
                 }
             }
 
-            MaterialData materialData {};
+            MaterialData3D materialData {};
 
 
             const auto material = ai_Scene->mMaterials[mesh->mMaterialIndex];
@@ -174,7 +174,7 @@ Entity_T AssimpImporter::Import3DFile(const std::string &filePath, Entity_T pare
             materialData.roughnessFactor = roughnessFactor;
 
             renderData.material = materialData;
-            _scene->ConnectComponents<RenderData, TransformData>(meshEntity, renderData, TransformData{});
+            _scene->ConnectComponents<RenderData3D, TransformData3D>(meshEntity, renderData, TransformData3D{});
         }
 
         for (RAVEN_INT i=0; i < current->mNumChildren; i++) {

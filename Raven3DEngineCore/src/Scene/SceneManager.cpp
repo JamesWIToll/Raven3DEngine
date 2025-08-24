@@ -20,16 +20,13 @@ SceneManager::SceneManager(RAVEN_U_INT vpID): _viewportId(vpID) {
         .id = _root,
         .name = "rootEntity"
     });
-    _registry.emplace<TransformData>(_root, TransformData{
+    _registry.emplace<TransformData3D>(_root, TransformData3D{
         .localTransform {1.0f },
         .worldTransform {1.0f }
     });
 }
 
 SceneManager::~SceneManager(){
-    for (const auto renderView = _registry.view<Rendering::RenderData>(); const auto [entity, data] : renderView.each()) {
-        Viewports::globalViewportManager->GetViewport(_viewportId)->renderer->ReleaseRenderData(&data);
-    }
     _registry.clear();
 }
 
@@ -37,12 +34,24 @@ void SceneManager::Initialize() {
     _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { Update(); });
     _eventHandler->RegisterEventListener(Events::EventType::AppPreRender, [this] (const Events::Event &event) {
         const auto preRenderEvent = dynamic_cast<const Events::AppPreRenderEvent&>(event);
-        ProcessRenderables(Viewports::globalViewportManager->GetViewport(_viewportId)->renderer);
+        const auto vp = Viewports::globalViewportManager->GetViewport(_viewportId);
+        if (vp != nullptr && vp->renderer != nullptr) {
+            ProcessRenderables(Viewports::globalViewportManager->GetViewport(_viewportId)->renderer);
+        }
+    });
+    _eventHandler->RegisterEventListener(Events::EventType::ViewportTearDown, [this] (const Events::Event &e) {
+        if (const auto vpEvent = dynamic_cast<const Events::VPTearDownEvent&>(e); vpEvent.GetViewportID() == _viewportId) {
+            for (const auto renderView = _registry.view<Rendering::RenderData3D>(); const auto [entity, data] : renderView.each()) {
+                if (const auto vp = Viewports::globalViewportManager->GetViewport(_viewportId); vp != nullptr && vp->renderer != nullptr) {
+                    vp->renderer->ReleaseRenderData(&data);
+                }
+            }
+        }
     });
 }
 
 void SceneManager::Update() {
-    const auto transformView = _registry.view<RelationshipData, TransformData>();
+    const auto transformView = _registry.view<RelationshipData, TransformData3D>();
 
     std::function<void(Entity_T)> UpdateChildTransform = [&](const Entity_T entity) {
         if (!transformView.contains(entity)) {
@@ -62,11 +71,11 @@ void SceneManager::Update() {
 }
 
 void SceneManager::ProcessRenderables(Rendering::IRenderer *renderer) {
-    for (const auto renderView = _registry.view<Rendering::RenderData, TransformData>(); const auto [entity, renderData, transform] : renderView.each()) {
+    for (const auto renderView = _registry.view<Rendering::RenderData3D, TransformData3D>(); const auto [entity, renderData, transform] : renderView.each()) {
         renderer->QueueForRender(&renderData, &transform);
     }
 
-    for (const auto lightView = _registry.view<Rendering::LightData, TransformData>(); const auto [entity, lightData, transform] : lightView.each()) {
+    for (const auto lightView = _registry.view<Rendering::LightData3D, TransformData3D>(); const auto [entity, lightData, transform] : lightView.each()) {
         if (lightData.type == Rendering::LightType::Point) {
             lightData.posDir = glm::vec3(transform.worldTransform[3]);
         }
@@ -74,7 +83,7 @@ void SceneManager::ProcessRenderables(Rendering::IRenderer *renderer) {
     }
 
     bool foundCurrent = false;
-    for (const auto camView = _registry.view<Rendering::CameraData, TransformData>(); auto [entity, camData, transform] : camView.each()) {
+    for (const auto camView = _registry.view<Rendering::CameraData3D, TransformData3D>(); auto [entity, camData, transform] : camView.each()) {
         camData.UpdateVectors(transform.worldTransform);
         if (camData.current && !foundCurrent) {
             foundCurrent = true;
@@ -119,7 +128,7 @@ bool SceneManager::DestroyEntity(const Entity_T entity) {
             parentRelData.children.erase(parentRelData.children.begin() + i);
         }
     }
-    if (const auto renderData = _registry.try_get<Rendering::RenderData>(entity); renderData != nullptr) {
+    if (const auto renderData = _registry.try_get<Rendering::RenderData3D>(entity); renderData != nullptr) {
         Viewports::globalViewportManager->GetViewport(_viewportId)->renderer->ReleaseRenderData(renderData);
     }
     _registry.destroy(entity);
@@ -169,7 +178,7 @@ bool SceneManager::AddChildEntity(const Entity_T entity, const Entity_T child) {
 }
 
 void SceneManager::PrintSceneGraph() const {
-    auto view = _registry.view<RelationshipData, EntityMetaData, TransformData>();
+    auto view = _registry.view<RelationshipData, EntityMetaData, TransformData3D>();
 
     for (auto [entity, relData, metaData, transformData] : view.each()) {
         std::string children;

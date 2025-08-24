@@ -33,7 +33,7 @@ namespace Raven3DEngineCore::Window {
 
     extern SDL_GLContext sharedSDLGLContext;
 
-    extern void ShutdownSharedSDLWindowData();
+    extern void ShutdownSharedSDLGLWindowData();
 }
 
 #endif //RAVEN3DENGINECORE_SDLWINDOW_H

@@ -7,7 +7,7 @@
 
 
 namespace Raven3DEngineCore::Rendering {
-    struct MaterialData {
+    struct MaterialData3D {
         glm::vec3 diffuseColor;
         glm::vec3 specularColor;
         glm::vec3 ambientColor;
@@ -24,8 +24,8 @@ namespace Raven3DEngineCore::Rendering {
                     normTex {0};
     };
 
-    struct RenderData {
-        MaterialData material;
+    struct RenderData3D {
+        MaterialData3D material;
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
         std::vector<glm::vec3> tangents;
@@ -35,7 +35,7 @@ namespace Raven3DEngineCore::Rendering {
         RAVEN_U_INT primitiveMode;
     };
 
-    struct CameraData {
+    struct CameraData3D {
         RAVEN_FLOAT fov { 40.0f };
         glm::vec3 position {0, 0, 0};
         glm::vec3 center {0, 0, -1};
@@ -52,7 +52,7 @@ namespace Raven3DEngineCore::Rendering {
             return glm::lookAt(position, position + center, up);
         }
 
-        [[nodiscard]] glm::mat4 GetProjectionMatrix(const RAVEN_INT &camWidth, const RAVEN_INT &camHeight) const {
+        [[nodiscard]] glm::mat4 GetPerspectiveMatrix(const RAVEN_INT &camWidth, const RAVEN_INT &camHeight) const {
             return glm::perspective(glm::radians(fov), static_cast<std::float_t>(camWidth)/static_cast<std::float_t>(camHeight), 0.1f, 200.0f);
         }
 
@@ -63,12 +63,32 @@ namespace Raven3DEngineCore::Rendering {
         Point = 1
     };
 
-    struct LightData {
+    struct LightData3D {
         LightType type { LightType::Point };
         glm::vec3 posDir {0.0, 0.0, 0.0};
         glm::vec3 color {1.0f};
         RAVEN_FLOAT intensity {1.0f};
         RAVEN_FLOAT radius {10.0f}; //if point light
+    };
+
+    struct FontData {
+        std::string fontFilePath;
+        RAVEN_INT charWidth, charHeight;
+        RAVEN_BYTE *fontRawData;
+        RAVEN_U_INT fontTextureID;
+    };
+
+    struct FontStyleData {
+        glm::vec3 color;
+        FontData regularFont;
+        FontData boldFont;
+        FontData italicFont;
+        FontData boldItalicFont;
+    };
+
+    struct TextData {
+        std::string text;
+        FontStyleData fontStyle;
     };
 
 }

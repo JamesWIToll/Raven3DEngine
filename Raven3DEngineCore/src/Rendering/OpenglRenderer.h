@@ -8,19 +8,19 @@
 
 namespace Raven3DEngineCore::Rendering {
     class OpenGLRenderer final : public IRenderer {
-        void RenderMesh(RenderData &renderData, Scene::TransformData &transformData) override;
+        void RenderMesh(RenderData3D &renderData, Scene::TransformData3D &transformData) override;
 
-        std::vector<std::pair<RenderData*, Scene::TransformData*>> _renderData {};
-        std::vector<std::pair<RenderData*, Scene::TransformData*>> _transparentRenderData {};
-        LightData *_lights[MAX_LIGHTS] {};
+        std::vector<std::pair<RenderData3D*, Scene::TransformData3D*>> _renderData {};
+        std::vector<std::pair<RenderData3D*, Scene::TransformData3D*>> _transparentRenderData {};
+        LightData3D *_lights[MAX_LIGHTS] {};
         RAVEN_INT _numLights {};
 
-        CameraData* _cameraData {};
-        Scene::TransformData* _camTransform {};
+        CameraData3D* _cameraData {};
+        Scene::TransformData3D* _camTransform {};
 
         GLShader _mainShader {};
 
-        static void LoadBuffers(RenderData *data);
+        static void LoadBuffers(RenderData3D *data);
 
     public:
         explicit OpenGLRenderer(const RAVEN_U_INT viewportID) : IRenderer(viewportID)  {}
@@ -28,11 +28,11 @@ namespace Raven3DEngineCore::Rendering {
             RAVEN_LOG_INFO("OpenGL Renderer Shut Down");
         }
 
-        void ReleaseRenderData(RenderData *data) override;
+        void ReleaseRenderData(RenderData3D *data) override;
 
-        void QueueForRender(RenderData *data, Scene::TransformData *transform) override;
-        void AddLight(LightData *data) override;
-        void SetActiveCam(CameraData *data, Scene::TransformData *camTransform) override;
+        void QueueForRender(RenderData3D *data, Scene::TransformData3D *transform) override;
+        void AddLight(LightData3D *data) override;
+        void SetActiveCam(CameraData3D *data, Scene::TransformData3D *camTransform) override;
         RAVEN_U_INT LoadTexture(RAVEN_INT width, RAVEN_INT height, RAVEN_BYTE* data, RAVEN_INT numComps) override;
         void Initialize() override;
         void RenderFrame() override;

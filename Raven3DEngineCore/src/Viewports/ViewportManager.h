@@ -20,14 +20,13 @@ namespace Raven3DEngineCore::Viewports {
         Window::IRenderWindow* window;
     };
 
-    class ViewportManager {
+    class ViewportManager final : public Events::EventNotifier {
         std::map<RAVEN_U_INT, Viewport> _viewports {};
         RAVEN_U_INT _nextID {0};
     public:
-        ~ViewportManager() {
-            for (auto vp: _viewports | std::views::values) {
-                delete vp.renderer;
-                delete vp.window;
+        ~ViewportManager() override {
+            for (const auto id: _viewports | std::views::keys) {
+                RemoveViewport(id);
             }
             _viewports.clear();
         }
@@ -49,11 +48,41 @@ namespace Raven3DEngineCore::Viewports {
             return newID;
         }
 
+        bool HasViewports() const {
+            return !_viewports.empty();
+        }
+
+        bool CloseWindow(const Window::IRenderWindow *window) {
+            bool foundWindow = false;
+            for (auto [id, vp] : _viewports) {
+                if (vp.window == window) {
+                    foundWindow = true;
+                    RemoveViewport(id);
+                }
+            }
+            return foundWindow;
+        }
+
         bool RemoveViewport(const RAVEN_U_INT id) {
             if (!_viewports.contains(id)) {
                 return false;
             }
+            _eventHandler->Notify(Events::VPTearDownEvent(id));
+
             delete _viewports[id].renderer;
+
+            bool foundOtherVPWithSameWindow = false;
+            for (auto [otherID, otherVP] : _viewports) {
+                if (otherID != id && otherVP.window == _viewports[id].window) {
+                    foundOtherVPWithSameWindow = true;
+                    break;
+                }
+            }
+
+            if (!foundOtherVPWithSameWindow) {
+                delete _viewports[id].window;
+            }
+
             _viewports.erase(id);
             return true;
         }

@@ -8,6 +8,7 @@
 using namespace Raven3DEngineCore::Window;
 
 SDL_GLContext Raven3DEngineCore::Window::sharedSDLGLContext = nullptr;
+static RAVEN_U_INT _windowCountForGLContext = 0;
 
 bool SDLWindow::SDLCheck(const bool success) {
     if (!success) {
@@ -17,7 +18,10 @@ bool SDLWindow::SDLCheck(const bool success) {
 }
 
 SDLWindow::~SDLWindow()  {
-    ReleaseMouse();
+    SDLWindow::ReleaseMouse();
+    if (_renderAPI == Rendering::RenderAPI::OPENGL && --_windowCountForGLContext == 0) {
+        ShutdownSharedSDLGLWindowData();
+    }
     SDL_DestroyWindow(_window);
     sharedSDLGLContext = nullptr;
     _surface = nullptr;
@@ -65,6 +69,7 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
     std::string rendererName = name;
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
+        _windowCountForGLContext++;
         _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         SDLCheck(_window != nullptr);
 
@@ -236,7 +241,7 @@ void SDLWindow::SwapWindow() {
     }
 }
 
-void Raven3DEngineCore::Window::ShutdownSharedSDLWindowData() {
+void Raven3DEngineCore::Window::ShutdownSharedSDLGLWindowData() {
     if (!SDL_GL_DestroyContext(sharedSDLGLContext)) {
         RAVEN_LOG_ERROR("Failed to destroy SDL_GLContext");
     }

@@ -39,6 +39,7 @@
 #include <Input/GamepadCode.h>
 #include <Input/InputDeviceRegistry.h>
 #include <Events/Event.h>
+#include <Events/VPEvent.h>
 #include <Events/EventHandler.h>
 #include <Window/Window.h>
 #include <Events/InputDeviceEvent.h>

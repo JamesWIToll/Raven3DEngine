@@ -15,7 +15,7 @@ static void PollGLErrors() {
     }
 }
 
-void OpenGLRenderer::LoadBuffers(RenderData *data) {
+void OpenGLRenderer::LoadBuffers(RenderData3D *data) {
     GLuint VAO, VBO, NBO, IBO, UV_0_BO, TBO;
     if (data->VAO != 0)         glDeleteVertexArrays(1, &data->VAO);
     if (data->VBO != 0)         glDeleteBuffers(1, &data->VBO);
@@ -67,7 +67,7 @@ void OpenGLRenderer::LoadBuffers(RenderData *data) {
     PollGLErrors();
 }
 
-void OpenGLRenderer::ReleaseRenderData(RenderData *data) {
+void OpenGLRenderer::ReleaseRenderData(RenderData3D *data) {
     glDeleteVertexArrays(1, &data->VAO);
     glDeleteBuffers(1, &data->VBO);
     glDeleteBuffers(1, &data->IBO);
@@ -83,7 +83,7 @@ void OpenGLRenderer::ReleaseRenderData(RenderData *data) {
     PollGLErrors();
 }
 
-void OpenGLRenderer::QueueForRender(RenderData *data, Scene::TransformData *transform) {
+void OpenGLRenderer::QueueForRender(RenderData3D *data, Scene::TransformData3D *transform) {
     if (data->VAO == 0 || data->VBO == 0 || data->NBO == 0 || data->UV_0_BO == 0 || data->IBO == 0 || data->TBO == 0) {
         LoadBuffers(data);
     }
@@ -95,7 +95,7 @@ void OpenGLRenderer::QueueForRender(RenderData *data, Scene::TransformData *tran
     }
 }
 
-void OpenGLRenderer::AddLight(LightData *data) {
+void OpenGLRenderer::AddLight(LightData3D *data) {
     if (_numLights >= MAX_LIGHTS) {
         RAVEN_LOG_ERROR("Cannot add more lights to scene");
         return;
@@ -104,7 +104,7 @@ void OpenGLRenderer::AddLight(LightData *data) {
     _numLights++;
 }
 
-void OpenGLRenderer::SetActiveCam(CameraData *data, Scene::TransformData *camTransform) {
+void OpenGLRenderer::SetActiveCam(CameraData3D *data, Scene::TransformData3D *camTransform) {
     _cameraData = data;
     _camTransform = camTransform;
 }
@@ -145,7 +145,7 @@ void OpenGLRenderer::Initialize() {
     RAVEN_LOG_INFO("OpenGL (version: {}) Renderer Initialized", glVersionString);
 }
 
-void OpenGLRenderer::RenderMesh(RenderData &renderData, Scene::TransformData &transformData) {
+void OpenGLRenderer::RenderMesh(RenderData3D &renderData, Scene::TransformData3D &transformData) {
     _mainShader.setMat4("uModel", transformData.worldTransform);
     _mainShader.setVec3("uMaterial.diffuseColor", renderData.material.diffuseColor);
     _mainShader.setVec3("uMaterial.specularColor", renderData.material.specularColor);
@@ -186,8 +186,11 @@ void OpenGLRenderer::RenderMesh(RenderData &renderData, Scene::TransformData &tr
 }
 
 void OpenGLRenderer::RenderFrame() {
-    Viewports::globalViewportManager->GetViewport(_viewportID)->window->MakeCurrent();
-    auto vp = Viewports::globalViewportManager->GetViewport(_viewportID);
+    const auto vp = Viewports::globalViewportManager->GetViewport(_viewportID);
+    if (vp == nullptr || vp->renderer == nullptr || vp->window == nullptr) {
+        return;
+    }
+    vp->window->MakeCurrent();
 
     _mainShader.use();
 
@@ -204,7 +207,7 @@ void OpenGLRenderer::RenderFrame() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 
-    const glm::mat4 projectionMat = _cameraData->GetProjectionMatrix(vp->width, vp->height);
+    const glm::mat4 projectionMat = _cameraData->GetPerspectiveMatrix(vp->width, vp->height);
     const glm::mat4 viewMat = _cameraData->GetViewMatrix();
 
     _mainShader.setMat4("uProjection", projectionMat);

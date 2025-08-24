@@ -41,6 +41,9 @@ namespace Raven3DEngineCore::Events {
 
         void Notify(const Event& event) const {
             const auto type = event.getEventType();
+            if (type == EventType::ViewportTearDown) {
+                event.logEvent();
+            }
             event.logEvent();
 
             if (!_listenerRegistry.contains(type)) { return; }
