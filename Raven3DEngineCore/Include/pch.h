@@ -17,6 +17,8 @@
 #include <chrono>
 #include <format>
 #include <cmath>
+#include <list>
+#include <queue>
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_gamepad.h>

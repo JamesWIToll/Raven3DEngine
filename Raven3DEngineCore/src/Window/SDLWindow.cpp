@@ -3,12 +3,12 @@
 //
 #include <Raven3DEngineCore.h>
 
-#include "glm/gtx/io.hpp"
-
 using namespace Raven3DEngineCore::Window;
 
 SDL_GLContext Raven3DEngineCore::Window::sharedSDLGLContext = nullptr;
-static RAVEN_U_INT _windowCountForGLContext = 0;
+static RAVEN_U_INT windowCountForGLContext = 0;
+static bool sdlInitialized = false;
+static std::vector<SDL_Event> events {};
 
 bool SDLWindow::SDLCheck(const bool success) {
     if (!success) {
@@ -19,7 +19,7 @@ bool SDLWindow::SDLCheck(const bool success) {
 
 SDLWindow::~SDLWindow()  {
     SDLWindow::ReleaseMouse();
-    if (_renderAPI == Rendering::RenderAPI::OPENGL && --_windowCountForGLContext == 0) {
+    if (_renderAPI == Rendering::RenderAPI::OPENGL && --windowCountForGLContext == 0) {
         ShutdownSharedSDLGLWindowData();
     }
     SDL_DestroyWindow(_window);
@@ -54,7 +54,21 @@ bool SDLWindow::MouseCaptured() {
 }
 
 void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
-    SDLCheck(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS));
+    if (!sdlInitialized) {
+        SDLCheck(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS));
+
+        _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [] (const Events::Event &) {
+            SDL_Event event;
+            while (SDL_PollEvent(&event)) {
+                events.push_back(event);
+            }
+        });
+        _eventHandler->RegisterEventListener(Events::EventType::AppPostUpdate, [] (const Events::Event &) {
+            events.clear();
+        });
+
+        sdlInitialized = true;
+    }
 
     _name = name;
 
@@ -69,7 +83,7 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
     std::string rendererName = name;
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-        _windowCountForGLContext++;
+        windowCountForGLContext++;
         _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         SDLCheck(_window != nullptr);
 
@@ -104,8 +118,6 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 void SDLWindow::UpdateWindow() {
     const auto windowViewports = Viewports::globalViewportManager->GetViewportsForWindow(this);
 
-    SDL_Event event;
-
     RAVEN_INT currWidth, currHeight;
     SDLCheck(SDL_GetWindowSize(_window, &currWidth, &currHeight));
 
@@ -113,7 +125,11 @@ void SDLWindow::UpdateWindow() {
         SDL_WarpMouseInWindow(_window, static_cast<float>(currWidth) / 2, static_cast<float>(currHeight) / 2);
     }
 
-    while (SDL_PollEvent(&event)) {
+    for (const auto &event : events) {
+        if (SDL_GetWindowFromEvent(&event) != _window) {
+            continue;
+        }
+
         switch (event.type) {
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
                 _eventHandler->Notify(Events::WindowCloseEvent(this));

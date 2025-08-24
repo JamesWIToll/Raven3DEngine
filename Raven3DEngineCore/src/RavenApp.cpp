@@ -9,6 +9,8 @@ using namespace Raven3DEngineCore;
 
 static const auto loggerListener = new Logging::ConsoleLog();
 
+static RAVEN_INT windowCount = 0;
+
 Viewports::ViewportManager *Viewports::globalViewportManager;
 
 RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
@@ -31,7 +33,8 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
 
     _window = new Window::SDLWindow();
     _window->SetEventHandler(_eventHandler);
-    _window->Initialize(Rendering::RenderAPI::OPENGL, appName + " [SDL Window 0]", pixelWidth, pixelHeight);
+    _window->Initialize(Rendering::RenderAPI::OPENGL, appName + ": SDL Window " + std::to_string(windowCount), pixelWidth, pixelHeight);
+    windowCount++;
 
     auto vp = Viewports::Viewport();
     vp.width = pixelWidth - 10;
@@ -94,10 +97,10 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
              transform->localTransform = glm::translate(transform->localTransform,  glm::vec3(0.0f, 1.0f, 0.0f));
          } else if (keyEvent.getKeyCode() == Input::Key::KeyCode::SPACE) {
              auto *vp1 =Viewports::globalViewportManager->GetViewport(vpID);
-             auto *window = new Window::SDLWindow();
-             window->SetEventHandler(_eventHandler);
-             window->Initialize(vp1->renderAPI, "SDL Window", vp1->width, vp1->height);
-             vp1->window = window;
+             auto *win = new Window::SDLWindow();
+             win->SetEventHandler(_eventHandler);
+             win->Initialize(vp1->renderAPI, "SDL Window " + std::to_string(windowCount++), vp1->width, vp1->height);
+             vp1->window = win;
              vp1->x_offset = 0;
              vp1->y_offset = 0;
          }
@@ -126,9 +129,9 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
 
 RavenApp::~RavenApp() {
     delete _importer;
+    delete Viewports::globalViewportManager;
     delete _sceneManager;
     delete _eventHandler;
-    delete Viewports::globalViewportManager;
     RAVEN_LOG_INFO("{} - Application Exiting", this->appName);
 }
 
