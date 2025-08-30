@@ -45,6 +45,7 @@ namespace Raven3DEngineCore::Viewports {
             }
             vp.renderer->SetEventHandler(vp.window->GetEventHandler());
             vp.renderer->Initialize();
+            vp.renderer->GetEventHandler()->Notify(Events::VPWindowConnectedEvent{newID});
             return newID;
         }
 
@@ -142,14 +143,15 @@ namespace Raven3DEngineCore::Viewports {
             return _viewports[id].window;
         }
 
-        void *MoveToNewWindow(const RAVEN_U_INT id, Window::IRenderWindow *window) {
+        bool MoveToNewWindow(const RAVEN_U_INT id, Window::IRenderWindow *window) {
             if (!_viewports.contains(id)) {
-                return nullptr;
+                return false;
             }
             const auto vp = GetViewport(id);
             vp->renderer->GetEventHandler()->Notify(Events::VPTearDownEvent{id});
             vp->window = window;
-
+            vp->renderer->GetEventHandler()->Notify(Events::VPWindowConnectedEvent{id});
+            return true;
         }
     };
 

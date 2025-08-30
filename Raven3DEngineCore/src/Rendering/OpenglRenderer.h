@@ -24,7 +24,7 @@ namespace Raven3DEngineCore::Rendering {
         void LoadTextures(MaterialData3D *data);
 
     public:
-        explicit OpenGLRenderer(const RAVEN_U_INT viewportID) : IRenderer(viewportID)  {}
+        explicit OpenGLRenderer(const RAVEN_U_INT viewportID) : IRenderer(viewportID) {}
         ~OpenGLRenderer() override {
             RAVEN_LOG_INFO("OpenGL Renderer Shut Down");
         }

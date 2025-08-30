@@ -9,8 +9,6 @@
 namespace Raven3DEngineCore::Rendering {
 
     struct TextureData {
-        ~TextureData();
-
         RAVEN_U_INT id {0};
         RAVEN_INT width, height;
         std::vector<RAVEN_BYTE> data;
@@ -29,7 +27,11 @@ namespace Raven3DEngineCore::Rendering {
         RAVEN_FLOAT shininessStrength;
         RAVEN_FLOAT metallicFactor;
         RAVEN_FLOAT roughnessFactor;
-        TextureData *diffTex, *specTex, *ambTex, *emisTex, *normTex;
+        RAVEN_U_INT diffTex = 0,
+                    specTex = 0,
+                    ambTex  = 0,
+                    emisTex = 0,
+                    normTex = 0;
     };
 
     struct RenderData3D {

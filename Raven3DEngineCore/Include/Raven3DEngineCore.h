@@ -35,6 +35,7 @@
 #include <Scene/Components/CoreComponents.h>
 #include <Rendering/RenderAPIs.h>
 #include <Scene/Components/RenderComponents.h>
+#include <Importer/TextureManager.h>
 #include <Input/KeyCode.h>
 #include <Input/MouseCode.h>
 #include <Input/GamepadCode.h>

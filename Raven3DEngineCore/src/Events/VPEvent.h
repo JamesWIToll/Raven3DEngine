@@ -26,6 +26,16 @@ namespace Raven3DEngineCore::Events {
         }
     };
 
+    class VPWindowConnectedEvent final : public VPEvent {
+    public:
+        explicit VPWindowConnectedEvent(const RAVEN_U_INT &viewportID) : VPEvent(viewportID) {}
+        EVENT_TYPE_GETTERS(ViewportWindowConnected)
+
+        void logEvent() const override {
+            RAVEN_LOG_DEBUG("Window connected event triggered for viewport: {}", _vpID);
+        }
+    };
+
 }
 
 #endif //RAVEN3DENGINECORE_VPEVENT_H

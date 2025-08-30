@@ -38,11 +38,16 @@ SceneManager::SceneManager(RAVEN_U_INT vpID): _viewportId(vpID) {
 SceneManager::~SceneManager(){
     ResetRenderBuffers();
     for (const auto [entity, renderData] : _registry.view<Entity_T, Rendering::RenderData3D>().each()) {
-        delete renderData.material.ambTex;
-        delete renderData.material.diffTex;
-        delete renderData.material.specTex;
-        delete renderData.material.emisTex;
-        delete renderData.material.normTex;
+        Importer::globalTextureManager.UnregisterTexture(renderData.material.ambTex);
+        Importer::globalTextureManager.UnregisterTexture(renderData.material.normTex);
+        Importer::globalTextureManager.UnregisterTexture(renderData.material.emisTex);
+        Importer::globalTextureManager.UnregisterTexture(renderData.material.specTex);
+        Importer::globalTextureManager.UnregisterTexture(renderData.material.diffTex);
+        renderData.material.ambTex = 0;
+        renderData.material.normTex = 0;
+        renderData.material.emisTex = 0;
+        renderData.material.specTex = 0;
+        renderData.material.diffTex = 0;
     }
     _registry.clear();
 }

@@ -10,8 +10,7 @@ static void PollGLErrors() {
     while (error != GL_NO_ERROR) {
         auto glVersionString = reinterpret_cast<const char*>( glGetString(GL_VERSION));
         if (glVersionString == nullptr)  glVersionString = "UNKNOWN";
-        const auto errorString = reinterpret_cast<const char *>(glewGetErrorString(error));
-        RAVEN_LOG_ERROR("OPENGL V: {} - ERROR: {} - {}", glVersionString, error, errorString);
+        RAVEN_LOG_ERROR("OPENGL V: {} - ERROR: {}", glVersionString, error);
         error = glGetError();
     }
 }
@@ -69,14 +68,27 @@ void OpenGLRenderer::LoadBuffers(RenderData3D *data) {
 }
 
 void OpenGLRenderer::LoadTextures(MaterialData3D *data) {
-    if (data->ambTex  != nullptr && data->ambTex->id  == 0) LoadTexture(data->ambTex);
-    if (data->diffTex != nullptr && data->diffTex->id == 0) LoadTexture(data->diffTex);
-    if (data->specTex != nullptr && data->specTex->id == 0) LoadTexture(data->specTex);
-    if (data->emisTex != nullptr && data->emisTex->id == 0) LoadTexture(data->emisTex);
-    if (data->normTex != nullptr && data->normTex->id == 0) LoadTexture(data->normTex);
+    const auto ambTex  = Importer::globalTextureManager.getTexData(data->ambTex);
+    const auto diffTex = Importer::globalTextureManager.getTexData(data->diffTex);
+    const auto specTex = Importer::globalTextureManager.getTexData(data->specTex);
+    const auto emisTex = Importer::globalTextureManager.getTexData(data->emisTex);
+    const auto normTex = Importer::globalTextureManager.getTexData(data->normTex);
+
+    if (ambTex  != nullptr && ambTex->id  == 0) LoadTexture(ambTex);
+    if (diffTex != nullptr && diffTex->id == 0) LoadTexture(diffTex);
+    if (specTex != nullptr && specTex->id == 0) LoadTexture(specTex);
+    if (emisTex != nullptr && emisTex->id == 0) LoadTexture(emisTex);
+    if (normTex != nullptr && normTex->id == 0) LoadTexture(normTex);
 }
 
 void OpenGLRenderer::ReleaseRenderData(RenderData3D *data) {
+
+    const auto ambTex =  Importer::globalTextureManager.getTexData(data->material.ambTex);
+    const auto diffTex = Importer::globalTextureManager.getTexData(data->material.diffTex);
+    const auto specTex = Importer::globalTextureManager.getTexData(data->material.specTex);
+    const auto emisTex = Importer::globalTextureManager.getTexData(data->material.emisTex);
+    const auto normTex = Importer::globalTextureManager.getTexData(data->material.normTex);
+
     glDeleteVertexArrays(1, &data->VAO);
 
     glDeleteBuffers(1, &data->VBO);
@@ -85,23 +97,25 @@ void OpenGLRenderer::ReleaseRenderData(RenderData3D *data) {
     glDeleteBuffers(1, &data->TBO);
     glDeleteBuffers(1, &data->UV_0_BO);
 
-    glDeleteTextures(1, &data->material.diffTex->id);
-    glDeleteTextures(1, &data->material.specTex->id);
-    glDeleteTextures(1, &data->material.ambTex->id);
-    glDeleteTextures(1, &data->material.normTex->id);
-    glDeleteTextures(1, &data->material.emisTex->id);
 
-    data->VAO                   = 0;
-    data->VBO                   = 0;
-    data->NBO                   = 0;
-    data->IBO                   = 0;
-    data->UV_0_BO               = 0;
-    data->TBO                   = 0;
-    data->material.diffTex->id  = 0;
-    data->material.specTex->id  = 0;
-    data->material.ambTex->id   = 0;
-    data->material.normTex->id  = 0;
-    data->material.emisTex->id  = 0;
+
+    glDeleteTextures(1, &diffTex->id);
+    glDeleteTextures(1, &specTex->id);
+    glDeleteTextures(1, &ambTex->id);
+    glDeleteTextures(1, &normTex->id);
+    glDeleteTextures(1, &emisTex->id);
+
+    data->VAO       = 0;
+    data->VBO       = 0;
+    data->NBO       = 0;
+    data->IBO       = 0;
+    data->UV_0_BO   = 0;
+    data->TBO       = 0;
+    diffTex->id     = 0;
+    specTex->id     = 0;
+    ambTex->id      = 0;
+    normTex->id     = 0;
+    emisTex->id     = 0;
 
     PollGLErrors();
 }
@@ -161,9 +175,21 @@ void OpenGLRenderer::Initialize() {
 
     _eventHandler->RegisterEventListener(Events::EventType::AppRender, [this] (const Events::Event &) { RenderFrame(); });
 
-    _renderData.clear();
+    _eventHandler->RegisterEventListener(Events::EventType::ViewportTearDown, [this] (const Events::Event &e) {
+        if (const auto vpEvent = dynamic_cast<const Events::VPTearDownEvent&>(e); vpEvent.GetViewportID() == _viewportID) {
+            Viewports::globalViewportManager->GetViewport(_viewportID)->window->MakeCurrent();
+            _mainShader = {};
+        }
+    });
 
-    _mainShader.Initialize(std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.vert", std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.frag");
+    _eventHandler->RegisterEventListener(Events::EventType::ViewportWindowConnected, [this] (const Events::Event &e) {
+        if (const auto vpEvent = dynamic_cast<const Events::VPWindowConnectedEvent&>(e); vpEvent.GetViewportID() == _viewportID) {
+            Viewports::globalViewportManager->GetViewport(_viewportID)->window->MakeCurrent();
+            _mainShader.Initialize(std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.vert", std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.frag");
+        }
+    });
+
+    _renderData.clear();
 
     PollGLErrors();
     const auto glVersionString = reinterpret_cast<const char*>( glGetString(GL_VERSION));
@@ -172,6 +198,13 @@ void OpenGLRenderer::Initialize() {
 }
 
 void OpenGLRenderer::RenderMesh(RenderData3D &renderData, Scene::TransformData3D &transformData) {
+
+    const auto ambTex  = Importer::globalTextureManager.getTexData(renderData.material.ambTex);
+    const auto diffTex = Importer::globalTextureManager.getTexData(renderData.material.diffTex);
+    const auto specTex = Importer::globalTextureManager.getTexData(renderData.material.specTex);
+    const auto emisTex = Importer::globalTextureManager.getTexData(renderData.material.emisTex);
+    const auto normTex = Importer::globalTextureManager.getTexData(renderData.material.normTex);
+
     _mainShader.setMat4("uModel", transformData.worldTransform);
     _mainShader.setVec3("uMaterial.diffuseColor", renderData.material.diffuseColor);
     _mainShader.setVec3("uMaterial.specularColor", renderData.material.specularColor);
@@ -182,25 +215,25 @@ void OpenGLRenderer::RenderMesh(RenderData3D &renderData, Scene::TransformData3D
     _mainShader.setFloat("uMaterial.metallicFactor", renderData.material.metallicFactor);
     _mainShader.setFloat("uMaterial.roughnessFactor", renderData.material.roughnessFactor);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.diffTex->id);
+    if (diffTex != nullptr) glBindTexture(GL_TEXTURE_2D, diffTex->id);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.specTex->id);
+    if (specTex != nullptr) glBindTexture(GL_TEXTURE_2D, specTex->id);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.ambTex->id);
+    if (ambTex != nullptr) glBindTexture(GL_TEXTURE_2D, ambTex->id);
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.normTex->id);
+    if (normTex != nullptr) glBindTexture(GL_TEXTURE_2D, normTex->id);
     glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.emisTex->id);
+    if (emisTex != nullptr) glBindTexture(GL_TEXTURE_2D, emisTex->id);
     _mainShader.setInt("uMaterial.diffTex", 0);
     _mainShader.setInt("uMaterial.specTex", 1);
     _mainShader.setInt("uMaterial.ambTex",  2);
     _mainShader.setInt("uMaterial.normTex", 3);
     _mainShader.setInt("uMaterial.emisTex", 4);
-    _mainShader.setBool("uMaterial.useDiffTex", renderData.material.diffTex->id != 0);
-    _mainShader.setBool("uMaterial.useSpecTex", renderData.material.specTex->id != 0);
-    _mainShader.setBool("uMaterial.useAmbTex",  renderData.material.ambTex->id  != 0);
-    _mainShader.setBool("uMaterial.useNormTex", renderData.material.normTex->id != 0);
-    _mainShader.setBool("uMaterial.useEmisTex", renderData.material.emisTex->id != 0);
+    _mainShader.setBool("uMaterial.useDiffTex",  diffTex != nullptr && diffTex->id != 0);
+    _mainShader.setBool("uMaterial.useSpecTex", specTex != nullptr && specTex->id != 0);
+    _mainShader.setBool("uMaterial.useAmbTex",  ambTex != nullptr && ambTex->id  != 0);
+    _mainShader.setBool("uMaterial.useNormTex", normTex != nullptr && normTex->id != 0);
+    _mainShader.setBool("uMaterial.useEmisTex", emisTex != nullptr && emisTex->id != 0);
     glBindVertexArray(renderData.VAO);
     auto mode = GL_TRIANGLES;
     if (renderData.material.wireframe) { mode = GL_LINES;}

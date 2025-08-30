@@ -10,6 +10,7 @@ using namespace Raven3DEngineCore::Importer;
 using namespace Raven3DEngineCore::Scene;
 using namespace Raven3DEngineCore::Rendering;
 
+TextureManager Raven3DEngineCore::Importer::globalTextureManager {};
 
 void Raven3DEngineCore::Importer::FreeImage(RAVEN_BYTE* data) {
     stbi_image_free(data);
@@ -40,27 +41,30 @@ Entity_T AssimpImporter::ImportFile(const std::string &filePath, Entity_T parent
         });
     }
 
-    const std::function LoadTexture = [&](const std::string &texPath) -> TextureData* {
-            auto* texture = new TextureData();
+    const std::function LoadTexture = [&](const std::string &texPath) -> TextureData {
+            auto texture = TextureData();
             if (texPath[0] == '*') {
                 const auto Tex = ai_Scene->mTextures[std::stoi(texPath.substr(1))];
                 const int length = Tex->mHeight == 0 ? Tex->mWidth * sizeof(aiTexel) : Tex->mHeight * Tex->mWidth * sizeof(aiTexel);
                 int height, width, compPerPixel;
-                const RAVEN_BYTE* data = stbi_load_from_memory(reinterpret_cast<RAVEN_BYTE*>(Tex->pcData), length, &width, &height, &compPerPixel, 0);
-                texture->data = std::vector<RAVEN_BYTE>(data, data + width * height * compPerPixel);
-                texture->width = width;
-                texture->height = height;
-                texture->numChannels = compPerPixel;
-                _renderer->LoadTexture(texture);
+                std::uint8_t *data = stbi_load_from_memory(reinterpret_cast<RAVEN_BYTE *>(Tex->pcData), length, &width,
+                                                           &height, &compPerPixel, 0);
+                texture.data = std::vector(data, data + width * height * compPerPixel);
+                texture.width = width;
+                texture.height = height;
+                texture.numChannels = compPerPixel;
+                _renderer->LoadTexture(&texture);
+                FreeImage(data);
             } else {
                 int height, width, compPerPixel;
-                const RAVEN_BYTE* data = stbi_load(texPath.c_str(), &width, &height, &compPerPixel, 0);
+                RAVEN_BYTE* data = stbi_load(texPath.c_str(), &width, &height, &compPerPixel, 0);
                 const auto length = width * height * compPerPixel;
-                texture->data = std::vector<RAVEN_BYTE>(data, data + length);
-                texture->width = width;
-                texture->height = height;
-                texture->numChannels = compPerPixel;
-                _renderer->LoadTexture(texture);
+                texture.data = std::vector(data, data + length);
+                texture.width = width;
+                texture.height = height;
+                texture.numChannels = compPerPixel;
+                _renderer->LoadTexture(&texture);
+                FreeImage(data);
             }
             return texture;
     };
@@ -129,42 +133,42 @@ Entity_T AssimpImporter::ImportFile(const std::string &filePath, Entity_T parent
             RAVEN_FLOAT roughnessFactor; material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughnessFactor);
 
             RAVEN_INT diffTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), diffTexIdx);
-            TextureData* diffTex;
+            RAVEN_U_INT diffTex = 0;
             if (diffTexIdx > -1) {
                 aiString diffTexturePath; material->GetTexture(aiTextureType_DIFFUSE, diffTexIdx, &diffTexturePath);
-                diffTex = LoadTexture(std::string(diffTexturePath.C_Str()));
+                diffTex = globalTextureManager.RegisterTexture(LoadTexture(std::string(diffTexturePath.C_Str())));
             }
 
 
             RAVEN_INT specTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_SPECULAR(0), specTexIdx);
-            TextureData* specTex;
+            RAVEN_U_INT specTex = 0;
             if (specTexIdx > -1) {
                 aiString specTexturePath; material->GetTexture(aiTextureType_SPECULAR, specTexIdx, &specTexturePath);
-                specTex = LoadTexture(std::string(specTexturePath.C_Str()));
+                specTex = globalTextureManager.RegisterTexture(LoadTexture(std::string(specTexturePath.C_Str())));
             }
 
 
             RAVEN_INT ambTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_AMBIENT(0), ambTexIdx);
-            TextureData* ambTex;
+            RAVEN_U_INT ambTex = 0;
             if (ambTexIdx > -1) {
                 aiString ambTexturePath; material->GetTexture(aiTextureType_AMBIENT, 0, &ambTexturePath);
-                ambTex = LoadTexture(std::string(ambTexturePath.C_Str()));
+                ambTex = globalTextureManager.RegisterTexture(LoadTexture(std::string(ambTexturePath.C_Str())));
             }
 
 
             RAVEN_INT emiTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_EMISSIVE(0), emiTexIdx);
-            TextureData* emiTex;
+            RAVEN_U_INT emiTex = 0;
             if (emiTexIdx > -1) {
                 aiString emisTexturePath; material->GetTexture(aiTextureType_EMISSIVE, 0, &emisTexturePath);
-                emiTex = LoadTexture(std::string(emisTexturePath.C_Str()));
+                emiTex = globalTextureManager.RegisterTexture(LoadTexture(std::string(emisTexturePath.C_Str())));
             }
 
 
             RAVEN_INT normTexIdx = -1; material->Get(AI_MATKEY_TEXTURE_NORMALS(0), normTexIdx);
-            TextureData* normTex;
+            RAVEN_U_INT normTex = 0;
             if (normTexIdx > -1) {
                 aiString normTexturePath; material->GetTexture(aiTextureType_NORMALS, 0, &normTexturePath);
-                normTex = LoadTexture(std::string(normTexturePath.C_Str()));
+                normTex = globalTextureManager.RegisterTexture(LoadTexture(std::string(normTexturePath.C_Str())));
             }
 
 
