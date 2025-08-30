@@ -135,6 +135,7 @@ void OpenGLRenderer::SetActiveCam(CameraData3D *data, Scene::TransformData3D *ca
 }
 
 void OpenGLRenderer::LoadTexture(TextureData * texture) {
+    Viewports::globalViewportManager->GetWindow(_viewportID)->MakeCurrent();
     glGenTextures(1, &texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

@@ -44,10 +44,10 @@ Entity_T AssimpImporter::ImportFile(const std::string &filePath, Entity_T parent
             auto* texture = new TextureData();
             if (texPath[0] == '*') {
                 const auto Tex = ai_Scene->mTextures[std::stoi(texPath.substr(1))];
-                const int length = Tex->mHeight == 0 ? Tex->mWidth : Tex->mHeight * Tex->mWidth * sizeof(aiTexel);
+                const int length = Tex->mHeight == 0 ? Tex->mWidth * sizeof(aiTexel) : Tex->mHeight * Tex->mWidth * sizeof(aiTexel);
                 int height, width, compPerPixel;
                 const RAVEN_BYTE* data = stbi_load_from_memory(reinterpret_cast<RAVEN_BYTE*>(Tex->pcData), length, &width, &height, &compPerPixel, 0);
-                texture->data = std::vector<RAVEN_BYTE>(data, data + length);
+                texture->data = std::vector<RAVEN_BYTE>(data, data + width * height * compPerPixel);
                 texture->width = width;
                 texture->height = height;
                 texture->numChannels = compPerPixel;
