@@ -29,6 +29,7 @@
 #define RAVEN_RESOURCE_PATH "../Resources/"
 #endif
 
+#include <Importer/Destructors.h>
 #include <Events/AppClock.h>
 #include <Logging/Log.h>
 #include <Scene/Components/CoreComponents.h>

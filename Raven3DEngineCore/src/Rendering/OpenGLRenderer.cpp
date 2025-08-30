@@ -8,7 +8,8 @@ using namespace Raven3DEngineCore::Rendering;
 static void PollGLErrors() {
     GLenum error = glGetError();
     while (error != GL_NO_ERROR) {
-        const auto glVersionString = reinterpret_cast<const char*>( glGetString(GL_VERSION));
+        auto glVersionString = reinterpret_cast<const char*>( glGetString(GL_VERSION));
+        if (glVersionString == nullptr)  glVersionString = "UNKNOWN";
         const auto errorString = reinterpret_cast<const char *>(glewGetErrorString(error));
         RAVEN_LOG_ERROR("OPENGL V: {} - ERROR: {} - {}", glVersionString, error, errorString);
         error = glGetError();
@@ -67,19 +68,41 @@ void OpenGLRenderer::LoadBuffers(RenderData3D *data) {
     PollGLErrors();
 }
 
+void OpenGLRenderer::LoadTextures(MaterialData3D *data) {
+    if (data->ambTex  != nullptr && data->ambTex->id  == 0) LoadTexture(data->ambTex);
+    if (data->diffTex != nullptr && data->diffTex->id == 0) LoadTexture(data->diffTex);
+    if (data->specTex != nullptr && data->specTex->id == 0) LoadTexture(data->specTex);
+    if (data->emisTex != nullptr && data->emisTex->id == 0) LoadTexture(data->emisTex);
+    if (data->normTex != nullptr && data->normTex->id == 0) LoadTexture(data->normTex);
+}
+
 void OpenGLRenderer::ReleaseRenderData(RenderData3D *data) {
     glDeleteVertexArrays(1, &data->VAO);
+
     glDeleteBuffers(1, &data->VBO);
     glDeleteBuffers(1, &data->IBO);
     glDeleteBuffers(1, &data->NBO);
-    glDeleteBuffers(1, &data->IBO);
     glDeleteBuffers(1, &data->TBO);
+    glDeleteBuffers(1, &data->UV_0_BO);
 
-    glDeleteTextures(1, &data->material.diffTex);
-    glDeleteTextures(1, &data->material.specTex);
-    glDeleteTextures(1, &data->material.ambTex);
-    glDeleteTextures(1, &data->material.normTex);
-    glDeleteTextures(1, &data->material.emisTex);
+    glDeleteTextures(1, &data->material.diffTex->id);
+    glDeleteTextures(1, &data->material.specTex->id);
+    glDeleteTextures(1, &data->material.ambTex->id);
+    glDeleteTextures(1, &data->material.normTex->id);
+    glDeleteTextures(1, &data->material.emisTex->id);
+
+    data->VAO                   = 0;
+    data->VBO                   = 0;
+    data->NBO                   = 0;
+    data->IBO                   = 0;
+    data->UV_0_BO               = 0;
+    data->TBO                   = 0;
+    data->material.diffTex->id  = 0;
+    data->material.specTex->id  = 0;
+    data->material.ambTex->id   = 0;
+    data->material.normTex->id  = 0;
+    data->material.emisTex->id  = 0;
+
     PollGLErrors();
 }
 
@@ -87,6 +110,8 @@ void OpenGLRenderer::QueueForRender(RenderData3D *data, Scene::TransformData3D *
     if (data->VAO == 0 || data->VBO == 0 || data->NBO == 0 || data->UV_0_BO == 0 || data->IBO == 0 || data->TBO == 0) {
         LoadBuffers(data);
     }
+
+    LoadTextures(&data->material);
 
     if (data->material.opacity < 1.0f) {
         _transparentRenderData.emplace_back(data, transform);
@@ -109,22 +134,22 @@ void OpenGLRenderer::SetActiveCam(CameraData3D *data, Scene::TransformData3D *ca
     _camTransform = camTransform;
 }
 
-RAVEN_U_INT OpenGLRenderer::LoadTexture(const RAVEN_INT width, const RAVEN_INT height, RAVEN_BYTE *data, const RAVEN_INT numComps) {
-    RAVEN_U_INT textureID {};
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+void OpenGLRenderer::LoadTexture(TextureData * texture) {
+    glGenTextures(1, &texture->id);
+    glBindTexture(GL_TEXTURE_2D, texture->id);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    if (numComps == 4) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    } else {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    if (texture->numChannels == 4) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data.data());
+    } else if (texture->numChannels == 3) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture->width, texture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture->data.data());
+    } else if (texture->numChannels == 1) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R, texture->width, texture->height, 0, GL_R, GL_UNSIGNED_BYTE, texture->data.data());
     }
     glGenerateMipmap(GL_TEXTURE_2D);
     PollGLErrors();
-    return textureID;
 }
 
 
@@ -156,25 +181,25 @@ void OpenGLRenderer::RenderMesh(RenderData3D &renderData, Scene::TransformData3D
     _mainShader.setFloat("uMaterial.metallicFactor", renderData.material.metallicFactor);
     _mainShader.setFloat("uMaterial.roughnessFactor", renderData.material.roughnessFactor);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.diffTex);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.diffTex->id);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.specTex);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.specTex->id);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.ambTex);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.ambTex->id);
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.normTex);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.normTex->id);
     glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, renderData.material.emisTex);
+    glBindTexture(GL_TEXTURE_2D, renderData.material.emisTex->id);
     _mainShader.setInt("uMaterial.diffTex", 0);
     _mainShader.setInt("uMaterial.specTex", 1);
-    _mainShader.setInt("uMaterial.ambTex", 2);
+    _mainShader.setInt("uMaterial.ambTex",  2);
     _mainShader.setInt("uMaterial.normTex", 3);
     _mainShader.setInt("uMaterial.emisTex", 4);
-    _mainShader.setBool("uMaterial.useDiffTex", renderData.material.diffTex != 0);
-    _mainShader.setBool("uMaterial.useSpecTex", renderData.material.specTex != 0);
-    _mainShader.setBool("uMaterial.useAmbTex", renderData.material.ambTex != 0);
-    _mainShader.setBool("uMaterial.useNormTex", renderData.material.normTex != 0);
-    _mainShader.setBool("uMaterial.useEmisTex", renderData.material.emisTex != 0);
+    _mainShader.setBool("uMaterial.useDiffTex", renderData.material.diffTex->id != 0);
+    _mainShader.setBool("uMaterial.useSpecTex", renderData.material.specTex->id != 0);
+    _mainShader.setBool("uMaterial.useAmbTex",  renderData.material.ambTex->id  != 0);
+    _mainShader.setBool("uMaterial.useNormTex", renderData.material.normTex->id != 0);
+    _mainShader.setBool("uMaterial.useEmisTex", renderData.material.emisTex->id != 0);
     glBindVertexArray(renderData.VAO);
     auto mode = GL_TRIANGLES;
     if (renderData.material.wireframe) { mode = GL_LINES;}
@@ -195,59 +220,70 @@ void OpenGLRenderer::RenderFrame() {
     _mainShader.use();
 
     glEnable(GL_DEPTH_TEST);
+    PollGLErrors();
     glEnable(GL_SCISSOR_TEST);
+    PollGLErrors();
 
     glViewport(vp->x_offset, vp->y_offset, vp->width, vp->height);
+    PollGLErrors();
     glScissor(vp->x_offset, vp->y_offset, vp->width, vp->height);
+    PollGLErrors();
     glClearColor(vp->borderColor[0], vp->borderColor[1], vp->borderColor[2], vp->borderColor[3]);
+    PollGLErrors();
     glClear(GL_COLOR_BUFFER_BIT);
+    PollGLErrors();
 
     glScissor(vp->x_offset + vp->borderWidth, vp->y_offset + vp->borderWidth, vp->width - vp->borderWidth*2, vp->height - vp->borderWidth*2);
+    PollGLErrors();
     glClearColor(vp->clearColor[0], vp->clearColor[1], vp->clearColor[2], vp->clearColor[3]);
+    PollGLErrors();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    PollGLErrors();
 
 
-    const glm::mat4 projectionMat = _cameraData->GetPerspectiveMatrix(vp->width, vp->height);
-    const glm::mat4 viewMat = _cameraData->GetViewMatrix();
+    if (_cameraData != nullptr && _camTransform != nullptr) {
+        const glm::mat4 projectionMat = _cameraData->GetPerspectiveMatrix(vp->width, vp->height);
+        const glm::mat4 viewMat = _cameraData->GetViewMatrix();
 
-    _mainShader.setMat4("uProjection", projectionMat);
-    _mainShader.setMat4("uView", viewMat );
+        _mainShader.setMat4("uProjection", projectionMat);
+        _mainShader.setMat4("uView", viewMat );
 
-    _mainShader.setVec3("uCamPos", _camTransform->worldTransform[3]);
+        _mainShader.setVec3("uCamPos", _camTransform->worldTransform[3]);
 
-    for (int i = 0; i < _numLights; i++) {
-        const auto light = _lights[i];
-        _mainShader.setVec3("uLights[" + std::to_string(i) + "].posDir", light->posDir);
-        _mainShader.setVec3("uLights[" + std::to_string(i) + "].color", light->color);
-        _mainShader.setFloat("uLights[" + std::to_string(i) + "].radius", light->radius);
-        _mainShader.setFloat("uLights[" + std::to_string(i) + "].intensity", light->intensity);
-        _mainShader.setInt("uLights[" + std::to_string(i) + "].type", static_cast<RAVEN_U_INT>(light->type));
+        for (int i = 0; i < _numLights; i++) {
+            const auto light = _lights[i];
+            _mainShader.setVec3("uLights[" + std::to_string(i) + "].posDir", light->posDir);
+            _mainShader.setVec3("uLights[" + std::to_string(i) + "].color", light->color);
+            _mainShader.setFloat("uLights[" + std::to_string(i) + "].radius", light->radius);
+            _mainShader.setFloat("uLights[" + std::to_string(i) + "].intensity", light->intensity);
+            _mainShader.setInt("uLights[" + std::to_string(i) + "].type", static_cast<RAVEN_INT>(light->type));
+        }
+        _mainShader.setInt("uNumLights", _numLights);
+
+        for (auto &[rData, tData] : _renderData) {
+            const auto renderData = rData;
+            const auto transform = tData;
+            RenderMesh(*renderData, *transform);
+        }
+        _renderData.clear();
+
+        const auto camPos = _cameraData->position;
+        std::ranges::sort(_transparentRenderData, [&](const auto &a, const auto &b) -> bool {
+            const auto camDistA = glm::distance(camPos, glm::vec3(a.second->worldTransform[3]));
+            const auto camDistB = glm::distance(camPos, glm::vec3(b.second->worldTransform[3]));
+            return camDistA > camDistB;
+        });
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        for (auto &[rData, tData] : _transparentRenderData) {
+            const auto renderData = rData;
+            renderData->material.diffuseColor = glm::vec3(1.0f, 1.0f, 1.0f);
+            const auto transform = tData;
+            RenderMesh(*renderData, *transform);
+        }
+        glDisable(GL_BLEND);
     }
-    _mainShader.setInt("uNumLights", _numLights);
-
-    for (int i = 0; i < _renderData.size(); i++) {
-        const auto renderData = _renderData[i].first;
-        const auto transform = _renderData[i].second;
-        RenderMesh(*renderData, *transform);
-    }
-    _renderData.clear();
-
-    const auto camPos = _cameraData->position;
-    std::ranges::sort(_transparentRenderData, [&](const auto &a, const auto &b) -> bool {
-        const auto camDistA = glm::distance(camPos, glm::vec3(a.second->worldTransform[3]));
-        const auto camDistB = glm::distance(camPos, glm::vec3(b.second->worldTransform[3]));
-        return camDistA > camDistB;
-    });
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    for (int i = 0; i < _transparentRenderData.size(); i++) {
-        const auto renderData = _transparentRenderData[i].first;
-        renderData->material.diffuseColor = glm::vec3(1.0f, 1.0f, 1.0f);
-        const auto transform = _transparentRenderData[i].second;
-        RenderMesh(*renderData, *transform);
-    }
-    glDisable(GL_BLEND);
 
     _numLights = 0;
     _transparentRenderData.clear();

@@ -12,6 +12,9 @@ namespace Raven3DEngineCore::Scene {
         entt::basic_registry<Entity_T> _registry;
         Entity_T _root = NullEntity;
         RAVEN_U_INT _viewportId;
+
+        void ResetRenderBuffers();
+
     public:
         explicit SceneManager(RAVEN_U_INT viewportId);
         ~SceneManager() override;

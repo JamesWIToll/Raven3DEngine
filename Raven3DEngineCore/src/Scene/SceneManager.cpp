@@ -8,6 +8,15 @@ using namespace Raven3DEngineCore::Scene;
 
 Entity_T Raven3DEngineCore::Scene::NullEntity = static_cast<Entity_T>(RAVEN_ENTITY_NULL);
 
+void SceneManager::ResetRenderBuffers() {
+    for (const auto renderView = _registry.view<Rendering::RenderData3D>(); const auto [entity, data] : renderView.each()) {
+        if (const auto vp = Viewports::globalViewportManager->GetViewport(_viewportId); vp != nullptr && vp->renderer != nullptr) {
+            vp->renderer->ReleaseRenderData(&data);
+        }
+    }
+
+}
+
 SceneManager::SceneManager(RAVEN_U_INT vpID): _viewportId(vpID) {
     _registry = entt::basic_registry<Entity_T>();
     _root = _registry.create();
@@ -27,6 +36,14 @@ SceneManager::SceneManager(RAVEN_U_INT vpID): _viewportId(vpID) {
 }
 
 SceneManager::~SceneManager(){
+    ResetRenderBuffers();
+    for (const auto [entity, renderData] : _registry.view<Entity_T, Rendering::RenderData3D>().each()) {
+        delete renderData.material.ambTex;
+        delete renderData.material.diffTex;
+        delete renderData.material.specTex;
+        delete renderData.material.emisTex;
+        delete renderData.material.normTex;
+    }
     _registry.clear();
 }
 
@@ -41,11 +58,7 @@ void SceneManager::Initialize() {
     });
     _eventHandler->RegisterEventListener(Events::EventType::ViewportTearDown, [this] (const Events::Event &e) {
         if (const auto vpEvent = dynamic_cast<const Events::VPTearDownEvent&>(e); vpEvent.GetViewportID() == _viewportId) {
-            for (const auto renderView = _registry.view<Rendering::RenderData3D>(); const auto [entity, data] : renderView.each()) {
-                if (const auto vp = Viewports::globalViewportManager->GetViewport(_viewportId); vp != nullptr && vp->renderer != nullptr) {
-                    vp->renderer->ReleaseRenderData(&data);
-                }
-            }
+            ResetRenderBuffers();
         }
     });
 }

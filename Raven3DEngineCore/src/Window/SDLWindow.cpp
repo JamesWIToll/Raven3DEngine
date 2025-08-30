@@ -5,8 +5,6 @@
 
 using namespace Raven3DEngineCore::Window;
 
-SDL_GLContext Raven3DEngineCore::Window::sharedSDLGLContext = nullptr;
-static RAVEN_U_INT windowCountForGLContext = 0;
 static bool sdlInitialized = false;
 static std::vector<SDL_Event> events {};
 
@@ -19,11 +17,8 @@ bool SDLWindow::SDLCheck(const bool success) {
 
 SDLWindow::~SDLWindow()  {
     SDLWindow::ReleaseMouse();
-    if (_renderAPI == Rendering::RenderAPI::OPENGL && --windowCountForGLContext == 0) {
-        ShutdownSharedSDLGLWindowData();
-    }
+    SDL_GL_DestroyContext(_context);
     SDL_DestroyWindow(_window);
-    sharedSDLGLContext = nullptr;
     _surface = nullptr;
     _window = nullptr;
     RAVEN_LOG_INFO("SDL Window Closed");
@@ -34,9 +29,7 @@ void SDLWindow::GetWindowDimensions(RAVEN_INT &out_width, RAVEN_INT &out_height)
 }
 
 void SDLWindow::MakeCurrent() {
-    if (_renderAPI == Rendering::RenderAPI::OPENGL && SDL_GL_GetCurrentWindow() != _window) {
-        SDLCheck(SDL_GL_MakeCurrent(_window, sharedSDLGLContext));
-    }
+    SDLCheck(SDL_GL_MakeCurrent(_window, _context));
 }
 
 void SDLWindow::CaptureMouse() {
@@ -72,8 +65,12 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 
     _name = name;
 
-    _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { UpdateWindow(); });
-    _eventHandler->RegisterEventListener(Events::EventType::AppPostRender, [this] (const Events::Event &) { SwapWindow(); });
+    _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) {
+        UpdateWindow();
+    });
+    _eventHandler->RegisterEventListener(Events::EventType::AppPostRender, [this] (const Events::Event &) {
+        SwapWindow();
+    });
 
     _renderAPI = api;
 
@@ -83,17 +80,16 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
     std::string rendererName = name;
 
     if (_renderAPI == Rendering::RenderAPI::OPENGL) {
-        windowCountForGLContext++;
         _window = SDL_CreateWindow(name.c_str(), pixelWidth, pixelHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         SDLCheck(_window != nullptr);
 
         RAVEN_INT glContextFlags = 0;
         SDLCheck(SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &glContextFlags));
         SDLCheck(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, glContextFlags | SDL_GL_CONTEXT_DEBUG_FLAG));
-        if (sharedSDLGLContext == nullptr) {
-            sharedSDLGLContext = SDL_GL_CreateContext(_window);
-            SDLCheck(sharedSDLGLContext != nullptr);
-        }
+
+        _context = SDL_GL_CreateContext(_window);
+        SDLCheck(_context != nullptr);
+
         rendererName = "OpenGL";
     }
 
@@ -255,11 +251,4 @@ void SDLWindow::SwapWindow() {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
     }
-}
-
-void Raven3DEngineCore::Window::ShutdownSharedSDLGLWindowData() {
-    if (!SDL_GL_DestroyContext(sharedSDLGLContext)) {
-        RAVEN_LOG_ERROR("Failed to destroy SDL_GLContext");
-    }
-    sharedSDLGLContext = nullptr;
 }

@@ -54,11 +54,15 @@ namespace Raven3DEngineCore::Viewports {
 
         bool CloseWindow(const Window::IRenderWindow *window) {
             bool foundWindow = false;
+            std::vector<RAVEN_U_INT> idsToRemove;
             for (auto [id, vp] : _viewports) {
                 if (vp.window == window) {
                     foundWindow = true;
-                    RemoveViewport(id);
+                    idsToRemove.emplace_back(id);
                 }
+            }
+            for (const auto id: idsToRemove) {
+                RemoveViewport(id);
             }
             return foundWindow;
         }
@@ -138,12 +142,13 @@ namespace Raven3DEngineCore::Viewports {
             return _viewports[id].window;
         }
 
-        Window::IRenderWindow *MoveToNewWindow(const RAVEN_U_INT id) {
+        void *MoveToNewWindow(const RAVEN_U_INT id, Window::IRenderWindow *window) {
             if (!_viewports.contains(id)) {
                 return nullptr;
             }
-            auto vp = GetViewport(id);
-            auto *window = new Window::SDLWindow();
+            const auto vp = GetViewport(id);
+            vp->renderer->GetEventHandler()->Notify(Events::VPTearDownEvent{id});
+            vp->window = window;
 
         }
     };

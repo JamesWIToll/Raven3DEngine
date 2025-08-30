@@ -10,6 +10,7 @@ namespace Raven3DEngineCore::Window {
     class SDLWindow final: public IRenderWindow {
         Rendering::RenderAPI _renderAPI = Rendering::RenderAPI::OPENGL;
         SDL_Window *_window = nullptr;
+        SDL_GLContext _context = nullptr;
         SDL_Surface *_surface = nullptr;
         std::string _name {};
 
@@ -30,10 +31,6 @@ namespace Raven3DEngineCore::Window {
         std::string GetName() override { return _name; }
 
     };
-
-    extern SDL_GLContext sharedSDLGLContext;
-
-    extern void ShutdownSharedSDLGLWindowData();
 }
 
 #endif //RAVEN3DENGINECORE_SDLWINDOW_H

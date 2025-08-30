@@ -24,8 +24,11 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
     Viewports::globalViewportManager->SetEventHandler(_eventHandler);
 
     _eventHandler->RegisterEventListener(Events::EventType::WindowClosed, [this] (const Events::Event &e) {
-        const auto windowEvent = dynamic_cast<const Events::WindowCloseEvent &>(e);
-        bool success = Viewports::globalViewportManager->CloseWindow(windowEvent.getWindow());
+        if (const auto windowEvent = dynamic_cast<const Events::WindowCloseEvent &>(e);
+            !Viewports::globalViewportManager->CloseWindow(windowEvent.getWindow())) {
+
+            delete windowEvent.getWindow();
+        }
         if (!Viewports::globalViewportManager->HasViewports()) {
             quitApp();
         }
@@ -103,6 +106,8 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
              vp1->window = win;
              vp1->x_offset = 0;
              vp1->y_offset = 0;
+
+             Viewports::globalViewportManager->AddViewport(Viewports::Viewport{.width = vp1->width, .height = vp1->height, .renderAPI = vp1->renderAPI, .window = _window});
          }
      });
      _eventHandler->RegisterEventListener(Events::EventType::MouseButtonPressed, [this] (const Events::Event &e) {

@@ -21,6 +21,7 @@ namespace Raven3DEngineCore::Rendering {
         GLShader _mainShader {};
 
         static void LoadBuffers(RenderData3D *data);
+        void LoadTextures(MaterialData3D *data);
 
     public:
         explicit OpenGLRenderer(const RAVEN_U_INT viewportID) : IRenderer(viewportID)  {}
@@ -33,7 +34,7 @@ namespace Raven3DEngineCore::Rendering {
         void QueueForRender(RenderData3D *data, Scene::TransformData3D *transform) override;
         void AddLight(LightData3D *data) override;
         void SetActiveCam(CameraData3D *data, Scene::TransformData3D *camTransform) override;
-        RAVEN_U_INT LoadTexture(RAVEN_INT width, RAVEN_INT height, RAVEN_BYTE* data, RAVEN_INT numComps) override;
+        void LoadTexture(TextureData *texture) override;
         void Initialize() override;
         void RenderFrame() override;
     };
