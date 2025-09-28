@@ -103,11 +103,7 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
              auto *win = new Window::SDLWindow();
              win->SetEventHandler(_eventHandler);
              win->Initialize(vp1->renderAPI, "SDL Window " + std::to_string(windowCount++), vp1->width, vp1->height);
-             vp1->window = win;
-             vp1->x_offset = 0;
-             vp1->y_offset = 0;
-
-             Viewports::globalViewportManager->AddViewport(Viewports::Viewport{.width = vp1->width, .height = vp1->height, .renderAPI = vp1->renderAPI, .window = _window});
+             Viewports::globalViewportManager->MoveToNewWindow(vpID, win);
          }
      });
      _eventHandler->RegisterEventListener(Events::EventType::MouseButtonPressed, [this] (const Events::Event &e) {

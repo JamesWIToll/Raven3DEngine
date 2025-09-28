@@ -99,11 +99,11 @@ void OpenGLRenderer::ReleaseRenderData(RenderData3D *data) {
 
 
 
-    glDeleteTextures(1, &diffTex->id);
-    glDeleteTextures(1, &specTex->id);
-    glDeleteTextures(1, &ambTex->id);
-    glDeleteTextures(1, &normTex->id);
-    glDeleteTextures(1, &emisTex->id);
+    if (diffTex) glDeleteTextures(1, &diffTex->id);
+    if (specTex) glDeleteTextures(1, &specTex->id);
+    if (ambTex)  glDeleteTextures(1, &ambTex->id);
+    if (normTex) glDeleteTextures(1, &normTex->id);
+    if (emisTex) glDeleteTextures(1, &emisTex->id);
 
     data->VAO       = 0;
     data->VBO       = 0;
@@ -111,11 +111,11 @@ void OpenGLRenderer::ReleaseRenderData(RenderData3D *data) {
     data->IBO       = 0;
     data->UV_0_BO   = 0;
     data->TBO       = 0;
-    diffTex->id     = 0;
-    specTex->id     = 0;
-    ambTex->id      = 0;
-    normTex->id     = 0;
-    emisTex->id     = 0;
+    if (diffTex)    diffTex->id = 0;
+    if (specTex)    specTex->id = 0;
+    if (ambTex)     ambTex->id  = 0;
+    if (normTex)    normTex->id = 0;
+    if (emisTex)    emisTex->id = 0;
 
     PollGLErrors();
 }
@@ -186,6 +186,7 @@ void OpenGLRenderer::Initialize() {
         if (const auto vpEvent = dynamic_cast<const Events::VPWindowConnectedEvent&>(e); vpEvent.GetViewportID() == _viewportID) {
             Viewports::globalViewportManager->GetViewport(_viewportID)->window->MakeCurrent();
             _mainShader.Initialize(std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.vert", std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.frag");
+            PollGLErrors();
         }
     });
 
@@ -245,13 +246,16 @@ void OpenGLRenderer::RenderMesh(RenderData3D &renderData, Scene::TransformData3D
 }
 
 void OpenGLRenderer::RenderFrame() {
+    PollGLErrors();
     const auto vp = Viewports::globalViewportManager->GetViewport(_viewportID);
     if (vp == nullptr || vp->renderer == nullptr || vp->window == nullptr) {
         return;
     }
     vp->window->MakeCurrent();
+    PollGLErrors();
 
     _mainShader.use();
+    PollGLErrors();
 
     glEnable(GL_DEPTH_TEST);
     PollGLErrors();
