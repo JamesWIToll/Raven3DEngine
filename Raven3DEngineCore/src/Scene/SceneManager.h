@@ -12,6 +12,7 @@ namespace Raven3DEngineCore::Scene {
         entt::basic_registry<Entity_T> _registry;
         Entity_T _root = NullEntity;
         RAVEN_U_INT _viewportId;
+        RAVEN_U_LONG _eventListenerId;
 
         void ResetRenderBuffers();
 

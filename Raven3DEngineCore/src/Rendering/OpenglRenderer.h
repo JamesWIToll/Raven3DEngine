@@ -26,6 +26,7 @@ namespace Raven3DEngineCore::Rendering {
     public:
         explicit OpenGLRenderer(const RAVEN_U_INT viewportID) : IRenderer(viewportID) {}
         ~OpenGLRenderer() override {
+            _eventHandler->UnregisterListenerAllEvents(_eventListenerID);
             RAVEN_LOG_INFO("OpenGL Renderer Shut Down");
         }
 

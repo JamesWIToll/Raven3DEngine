@@ -173,14 +173,14 @@ void OpenGLRenderer::Initialize() {
 
     glewInit();
 
-    _eventHandler->RegisterEventListener(Events::EventType::AppRender, [this] (const Events::Event &) { RenderFrame(); });
+    _eventHandler->RegisterEventListener(Events::EventType::AppRender, [this] (const Events::Event &) { RenderFrame(); }, _eventListenerID);
 
     _eventHandler->RegisterEventListener(Events::EventType::ViewportTearDown, [this] (const Events::Event &e) {
         if (const auto vpEvent = dynamic_cast<const Events::VPTearDownEvent&>(e); vpEvent.GetViewportID() == _viewportID) {
             Viewports::globalViewportManager->GetViewport(_viewportID)->window->MakeCurrent();
             _mainShader = {};
         }
-    });
+    }, _eventListenerID);
 
     _eventHandler->RegisterEventListener(Events::EventType::ViewportWindowConnected, [this] (const Events::Event &e) {
         if (const auto vpEvent = dynamic_cast<const Events::VPWindowConnectedEvent&>(e); vpEvent.GetViewportID() == _viewportID) {
@@ -188,7 +188,7 @@ void OpenGLRenderer::Initialize() {
             _mainShader.Initialize(std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.vert", std::string(RAVEN_RESOURCE_PATH) + "Shaders/main.frag");
             PollGLErrors();
         }
-    });
+    }, _eventListenerID);
 
     _renderData.clear();
 

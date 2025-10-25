@@ -17,7 +17,7 @@ void SceneManager::ResetRenderBuffers() {
 
 }
 
-SceneManager::SceneManager(RAVEN_U_INT vpID): _viewportId(vpID) {
+SceneManager::SceneManager(RAVEN_U_INT vpID): _viewportId(vpID), _eventListenerId(Events::GetNextEventListenerID()) {
     _registry = entt::basic_registry<Entity_T>();
     _root = _registry.create();
     _registry.emplace<RelationshipData>(_root, RelationshipData{
@@ -36,6 +36,7 @@ SceneManager::SceneManager(RAVEN_U_INT vpID): _viewportId(vpID) {
 }
 
 SceneManager::~SceneManager(){
+    _eventHandler->UnregisterListenerAllEvents(_eventListenerId);
     ResetRenderBuffers();
     for (const auto [entity, renderData] : _registry.view<Entity_T, Rendering::RenderData3D>().each()) {
         Importer::globalTextureManager.UnregisterTexture(renderData.material.ambTex);
@@ -53,19 +54,19 @@ SceneManager::~SceneManager(){
 }
 
 void SceneManager::Initialize() {
-    _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { Update(); });
+    _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) { Update(); }, _eventListenerId);
     _eventHandler->RegisterEventListener(Events::EventType::AppPreRender, [this] (const Events::Event &event) {
         const auto preRenderEvent = dynamic_cast<const Events::AppPreRenderEvent&>(event);
         const auto vp = Viewports::globalViewportManager->GetViewport(_viewportId);
         if (vp != nullptr && vp->renderer != nullptr) {
             ProcessRenderables(Viewports::globalViewportManager->GetViewport(_viewportId)->renderer);
         }
-    });
+    }, _eventListenerId);
     _eventHandler->RegisterEventListener(Events::EventType::ViewportTearDown, [this] (const Events::Event &e) {
         if (const auto vpEvent = dynamic_cast<const Events::VPTearDownEvent&>(e); vpEvent.GetViewportID() == _viewportId) {
             ResetRenderBuffers();
         }
-    });
+    }, _eventListenerId);
 }
 
 void SceneManager::Update() {

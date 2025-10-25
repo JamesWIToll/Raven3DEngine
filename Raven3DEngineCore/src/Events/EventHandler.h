@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by wesley on 8/6/25.
 //
@@ -7,18 +9,22 @@
 
 namespace Raven3DEngineCore::Events {
 
-
+    extern RAVEN_U_LONG GetNextEventListenerID();
 
     class Listener {
-        std::vector<std::function<void(const Event&)>> _listeners {};
+        std::vector<std::tuple<RAVEN_U_LONG,std::function<void(const Event&)>>> _listeners {};
 
     public:
-        void RegisterListenerFunction(const std::function<void(const Event&)> &_listener) {
-            _listeners.push_back(_listener);
+        void RegisterListenerFunction(const std::function<void(const Event&)> &_listener, const RAVEN_U_LONG _listenerID) {
+            _listeners.emplace_back(_listenerID, _listener);
+        }
+
+        void UnregisterListener(const RAVEN_U_LONG _listenerID) {
+            erase_if(_listeners, [&](auto item) { auto [id, listener] = std::move(item); return id == _listenerID; } );
         }
 
         void Notify(const Event& event) const {
-            for (const auto& listener : _listeners) {
+            for (const auto& [id, listener] : _listeners) {
                 listener(event);
             }
         }
@@ -29,13 +35,25 @@ namespace Raven3DEngineCore::Events {
 
     public:
 
-        void RegisterEventListener(const EventType type, const std::function<void(const Event&)> &_listener) {
+        void RegisterEventListener(const EventType type, const std::function<void(const Event&)> &_listener, const RAVEN_U_LONG _listenerID) {
             if (_listenerRegistry.contains(type)) {
-                _listenerRegistry.at(type).RegisterListenerFunction(_listener);
+                _listenerRegistry.at(type).RegisterListenerFunction(_listener, _listenerID);
             } else {
                 auto listener = Listener{};
-                listener.RegisterListenerFunction(_listener);
+                listener.RegisterListenerFunction(_listener, _listenerID);
                 _listenerRegistry.emplace(type, listener);
+            }
+        }
+
+        void UnregisterEventListener(const EventType type, const RAVEN_U_LONG _listenerID) {
+            if (_listenerRegistry.contains(type)) {
+                _listenerRegistry.at(type).UnregisterListener(_listenerID);
+            }
+        }
+
+        void UnregisterListenerAllEvents(const RAVEN_U_LONG _listenerID) {
+            for (const auto &type: _listenerRegistry | std::views::keys) {
+                _listenerRegistry.at(type).UnregisterListener(_listenerID);
             }
         }
 

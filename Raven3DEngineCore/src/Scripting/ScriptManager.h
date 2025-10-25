@@ -14,6 +14,7 @@ namespace Raven3DEngineCore::Scripting {
     class IScriptManager : public Events::EventNotifier {
     protected:
         Scene::SceneManager* _sceneManager = nullptr;
+        RAVEN_U_LONG _eventListenerId = Events::GetNextEventListenerID();
         explicit IScriptManager(Scene::SceneManager* sceneManager) : _sceneManager(sceneManager) {}
     public:
         virtual ~IScriptManager() = default;

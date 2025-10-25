@@ -12,10 +12,11 @@ namespace Raven3DEngineCore::Rendering {
     class IRenderer : public Events::EventNotifier {
     protected:
         RAVEN_U_INT _viewportID;
+        RAVEN_U_LONG _eventListenerID;
 
         virtual void RenderMesh(RenderData3D &renderData, Scene::TransformData3D &transformData) = 0;
     public:
-        explicit IRenderer(const RAVEN_U_INT viewportID) : _viewportID(viewportID) {}
+        explicit IRenderer(const RAVEN_U_INT viewportID) : _viewportID(viewportID), _eventListenerID(Events::GetNextEventListenerID()) {}
 
         ~IRenderer() override = default;
 

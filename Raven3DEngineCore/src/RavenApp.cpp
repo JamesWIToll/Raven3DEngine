@@ -10,6 +10,7 @@ using namespace Raven3DEngineCore;
 static const auto loggerListener = new Logging::ConsoleLog();
 
 static RAVEN_INT windowCount = 0;
+static RAVEN_U_LONG appEventListenerID = Events::GetNextEventListenerID();
 
 Viewports::ViewportManager *Viewports::globalViewportManager;
 
@@ -32,7 +33,7 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
         if (!Viewports::globalViewportManager->HasViewports()) {
             quitApp();
         }
-    });
+    }, appEventListenerID);
 
     _window = new Window::SDLWindow();
     _window->SetEventHandler(_eventHandler);
@@ -105,14 +106,14 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
              win->Initialize(vp1->renderAPI, "SDL Window " + std::to_string(windowCount++), vp1->width, vp1->height);
              Viewports::globalViewportManager->MoveToNewWindow(vpID, win);
          }
-     });
+     }, appEventListenerID);
      _eventHandler->RegisterEventListener(Events::EventType::MouseButtonPressed, [this] (const Events::Event &e) {
          if (const auto mouseEvent = dynamic_cast<const Events::MousePressedEvent &>(e); mouseEvent.getButton() == Input::Mouse::MouseCode::BUTTON_LEFT) {
              mouseEvent.GetWindow()->CaptureMouse();
          } else if (mouseEvent.getButton() == Input::Mouse::MouseCode::BUTTON_RIGHT) {
              mouseEvent.GetWindow()->ReleaseMouse();
          }
-     });
+     }, appEventListenerID);
      _eventHandler->RegisterEventListener(Events::EventType::MouseMoved, [=, this] (const Events::Event &e) {
          const auto mouseEvent = dynamic_cast<const Events::MouseMovedEvent &>(e);
          if (!mouseEvent.GetWindow()->MouseCaptured()) {
@@ -122,13 +123,14 @@ RavenApp::RavenApp(const std::string& appName, const RAVEN_INT &pixelWidth, cons
          transform->localTransform = glm::rotate(transform->localTransform, glm::radians(mouseEvent.getXDelta()*-0.1f), glm::vec3(0.0f, 1.0f, 0.0f));
          transform->localTransform = glm::rotate(transform->localTransform, glm::radians(mouseEvent.getYDelta()*-0.1f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-     });
+     }, appEventListenerID);
 
     _sceneManager->PrintSceneGraph();
     RAVEN_LOG_INFO("{} - Application Initialized", this->appName);
 }
 
 RavenApp::~RavenApp() {
+    _eventHandler->UnregisterListenerAllEvents(appEventListenerID);
     delete _importer;
     delete Viewports::globalViewportManager;
     delete _sceneManager;

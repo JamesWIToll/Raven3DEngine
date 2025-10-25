@@ -7,6 +7,8 @@ using namespace Raven3DEngineCore::Window;
 
 static bool sdlInitialized = false;
 static std::vector<SDL_Event> events {};
+static RAVEN_U_LONG numSDLWindows = 0;
+static RAVEN_U_LONG globalSDLEventListenerID = Raven3DEngineCore::Events::GetNextEventListenerID();
 
 bool SDLWindow::SDLCheck(const bool success) {
     if (!success) {
@@ -16,6 +18,11 @@ bool SDLWindow::SDLCheck(const bool success) {
 }
 
 SDLWindow::~SDLWindow()  {
+    numSDLWindows--;
+    _eventHandler->UnregisterListenerAllEvents(_eventListenerId);
+    if (numSDLWindows <= 0) {
+        _eventHandler->UnregisterListenerAllEvents(globalSDLEventListenerID);
+    }
     SDLWindow::ReleaseMouse();
     SDL_GL_DestroyContext(_context);
     SDL_DestroyWindow(_window);
@@ -47,6 +54,7 @@ bool SDLWindow::MouseCaptured() {
 }
 
 void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &name, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight) {
+    numSDLWindows++;
     if (!sdlInitialized) {
         SDLCheck(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS));
 
@@ -55,10 +63,10 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
             while (SDL_PollEvent(&event)) {
                 events.push_back(event);
             }
-        });
+        }, globalSDLEventListenerID);
         _eventHandler->RegisterEventListener(Events::EventType::AppPostUpdate, [] (const Events::Event &) {
             events.clear();
-        });
+        }, globalSDLEventListenerID);
 
         sdlInitialized = true;
     }
@@ -67,10 +75,10 @@ void SDLWindow::Initialize(const Rendering::RenderAPI api, const std::string &na
 
     _eventHandler->RegisterEventListener(Events::EventType::AppUpdate, [this] (const Events::Event &) {
         UpdateWindow();
-    });
+    }, _eventListenerId);
     _eventHandler->RegisterEventListener(Events::EventType::AppPostRender, [this] (const Events::Event &) {
         SwapWindow();
-    });
+    }, _eventListenerId);
 
     _renderAPI = api;
 
