@@ -9,6 +9,8 @@ if (WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif ()
 
+set(ASSIMP_WARNINGS_AS_ERRORS OFF)
+
 add_subdirectory(ThirdParty/assimp)
 add_subdirectory(ThirdParty/entt)
 add_subdirectory(ThirdParty/glew/build/cmake)

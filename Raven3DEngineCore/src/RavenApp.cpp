@@ -4,7 +4,6 @@
 
 #include <Raven3DEngineCore.h>
 
-
 using namespace Raven3DEngineCore;
 
 static const auto loggerListener = new Logging::ConsoleLog();
