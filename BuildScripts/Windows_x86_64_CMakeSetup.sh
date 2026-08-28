@@ -11,7 +11,7 @@ echo "======================================================"
 echo "\n"
 
 echo "Running CMake command to set up debug"
-cmake -DCMAKE_BUILD_TYPE=Debug -G "Ninja" -B cmake-build-debug --compile-no-warning-as-error --toolchain "./ToolChains/Linux_x86-64_Toolchain.cmake"
+cmake -DCMAKE_BUILD_TYPE=Debug -G "Ninja" -B cmake-build-debug --compile-no-warning-as-error --toolchain "./ToolChains/Windows_x86-64_Toolchain.cmake"
 
 echo "Running CMake command to set up rlease"
-cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -B cmake-build-release --compile-no-warning-as-error --toolchain "./ToolChains/Linux_x86-64_Toolchain.cmake"
+cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -B cmake-build-release --compile-no-warning-as-error --toolchain "./ToolChains/Windows_x86-64_Toolchain.cmake"
