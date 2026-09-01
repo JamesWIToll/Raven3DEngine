@@ -1,40 +1,40 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.5)
 project(LuaLib)
 
 add_library(
         LuaLib
         SHARED
-        ../lua/lapi.c
-        ../lua/lauxlib.c
-        ../lua/lbaselib.c
-        ../lua/lcode.c
-        ../lua/lcorolib.c
-        ../lua/lctype.c
-        ../lua/ldblib.c
-        ../lua/ldebug.c
-        ../lua/ldo.c
-        ../lua/ldump.c
-        ../lua/lfunc.c
-        ../lua/lgc.c
-        ../lua/linit.c
-        ../lua/liolib.c
-        ../lua/llex.c
-        ../lua/lmathlib.c
-        ../lua/lmem.c
-        ../lua/loadlib.c
-        ../lua/lobject.c
-        ../lua/lopcodes.c
-        ../lua/loslib.c
-        ../lua/lparser.c
-        ../lua/lstate.c
-        ../lua/lstring.c
-        ../lua/lstrlib.c
-        ../lua/ltable.c
-        ../lua/ltablib.c
-        ../lua/ltests.c
-        ../lua/ltm.c
-        ../lua/lundump.c
-        ../lua/lutf8lib.c
-        ../lua/lvm.c
-        ../lua/lzio.c
+        ../lua/src/lapi.c
+        ../lua/src/lauxlib.c
+        ../lua/src/lbaselib.c
+        ../lua/src/lcode.c
+        ../lua/src/lcorolib.c
+        ../lua/src/lctype.c
+        ../lua/src/ldblib.c
+        ../lua/src/ldebug.c
+        ../lua/src/ldo.c
+        ../lua/src/ldump.c
+        ../lua/src/lfunc.c
+        ../lua/src/lgc.c
+        ../lua/src/linit.c
+        ../lua/src/liolib.c
+        ../lua/src/llex.c
+        ../lua/src/lmathlib.c
+        ../lua/src/lmem.c
+        ../lua/src/loadlib.c
+        ../lua/src/lobject.c
+        ../lua/src/lopcodes.c
+        ../lua/src/loslib.c
+        ../lua/src/lparser.c
+        ../lua/src/lstate.c
+        ../lua/src/lstring.c
+        ../lua/src/lstrlib.c
+        ../lua/src/ltable.c
+        ../lua/src/ltablib.c
+        ../lua/src/ltests.c
+        ../lua/src/ltm.c
+        ../lua/src/lundump.c
+        ../lua/src/lutf8lib.c
+        ../lua/src/lvm.c
+        ../lua/src/lzio.c
 )
