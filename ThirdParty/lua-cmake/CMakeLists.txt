@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 4.0)
 project(LuaLib)
 
 add_library(
@@ -31,7 +31,6 @@ add_library(
         ../lua/src/lstrlib.c
         ../lua/src/ltable.c
         ../lua/src/ltablib.c
-        ../lua/src/ltests.c
         ../lua/src/ltm.c
         ../lua/src/lundump.c
         ../lua/src/lutf8lib.c
