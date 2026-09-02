@@ -47,7 +47,7 @@ target_include_directories(Raven3DEngineCore PUBLIC
         ThirdParty/SDL/SDL3/include
         Raven3DEngineCore/Include
         Raven3DEngineCore/src
-        ThirdParty/lua
+        ThirdParty/lua/src
         ThirdParty/Other
         ThirdParty/freetype/include
         ${CMAKE_CURRENT_BINARY_DIR}/ThirdParty/freetype/include
