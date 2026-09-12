@@ -4,7 +4,7 @@
 
 #ifndef RAVEN3DENGINECORE_RENDERCOMPONENTS_H
 #define RAVEN3DENGINECORE_RENDERCOMPONENTS_H
-
+#include <RavenDefs.h>
 
 namespace Raven3DEngineCore::Rendering {
 

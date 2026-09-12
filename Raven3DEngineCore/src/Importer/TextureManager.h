@@ -4,7 +4,7 @@
 
 #ifndef RAVEN3DENGINECORE_TEXTUREMANAGER_H
 #define RAVEN3DENGINECORE_TEXTUREMANAGER_H
-
+#include <RavenForward.h>
 
 namespace Raven3DEngineCore::Importer {
     class TextureManager {
@@ -14,26 +14,12 @@ namespace Raven3DEngineCore::Importer {
         TextureManager() = default;
         ~TextureManager() = default;
 
-        [[nodiscard]] Rendering::TextureData* getTexData(const RAVEN_U_INT id) {
-            if (!_textures.contains(id)) {
-                return nullptr;
-            }
-            return &_textures[id];
-        }
+        [[nodiscard]] Rendering::TextureData* getTexData(const RAVEN_U_INT id);
 
-        RAVEN_U_INT RegisterTexture(const Rendering::TextureData& tex) {
-            auto id = _nextTextureId++;
-            _textures.emplace(id, tex);
-            return id;
-        }
+        RAVEN_U_INT RegisterTexture(const Rendering::TextureData& tex);
 
-        bool UnregisterTexture(const RAVEN_U_INT id) {
-            if (_textures.contains(id)) {
-                _textures.erase(id);
-                return true;
-            }
-            return false;
-        }
+
+        bool UnregisterTexture(const RAVEN_U_INT id); 
     };
 
     extern TextureManager globalTextureManager;

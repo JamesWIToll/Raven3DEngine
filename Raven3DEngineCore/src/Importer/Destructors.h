@@ -5,6 +5,8 @@
 #ifndef RAVEN3DENGINECORE_DESTRUCTORS_H
 #define RAVEN3DENGINECORE_DESTRUCTORS_H
 
+#include <RavenForward.h>
+
 namespace Raven3DEngineCore::Importer {
     extern void FreeImage(RAVEN_BYTE *data);
 }

@@ -4,8 +4,8 @@
 
 #ifndef RAVEN3DENGINECORE_VIEWPORTMANAGER_H
 #define RAVEN3DENGINECORE_VIEWPORTMANAGER_H
-#include "Window/SDLWindow.h"
-
+#include <RavenDefs.h>
+#include "../Events/EventHandler.h"
 
 namespace Raven3DEngineCore::Viewports {
 
@@ -31,23 +31,7 @@ namespace Raven3DEngineCore::Viewports {
             _viewports.clear();
         }
 
-        RAVEN_U_INT AddViewport(Viewport vp) {
-            const RAVEN_U_INT newID = _nextID++;
-
-            if (vp.renderAPI == Rendering::RenderAPI::OPENGL) {
-                vp.renderer = new Rendering::OpenGLRenderer(newID);
-            }
-            _viewports.emplace(newID, vp);
-
-            if (vp.renderer == nullptr || vp.window == nullptr) {
-                RAVEN_LOG_FATAL("Could not setup a renderer or window for VP: {}", newID);
-                return newID;
-            }
-            vp.renderer->SetEventHandler(vp.window->GetEventHandler());
-            vp.renderer->Initialize();
-            vp.renderer->GetEventHandler()->Notify(Events::VPWindowConnectedEvent{newID});
-            return newID;
-        }
+        RAVEN_U_INT AddViewport(Viewport vp);
 
         bool HasViewports() const {
             return !_viewports.empty();
@@ -68,31 +52,13 @@ namespace Raven3DEngineCore::Viewports {
             return foundWindow;
         }
 
-        bool RemoveViewport(const RAVEN_U_INT id) {
-            if (!_viewports.contains(id)) {
-                return false;
-            }
-            _eventHandler->Notify(Events::VPTearDownEvent(id));
+        bool RemoveViewport(const RAVEN_U_INT id);
 
-            delete _viewports[id].renderer;
 
-            bool foundOtherVPWithSameWindow = false;
-            for (auto [otherID, otherVP] : _viewports) {
-                if (otherID != id && otherVP.window == _viewports[id].window) {
-                    foundOtherVPWithSameWindow = true;
-                    break;
-                }
-            }
+        bool ResizeViewport(const RAVEN_U_INT id, 
+                            const RAVEN_U_INT width, 
+                            const RAVEN_U_INT height) {
 
-            if (!foundOtherVPWithSameWindow) {
-                delete _viewports[id].window;
-            }
-
-            _viewports.erase(id);
-            return true;
-        }
-
-        bool ResizeViewport(const RAVEN_U_INT id, const RAVEN_U_INT width, const RAVEN_U_INT height) {
             if (!_viewports.contains(id)) {
                 return false;
             }
@@ -143,19 +109,10 @@ namespace Raven3DEngineCore::Viewports {
             return _viewports[id].window;
         }
 
-        bool MoveToNewWindow(const RAVEN_U_INT id, Window::IRenderWindow *window) {
-            if (!_viewports.contains(id)) {
-                return false;
-            }
-            const auto vp = GetViewport(id);
-            vp->renderer->GetEventHandler()->Notify(Events::VPTearDownEvent{id});
-            vp->window = window;
-            vp->renderer->GetEventHandler()->Notify(Events::VPWindowConnectedEvent{id});
-            return true;
-        }
+        bool MoveToNewWindow(const RAVEN_U_INT id, Window::IRenderWindow *window);    
+
     };
 
-    extern ViewportManager *globalViewportManager;
 }
 
 

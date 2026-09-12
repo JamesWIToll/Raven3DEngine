@@ -4,6 +4,8 @@
 
 #ifndef MOUSEEVENT_H
 #define MOUSEEVENT_H
+#include <RavenForward.h>
+#include "InputDeviceEvent.h"
 
 namespace Raven3DEngineCore::Events {
 

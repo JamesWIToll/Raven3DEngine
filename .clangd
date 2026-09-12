@@ -1,6 +1,6 @@
 CompileFlags:
   CompilationDatabase: "./cmake-build-debug/"
-  Add: [-std=c++20]
+  Add: [-std=c++20]  
   Remove: 
     - -fmodules-ts
     - -fmodule-mapper=*

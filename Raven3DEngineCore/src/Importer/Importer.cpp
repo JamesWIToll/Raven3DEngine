@@ -16,6 +16,12 @@ void Raven3DEngineCore::Importer::FreeImage(RAVEN_BYTE* data) {
     stbi_image_free(data);
 }
 
+void IImporter::Initialize(Scene::SceneManager *scene) {
+    _scene = scene;
+    _renderer = Viewports::globalViewportManager->GetViewport(scene->GetViewportId())->renderer;
+};
+
+
 
 Entity_T AssimpImporter::ImportFile(const std::string &filePath, Entity_T parent) {
     Assimp::Importer importer;

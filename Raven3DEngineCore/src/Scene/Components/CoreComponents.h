@@ -4,11 +4,10 @@
 
 #ifndef RAVEN3DENGINECORE_CORECOMPONENTS_H
 #define RAVEN3DENGINECORE_CORECOMPONENTS_H
+#include <RavenDefs.h>
 
 namespace Raven3DEngineCore::Scene {
 
-    enum class Entity_T : RAVEN_ENTITY_TYPE {};
-    extern Entity_T NullEntity;
 
     struct TransformData3D {
         glm::mat4 localTransform {1.0f };

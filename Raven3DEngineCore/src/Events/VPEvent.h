@@ -4,6 +4,8 @@
 
 #ifndef RAVEN3DENGINECORE_VPEVENT_H
 #define RAVEN3DENGINECORE_VPEVENT_H
+#include <RavenForward.h>
+#include "Event.h"
 
 namespace Raven3DEngineCore::Events {
     class VPEvent : public Event {
@@ -21,9 +23,7 @@ namespace Raven3DEngineCore::Events {
 
         EVENT_TYPE_GETTERS(ViewportTearDown)
 
-        void logEvent() const override {
-            RAVEN_LOG_DEBUG("TearDown Event triggered for viewport: {}", _vpID);
-        }
+        void logEvent() const override;
     };
 
     class VPWindowConnectedEvent final : public VPEvent {
@@ -31,9 +31,7 @@ namespace Raven3DEngineCore::Events {
         explicit VPWindowConnectedEvent(const RAVEN_U_INT &viewportID) : VPEvent(viewportID) {}
         EVENT_TYPE_GETTERS(ViewportWindowConnected)
 
-        void logEvent() const override {
-            RAVEN_LOG_DEBUG("Window connected event triggered for viewport: {}", _vpID);
-        }
+        void logEvent() const override;
     };
 
 }

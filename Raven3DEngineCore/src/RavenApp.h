@@ -5,6 +5,8 @@
 #ifndef RAVENAPP_H
 #define RAVENAPP_H
 
+#include <RavenForward.h>
+
 namespace Raven3DEngineCore {
     class RavenApp {
         Window::IRenderWindow *_window;
@@ -17,14 +19,14 @@ namespace Raven3DEngineCore {
     public:
         std::string appName;
 
-        RavenApp(const std::string &appName, const RAVEN_INT &pixelWidth, const RAVEN_INT &pixelHeight);
+        RavenApp(const std::string &appName, 
+                 const RAVEN_INT &pixelWidth, 
+                 const RAVEN_INT &pixelHeight);
 
         ~RavenApp();
         void run();
         void quitApp();
     };
 }
-
-
 
 #endif //RAVENAPP_H

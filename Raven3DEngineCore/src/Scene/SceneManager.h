@@ -4,6 +4,8 @@
 
 #ifndef RAVEN3DENGINECORE_SCENEMANAGER_H
 #define RAVEN3DENGINECORE_SCENEMANAGER_H
+#include <RavenForward.h>
+#include "../Events/EventHandler.h"
 
 namespace Raven3DEngineCore::Scene {
 

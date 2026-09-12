@@ -1,12 +1,11 @@
-#include <utility>
-
 //
 // Created by wesley on 8/8/25.
 //
 
 #ifndef GAMEPADEVENT_H
 #define GAMEPADEVENT_H
-
+#include <RavenForward.h>
+#include "InputDeviceEvent.h"
 
 namespace Raven3DEngineCore::Events {
 

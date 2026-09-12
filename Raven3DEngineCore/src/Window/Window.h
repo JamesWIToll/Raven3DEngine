@@ -4,6 +4,8 @@
 
 #ifndef WINDOW_H
 #define WINDOW_H
+#include <RavenForward.h>
+#include "../Events/EventHandler.h"
 
 namespace Raven3DEngineCore::Window {
 

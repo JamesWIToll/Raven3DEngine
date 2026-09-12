@@ -4,6 +4,7 @@
 
 #ifndef RAVEN3DENGINECORE_IMPORTER_H
 #define RAVEN3DENGINECORE_IMPORTER_H
+#include <RavenForward.h>
 
 namespace Raven3DEngineCore::Importer {
 
@@ -12,10 +13,7 @@ namespace Raven3DEngineCore::Importer {
         Scene::SceneManager *_scene {nullptr};
         Rendering::IRenderer *_renderer {nullptr};
     public:
-        void Initialize(Scene::SceneManager *scene) {
-            _scene = scene;
-            _renderer = Viewports::globalViewportManager->GetViewport(scene->GetViewportId())->renderer;
-        };
+        void Initialize(Scene::SceneManager *scene);
         virtual Scene::Entity_T ImportFile(const std::string &filePath, Scene::Entity_T parent) = 0;
         virtual ~IImporter() = default;
     };

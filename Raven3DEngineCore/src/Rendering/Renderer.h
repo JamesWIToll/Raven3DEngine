@@ -4,6 +4,8 @@
 
 #ifndef IRENDERER_H
 #define IRENDERER_H
+#include <RavenForward.h>
+#include "../Events/EventHandler.h"
 
 #define MAX_LIGHTS 50
 

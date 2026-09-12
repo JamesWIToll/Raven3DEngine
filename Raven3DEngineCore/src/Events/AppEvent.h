@@ -4,6 +4,8 @@
 
 #ifndef RAVEN3DENGINECORE_APPEVENT_H
 #define RAVEN3DENGINECORE_APPEVENT_H
+#include <RavenForward.h>
+#include "Event.h" 
 
 namespace Raven3DEngineCore::Events {
 

@@ -4,7 +4,9 @@
 
 #ifndef RAVEN3DENGINECORE_OPENGLRENDERER_H
 #define RAVEN3DENGINECORE_OPENGLRENDERER_H
-
+#include <RavenForward.h>
+#include "Renderer.h"
+#include "Shader.h"
 
 namespace Raven3DEngineCore::Rendering {
     class OpenGLRenderer final : public IRenderer {

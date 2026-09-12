@@ -4,6 +4,7 @@
 
 #ifndef GAMEPADCODE_H
 #define GAMEPADCODE_H
+#include <RavenDefs.h>
 #include "SDL3/SDL_gamepad.h"
 
 namespace Raven3DEngineCore::Input::Gamepad {

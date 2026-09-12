@@ -4,6 +4,7 @@
 
 #ifndef INPUTDEVICEREGISTRY_H
 #define INPUTDEVICEREGISTRY_H
+#include <RavenDefs.h>
 
 namespace Raven3DEngineCore::Input {
 

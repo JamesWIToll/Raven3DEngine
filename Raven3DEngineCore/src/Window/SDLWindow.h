@@ -4,6 +4,8 @@
 
 #ifndef RAVEN3DENGINECORE_SDLWINDOW_H
 #define RAVEN3DENGINECORE_SDLWINDOW_H
+#include <RavenForward.h>
+#include "Window.h"
 
 namespace Raven3DEngineCore::Window {
 

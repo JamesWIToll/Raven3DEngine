@@ -4,6 +4,8 @@
 
 #ifndef KEYEVENT_H
 #define KEYEVENT_H
+#include <RavenForward.h>
+#include "InputDeviceEvent.h"
 
 namespace Raven3DEngineCore::Events {
 

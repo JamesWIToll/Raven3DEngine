@@ -1,4 +1,3 @@
-#include <utility>
 
 //
 // Created by wesley on 8/6/25.
@@ -6,6 +5,8 @@
 
 #ifndef EVENTHANDLER_H
 #define EVENTHANDLER_H
+#include <RavenForward.h>
+#include "Event.h"
 
 namespace Raven3DEngineCore::Events {
 

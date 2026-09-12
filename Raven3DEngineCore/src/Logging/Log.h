@@ -4,6 +4,8 @@
 
 #ifndef LOGHANDLER_H
 #define LOGHANDLER_H
+#include <RavenDefs.h>
+#include "../Events/AppClock.h"
 
 namespace Raven3DEngineCore::Logging {
 

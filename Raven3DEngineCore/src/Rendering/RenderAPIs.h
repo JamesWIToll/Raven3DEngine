@@ -4,6 +4,7 @@
 
 #ifndef RAVEN3DENGINECORE_RENDERAPIS_H
 #define RAVEN3DENGINECORE_RENDERAPIS_H
+#include <RavenDefs.h>
 
 namespace Raven3DEngineCore::Rendering {
     enum class RenderAPI : RAVEN_U_SHORT{

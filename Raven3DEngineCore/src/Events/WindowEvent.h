@@ -4,7 +4,8 @@
 
 #ifndef WINDOWEVENT_H
 #define WINDOWEVENT_H
-#include <Raven3DEngineCore.h>
+#include <RavenForward.h>
+#include "Event.h"
 
 namespace Raven3DEngineCore::Events {
 
@@ -12,8 +13,7 @@ namespace Raven3DEngineCore::Events {
     protected:
         Window::IRenderWindow *_window = nullptr;
     public:
-        explicit WindowEvent(Window::IRenderWindow *window) : _window(window) {}
-
+        explicit WindowEvent(Window::IRenderWindow *window);
         Window::IRenderWindow *getWindow() const { return _window; }
     };
 
@@ -23,9 +23,7 @@ namespace Raven3DEngineCore::Events {
 
         EVENT_TYPE_GETTERS(WindowClosed)
 
-        void logEvent() const override {
-            RAVEN_LOG_DEBUG("WindowClose Event Triggered for window: {}", _window->GetName());
-        }
+        void logEvent() const override;
     };
 
     class WindowResizeEvent final: public WindowEvent {
@@ -38,9 +36,7 @@ namespace Raven3DEngineCore::Events {
 
         EVENT_TYPE_GETTERS(WindowResized);
 
-        void logEvent() const override {
-            RAVEN_LOG_DEBUG("WindowResizeEvent Event Triggered with new width {} and height {} for window {}", _width, _height, _window->GetName());
-        }
+        void logEvent() const override;
     };
 
 }

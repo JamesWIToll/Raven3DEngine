@@ -4,6 +4,7 @@
 
 #ifndef KEYCODE_H
 #define KEYCODE_H
+#include <RavenDefs.h>
 
 namespace Raven3DEngineCore::Input::Key {
 

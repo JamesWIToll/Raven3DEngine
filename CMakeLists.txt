@@ -31,6 +31,10 @@ add_library(Raven3DEngineCore SHARED
         Raven3DEngineCore/src/Rendering/GLShader.cpp
         Raven3DEngineCore/src/Events/AppClock.cpp
         Raven3DEngineCore/src/Events/EventHandler.cpp
+        Raven3DEngineCore/src/Events/VPEvent.cpp
+        Raven3DEngineCore/src/Events/WindowEvent.cpp
+        Raven3DEngineCore/src/Importer/TextureManager.cpp
+        Raven3DEngineCore/src/Viewports/ViewportManager.cpp
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

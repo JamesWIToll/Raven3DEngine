@@ -4,6 +4,8 @@
 
 #ifndef RAVEN3DENGINECORE_SCRIPTMANAGER_H
 #define RAVEN3DENGINECORE_SCRIPTMANAGER_H
+#include <RavenForward.h>
+#include "../Events/EventHandler.h"
 
 namespace Raven3DEngineCore::Scripting {
 
