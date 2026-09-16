@@ -1,7 +1,23 @@
 #ifndef SHADER_H
 #define SHADER_H
+#define MAX_LIGHTS 50
+
+#include <RavenForward.h>
 
 namespace Raven3DEngineCore::Rendering {
+    
+    struct ShaderData 
+    {
+        glm::mat4 uModel;
+        glm::mat4 uView;
+        glm::mat4 uProjection;
+        LightData3D uLights[MAX_LIGHTS];
+        int uNumLights;
+        MaterialData3D uMaterial;
+        glm::vec3 uCamPos;
+    };
+
+
     class IShader {
     public:
         virtual ~IShader() = default;
@@ -17,6 +33,8 @@ namespace Raven3DEngineCore::Rendering {
         virtual void setVec4(const std::string &name, glm::vec4 vector) const = 0;
         virtual void setVec3(const std::string &name, glm::vec3 vector) const = 0;
         virtual void setVec2(const std::string &name, glm::vec2 vector) const = 0;
+        
+        virtual void setShaderData(const std::string &name, const ShaderData &data) const = 0;
     };
 
     class GLShader final : public IShader {
@@ -36,6 +54,8 @@ namespace Raven3DEngineCore::Rendering {
         void setVec4(const std::string &name, glm::vec4 vector) const override;
         void setVec3(const std::string &name, glm::vec3 vector) const override;
         void setVec2(const std::string &name, glm::vec2 vector) const override;
+        
+        void setShaderData(const std::string &name, const ShaderData &data) const override;
     };
 }
 
